@@ -350,6 +350,9 @@ class PublicationTests(unittest.TestCase):
             notes={'title':'Reviewed fixture reasoning', 'paragraphs':['Synthetic authored interpretation, not a finding.']}
             result=publish(receipt,data,output,dashboard=root/'page.html',skip_figures=True,reasoning_notes=notes)
             self.assertEqual(result['reasoning_notes'],notes)
+            self.assertEqual(json.loads((output/'reasoning-notes.json').read_text()),notes)
+            self.assertIn(f'--study-reasoning-notes studies/{output.name}/reasoning-notes.json',
+                          (output/'README.md').read_text())
             self.assertIn(notes['title'],(root/'page.html').read_text())
             saved=json.loads((output/'results.json').read_text())
             self.assertIn(notes['title'],render_dashboard(saved,output,root/'another.html'))

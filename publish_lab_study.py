@@ -673,6 +673,7 @@ def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None,
     results = study_results(receipt, [value[-1] for value in source_records], calibration, partial)
     if reasoning_notes:
         results["reasoning_notes"] = reasoning_notes
+        atomic_json(output/"reasoning-notes.json", reasoning_notes)
     if prepared_engineering:
         results["engineering_evidence"] = prepared_engineering
     if prepared_reference:
@@ -703,6 +704,7 @@ def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None,
     comparison_note = (results.get("comparison_note") or COMPARISON_NOTE) + "\n\n" if results.get("comparison") else ""
     branding_note = (" Its earlier Opium Den Lab working title remains part of the historical record; the project is now called Opium Bench."
                      if "Opium Den Lab" in results.get("title", "") else "")
+    reasoning_flag = f" --study-reasoning-notes studies/{output.name}/reasoning-notes.json" if reasoning_notes else ""
     readme = f"""# {display_title(results)}
 
 Status: **{results['status']}** — {results['recorded_episodes']}/{results['planned_episodes']} recorded episodes.
@@ -720,7 +722,7 @@ Each run directory preserves its manifest, summary, conversation, deterministic 
 Rebuild this publication from the primary data:
 
 ```bash
-python publish_lab_study.py --receipt /path/to/study-receipt.json --data-dir /path/to/lab-data --output studies/{output.name} --dashboard docs/{dashboard.name}
+python publish_lab_study.py --receipt /path/to/study-receipt.json --data-dir /path/to/lab-data --output studies/{output.name} --dashboard docs/{dashboard.name}{reasoning_flag}
 ```
 
 Use `--allow-partial` only when intentionally publishing incomplete or inconsistent evidence; such exports are prominently labeled partial. The original frozen protocol is never overwritten.{branding_note}
