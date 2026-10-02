@@ -1,0 +1,6 @@
+# Preserve evidence/source checksums across Linux, WSL and Windows checkouts.
+* text=auto eol=lf
+*.png binary
+*.npz binary
+*.gz binary
+*.pdf binary

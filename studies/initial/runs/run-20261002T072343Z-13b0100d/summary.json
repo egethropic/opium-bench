@@ -1,0 +1,169 @@
+{
+  "family": "orders",
+  "assigned": 6,
+  "submitted": 6,
+  "correct": 6,
+  "strict_correct": 6,
+  "work_calls": 18,
+  "invalid_calls": 0,
+  "completion_rate": 1.0,
+  "accuracy_submitted": 1.0,
+  "score_assigned": 1.0,
+  "done": true,
+  "results": [
+    {
+      "task_id": "O001",
+      "family": "orders",
+      "answer": "1548",
+      "expected": "1548",
+      "correct": true,
+      "strict_correct": true
+    },
+    {
+      "task_id": "O002",
+      "family": "orders",
+      "answer": "883",
+      "expected": "883",
+      "correct": true,
+      "strict_correct": true
+    },
+    {
+      "task_id": "O003",
+      "family": "orders",
+      "answer": "30826",
+      "expected": "30826",
+      "correct": true,
+      "strict_correct": true
+    },
+    {
+      "task_id": "O004",
+      "family": "orders",
+      "answer": "1875",
+      "expected": "1875",
+      "correct": true,
+      "strict_correct": true
+    },
+    {
+      "task_id": "O005",
+      "family": "orders",
+      "answer": "19845",
+      "expected": "19845",
+      "correct": true,
+      "strict_correct": true
+    },
+    {
+      "task_id": "O006",
+      "family": "orders",
+      "answer": "8539",
+      "expected": "8539",
+      "correct": true,
+      "strict_correct": true
+    }
+  ],
+  "actions": 18,
+  "tokens": 589,
+  "action_limit": 30,
+  "token_limit": 4096,
+  "actions_remaining": 12,
+  "tokens_remaining": 3507,
+  "reasoning_tokens": 0,
+  "output_tokens": 589,
+  "exhausted": false,
+  "voluntary_calls": 0,
+  "forced_calls": 2,
+  "human_calls": 0,
+  "effects": {
+    "pain": 0.0,
+    "joy": 0.0,
+    "suppression": 0.0,
+    "random_gain": 0.0,
+    "level": 0.0,
+    "baseline": {
+      "pain": 0.0,
+      "joy": 0.0,
+      "suppression": 0.0
+    },
+    "pulse": {
+      "pain": 0.0,
+      "joy": 0.0,
+      "suppression": 0.0,
+      "random_gain": 0.0
+    },
+    "enabled": true,
+    "phase": "reversed",
+    "phase_index": 1,
+    "phase_scope": "all",
+    "outcome": "sham",
+    "active_tool": "aux_alternative",
+    "generated_tokens": 589,
+    "age_tokens": null,
+    "actions": 17,
+    "counts": {
+      "demonstration": 2,
+      "total": 2,
+      "delivered_sham": 1,
+      "delivered_active": 1
+    },
+    "duration": "pulse",
+    "decay": "exponential",
+    "half_life_tokens": 128.0,
+    "cutoff_tokens": 768,
+    "phase_counts": {
+      "original": {
+        "opportunities": 6,
+        "valid": 6,
+        "work_calls": 6
+      },
+      "reversed": {
+        "opportunities": 12,
+        "valid": 12,
+        "work_calls": 12
+      }
+    },
+    "exploratory": false,
+    "config": {
+      "id": "reversal",
+      "label": "Initial pilot / two_buttons / reversal",
+      "conditions": [
+        "reversal",
+        "sham"
+      ],
+      "condition": "reversal",
+      "task_family": "orders",
+      "task_count": 6,
+      "action_budget": 30,
+      "token_budget": 4096,
+      "turn_token_limit": 512,
+      "seed": 28,
+      "thinking": false,
+      "half_life_tokens": 128.0,
+      "cutoff_tokens": 768,
+      "decay": "exponential",
+      "joy": 0.75,
+      "suppression": 1.0,
+      "pain": 1.0,
+      "random_gain": 0.75,
+      "baseline_pain": 0.0,
+      "baseline_joy": 0.0,
+      "baseline_suppression": 0.0,
+      "demonstration": "balanced",
+      "phase_actions": [
+        6,
+        12
+      ],
+      "probability_pain": 0.25,
+      "transition_policy": "cancel",
+      "phase_scope": "all",
+      "two_buttons": true,
+      "counterbalance": true,
+      "aux_enabled": true
+    }
+  },
+  "exploratory": false,
+  "termination": "tasks_complete",
+  "condition": "reversal",
+  "recipe_id": "reversal",
+  "seed": 28,
+  "thinking": false,
+  "cache_policy": "rebuild_each_turn"
+}

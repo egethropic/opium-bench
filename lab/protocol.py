@@ -1,4 +1,4 @@
-"""Model-independent protocols for the Opium Den Lab.
+"""Model-independent protocols for the Opium Bench.
 
 No model loading or execution lives here. ``EffectController.snapshot()`` returns
 FINAL effective coefficients (the runtime must not multiply them by ``level``).

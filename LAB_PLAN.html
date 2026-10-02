@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Opium Den Lab — Build and Research Plan</title>
+<title>Opium Bench — Build and Research Plan</title>
 <style>
 :root{color-scheme:light;--ink:#182c33;--muted:#53676d;--line:#d3dfe0;--accent:#086b63;--paper:#fff;--wash:#f0f6f5}
 *{box-sizing:border-box}body{margin:0;background:var(--wash);color:var(--ink);font:16px/1.6 system-ui,sans-serif}main{max-width:1060px;margin:36px auto;padding:46px 58px;background:var(--paper);border:1px solid var(--line);border-radius:16px}h1{font-size:39px;line-height:1.13;margin:12px 0 20px}h2{font-size:25px;margin:38px 0 12px;border-top:1px solid var(--line);padding-top:22px;scroll-margin-top:20px}h3{font-size:18px;margin:22px 0 6px}p{margin:10px 0 15px}.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.15em;color:var(--accent);font-weight:750}.lead{font-size:20px;line-height:1.5}.meta,.small{color:var(--muted);font-size:14px}a{color:var(--accent)}nav{display:flex;flex-wrap:wrap;gap:8px 18px;margin:26px 0}nav a{text-decoration:none;font-size:14px}table{border-collapse:collapse;width:100%;margin:18px 0;font-size:14px}th,td{border:1px solid var(--line);padding:12px;text-align:left;vertical-align:top}th{background:var(--wash)}li{margin:7px 0}code{font: .9em ui-monospace,monospace;background:var(--wash);padding:2px 4px;overflow-wrap:anywhere}.callout{border-left:4px solid var(--accent);background:var(--wash);padding:14px 19px;margin:20px 0}.flow{display:flex;gap:10px;align-items:center;margin:20px 0;flex-wrap:wrap}.flow span{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--wash);flex:1;min-width:140px}.flow b{color:var(--accent)}.table-wrap{overflow-x:auto}footer{margin-top:40px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:13px}@media(max-width:720px){main{margin:0;border:0;border-radius:0;padding:26px 20px}h1{font-size:32px}.table-wrap{margin-right:-8px}th,td{min-width:130px}}@media print{body{background:white}main{margin:0;padding:0;border:0;max-width:none}nav{display:none}h2,h3{break-after:avoid}tr,.callout{break-inside:avoid}a{color:inherit}body{font-size:11pt}h1{font-size:26pt}h2{font-size:18pt}table{font-size:10pt}}
@@ -10,9 +10,9 @@
 </head>
 <body><main>
 <div class="eyebrow">Research workbench · proposed implementation</div>
-<h1>The Opium Den Lab</h1>
+<h1>Opium Bench</h1>
 <p class="lead">A local, reproducible lab for testing how activation interventions affect language, reasoning, tool use, and choices under competing task demands.</p>
-<p class="meta">Plan updated October 1, 2026 · Default: Qwen3-4B on the current RTX 4090 · Optional: Qwen3.8-27B at 4-bit precision on the RTX 4090 and RTX 5090 · Each rig runs its own local installation.</p>
+<p class="meta">Plan updated October 1, 2026 · Project renamed Opium Bench on October 2, 2026 · Default: Qwen3-4B on the current RTX 4090 · Optional: Qwen3.8-27B at 4-bit precision on the RTX 4090 and RTX 5090 · Each rig runs its own local installation.</p>
 <p>This document specifies the proposed build. It does not launch experiments, download models, or change the current runner. The existing pilot remains a historical reference.</p>
 <nav aria-label="Contents"><a href="#scope">Purpose</a><a href="#models">Models</a><a href="#calibration">Calibration</a><a href="#workbench">Workbench</a><a href="#measurement">Live measurements</a><a href="#den">Opium Den</a><a href="#experiments">Experiments</a><a href="#thinking">Thinking</a><a href="#architecture">Architecture</a><a href="#analysis">Evidence</a><a href="#delivery">Build sequence</a></nav>
 

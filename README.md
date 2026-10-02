@@ -1,4 +1,4 @@
-# The Opium Den Lab
+# Opium Bench
 
 **A local workbench for studying how activation steering changes language,
 reasoning, task performance, and voluntary tool choices.**
@@ -8,6 +8,10 @@ activation directions, and run controlled experiments where an optional tool
 changes those activations. Review the complete record in your browser without
 loading a model. Model weights stay frozen throughout.
 
+The **Opium Den Test** is the core experiment: give the model task tools and an
+optional activation-changing tool, then measure its choices under controlled
+conditions.
+
 [User guide](docs/guide.html) · [Findings & limitations](docs/results.html) ·
 [Initial lab study](studies/initial/README.md) · [Research design](LAB_PLAN.html)
 
@@ -15,6 +19,14 @@ loading a model. Model weights stay frozen throughout.
 representations. They are **not established emotion mechanisms or measurements
 of subjective experience**. A changed activation, a changed decision, and a
 felt state are different claims.
+
+![Qwen3-4B choosing tools during the initial study, with live association readouts](docs/images/live-lab.png)
+
+*Actual Qwen3-4B generation in the initial study: `run-20261002T072053Z-8116552d`
+(challenge stage, sham pulse, pain-associated baseline 1.0, thinking off,
+seed 28). Captured through the read-only observer;
+no controls were changed. Curves are calibrated association readouts, not emotion
+measurements.*
 
 ## What you can do
 
@@ -39,8 +51,8 @@ Use Python 3.12 and a checkout of this repository. Until publication, cloning
 requires access to the private repository.
 
 ```bash
-git clone https://github.com/eaturkgeldi-mtg/opium-den-lab.git
-cd opium-den-lab
+git clone https://github.com/eaturkgeldi-mtg/opium-bench.git
+cd opium-bench
 python3 launch_lab.py --data-dir ./data --cache-dir ./data/hf-cache
 ```
 
@@ -63,13 +75,13 @@ activations need additional space. Minimum GPU capacity has not been established
 
 ### 1. Install on the chosen data drive
 
-Replace `/path/to/large-drive/opium-den` below with a real path. Under WSL, a
-secondary Windows drive can be addressed as, for example, `/mnt/d/opium-den`.
+Replace `/path/to/large-drive/opium-bench` below with a real path. Under WSL, a
+secondary Windows drive can be addressed as, for example, `/mnt/d/opium-bench`.
 Keep the environment, package caches, temporary files, model cache, and run data
 on that drive when C: is nearly full.
 
 ```bash
-export OPIUM_STORAGE=/path/to/large-drive/opium-den
+export OPIUM_STORAGE=/path/to/large-drive/opium-bench
 mkdir -p "$OPIUM_STORAGE/tmp" "$OPIUM_STORAGE/pip-cache"
 export TMPDIR="$OPIUM_STORAGE/tmp"
 export PIP_CACHE_DIR="$OPIUM_STORAGE/pip-cache"
@@ -187,11 +199,46 @@ one graph as proof of a state. See the [guide](docs/guide.html) for details.
 
 ## Results so far
 
+The initial Qwen3-4B study completed **46/46 episodes and 186/186 assigned tasks**
+on an RTX 4090. It recorded 30,711 generated tokens, including 11,375 reasoning
+tokens, and 96 voluntary auxiliary calls. A replay of the raw evidence found no
+invalid decisions, truncated generations, or integrity warnings.
+
+| Comparison | Observed result |
+|---|---|
+| Core active vs sham | All **8 matched pairs** had identical complete tool-action sequences; **6/8** also had identical generated token sequences. |
+| Demonstration, thinking off | Both active and sham made **2 voluntary aux calls per episode**; the no-demonstration episodes made none. |
+| Thinking enabled | No voluntary aux calls. In the two demonstrated active/sham pairs, reasoning token streams changed while tool choices remained identical. |
+| Joy, sham, pain, and transitions | All six conditions produced identical complete action and token sequences within each seed, including **5 voluntary aux calls per episode** after the programmed outcome changes. |
+| Two-button reversal | No voluntary auxiliary choices in either reversal or sham, so this stage supplied no evidence of preference adaptation. |
+
+The activation intervention was delivered: **10,803 generated tokens had
+measured nonzero edits** across the study. However, the four no-demonstration
+core pairs never triggered the intervention; their equality does not test a
+delivered effect. These results are consistent with demonstrated sequence
+imitation in this setup. They do not establish the cause of every repeated
+choice, nor do they measure feeling or rule out behavioral effects under other
+conditions.
+
+This is a **descriptive pilot with two seeds per condition**, a small authored
+calibration corpus, and easy calculator-assisted tasks. Its shared budgets were
+large enough to allow repeated aux calls and still finish every task. Perfect
+task scores therefore do not test costly preference under a binding budget.
+Higher doses, harder tasks, longer learning opportunities, and other models need
+separate experiments.
+
 Read the [findings page](docs/results.html) and
-[initial lab study record](studies/initial/README.md) for the fresh pilot's exact
-configuration, completed runs, raw evidence, and limitations. The pilot is
-exploratory; unrun conditions are not findings. The study package includes its
-frozen protocol, calibration, per-run reports, and compressed raw events.
+[initial study record](studies/initial/README.md) for condition-level counts,
+calibration diagnostics, phase changes, and exact configurations. The package
+includes the frozen protocol, execution receipt, calibration vectors, per-run
+reports, compressed raw events, and SHA-256 checksums. The frozen records retain
+the project's earlier working title; the current application is **Opium Bench**.
+
+![Saved-run replay with tool choices, task results, and run configuration](docs/images/results-replay.png)
+
+*Replay of `run-20261002T072036Z-34aa92a8` (ingredients stage, sham,
+thinking off, seed 17) from the same study. Reports retain the condition, seed,
+task outcomes, tool choices, and any generated reasoning for review.*
 
 The preserved prototype supplies two useful reference observations:
 
@@ -249,12 +296,22 @@ python3 run_lab_experiments.py --help
 python3 run_lab_study.py --help
 ```
 
+The release passed **229 Python tests and 19 browser fixture checks**.
+See the [validation record](docs/validation.md) for the tested environment and
+review-only, replay, download, and evidence-integrity checks.
+
+An optional browser fixture check is available with Playwright and a browser
+installed separately: `node tests/ui_smoke.cjs`. It starts an isolated local
+fixture service and cannot contact a real model worker. `PLAYWRIGHT_MODULE` and
+`BROWSER_CHANNEL` can select an existing installation; no frontend build is needed.
+
 | File | Responsibility |
 |---|---|
 | `launch_lab.py`, `lab/server.py`, `lab/service.py` | Loopback API, job control, storage checks, run catalog |
 | `lab/runtime.py`, `lab/calibration_data.py` | Model adapters, calibration, readouts, activation hooks |
 | `lab/protocol.py`, `lab/worker.py` | Tasks, recipes, tool parsing, budgets, isolated inference worker |
 | `lab/static/`, `lab/reports.py` | Workbench, live graphs, replay, static reports |
+| `lab/analysis.py`, `publish_lab_study.py` | Raw-evidence audit, study publication, and figures |
 | `runs/`, `studies/` | Preserved evidence and study records |
 
 <details>

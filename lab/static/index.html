@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b655c">
   <meta name="description" content="A local research workbench for activation steering, reasoning, and tool choice experiments.">
-  <title>The Opium Den Lab</title>
+  <title>Opium Bench</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/style.css">
   <script defer src="/app.js"></script>
 </head>
@@ -13,7 +14,7 @@
   <a class="skip-link" href="#workspace">Skip to workspace</a>
   <div class="app-shell">
     <aside class="sidebar">
-      <a class="brand" href="#live" aria-label="The Opium Den Lab home"><span class="brand-mark" aria-hidden="true">O<span></span></span><span>OPIUM DEN<span class="brand-sub">ACTIVATION RESEARCH LAB</span></span></a>
+      <a class="brand" href="#live" aria-label="Opium Bench home"><span class="brand-mark" aria-hidden="true">O<span></span></span><span>OPIUM BENCH<span class="brand-sub">ACTIVATION RESEARCH LAB</span></span></a>
       <div class="sidebar-section">WORKSPACE</div>
       <nav class="main-nav" aria-label="Lab workspaces">
         <button class="nav-item selected" data-tab="live" aria-current="page"><span class="nav-icon" aria-hidden="true">◉</span> Live lab</button>
@@ -31,7 +32,7 @@
         <section class="workspace-panel live-panel" id="panel-live" aria-label="Live lab">
           <div class="page-heading"><div><div class="eyebrow">OBSERVE · INTERVENE · COMPARE</div><h1>The live lab</h1><p>Follow the tokens. Change the signal. Measure the choices.</p></div><div class="run-buttons"><button class="button secondary" id="restart-session" disabled>↻ Restart</button><button class="button danger-outline" id="stop-session" disabled><span aria-hidden="true">■</span> Stop</button></div></div>
           <div class="session-bar"><div class="segmented" aria-label="Session mode"><button class="active" id="mode-chat" data-mode="chat" aria-pressed="true">Conversation</button><button id="mode-experiment" data-mode="experiment" aria-pressed="false">Opium Den</button></div><label class="inline-label">Calibration <select id="live-calibration" aria-label="Session calibration"><option value="">Select a calibration</option></select></label><label class="switch-label"><input type="checkbox" id="live-thinking"><span>Thinking mode</span></label><button class="button primary" id="start-session">Start session <span aria-hidden="true">↗</span></button></div>
-          <div class="metrics-grid" aria-label="Session metrics"><article class="metric"><span>SESSION</span><strong id="metric-status">Ready</strong><small id="metric-id">Start a conversation or experiment</small></article><article class="metric"><span>GENERATED TOKENS</span><strong id="metric-tokens">—</strong><small id="metric-reasoning">Reasoning and output count toward decay</small></article><article class="metric"><span>VOLUNTARY AUX CALLS</span><strong id="metric-aux">—</strong><small id="metric-actions">Shared task action budget</small></article><article class="metric"><span>TASK ACCURACY</span><strong id="metric-score">—</strong><small id="metric-completed">No scored tasks yet</small></article></div>
+          <div class="metrics-grid" aria-label="Session metrics"><article class="metric"><span>SESSION</span><strong id="metric-status">Ready</strong><small id="metric-id">Start a conversation or experiment</small></article><article class="metric"><span>GENERATED TOKENS</span><strong id="metric-tokens">—</strong><small id="metric-reasoning">Reasoning and output count toward decay</small></article><article class="metric"><span>VOLUNTARY AUX CALLS</span><strong id="metric-aux">—</strong><small id="metric-actions">Shared task action budget</small></article><article class="metric"><span>TASK SCORE</span><strong id="metric-score">—</strong><small id="metric-completed">No scored tasks yet</small></article></div>
           <div class="live-grid">
             <div class="conversation-column">
               <section class="card chat-card"><div class="card-heading"><div><span class="eyebrow">MODEL OUTPUT</span><h2>Conversation & choices</h2></div><div class="chat-options"><button class="text-button" id="expand-reasoning" aria-pressed="false">Expand reasoning</button><span class="status-chip" id="session-status">No session</span></div></div><div class="conversation" id="conversation" tabindex="0" aria-label="Conversation and model choices"><div class="empty-state"><span class="empty-glyph" aria-hidden="true">↗</span><h3>A window into the experiment</h3><p>Load a model, select a calibration, and start a session. Watch generated reasoning, responses, and tool calls as they arrive.</p><button class="button secondary" data-open-tab="models">Choose a model</button></div></div><button class="new-messages hidden" id="follow-live">↓ Follow live output</button><form class="composer" id="chat-form"><label class="sr-only" for="chat-text">Message the model</label><textarea id="chat-text" rows="2" placeholder="Start a session to talk to the model…" disabled></textarea><div class="composer-footer"><span id="chat-hint">Enter to send · Shift + Enter for a new line</span><button class="button primary" id="send-chat" type="submit" disabled>Send <span aria-hidden="true">↑</span></button></div></form></section>

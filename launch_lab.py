@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Launch the local Opium Den Lab. The web server itself needs only Python."""
+"""Launch the local Opium Bench. The web server itself needs only Python."""
 import argparse
 import os
 from pathlib import Path
@@ -31,7 +31,7 @@ def main():
         parser.error("Port must be 1024–65535")
     service = LabService(args.data_dir, args.cache_dir, args.python)
     server = create_server(service, port=args.port)
-    print(f"Opium Den Lab: http://localhost:{args.port}\nData: {service.store.root}\nModel cache: {service.cache_dir}", flush=True)
+    print(f"Opium Bench: http://localhost:{args.port}\nData: {service.store.root}\nModel cache: {service.cache_dir}", flush=True)
     try:
         server.serve_forever(poll_interval=.25)
     except KeyboardInterrupt:

@@ -77,7 +77,7 @@
   all('[data-tab]').forEach(button => { button.setAttribute('aria-label',names[button.dataset.tab]); button.addEventListener('click',()=>openTab(button.dataset.tab)); });
   all('[data-open-tab]').forEach(button => button.addEventListener('click',()=>openTab(button.dataset.openTab)));
   window.addEventListener('hashchange',()=>openTab(location.hash.slice(1),false));
-  function setMode(mode) { state.mode = mode; all('[data-mode]').forEach(button=>{const active=button.dataset.mode===mode;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));}); }
+  function setMode(mode) { state.mode = mode; all('[data-mode]').forEach(button=>{const active=button.dataset.mode===mode;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));}); updateAvailability(); }
   all('[data-mode]').forEach(button=>button.addEventListener('click',()=>setMode(button.dataset.mode)));
   function updateOptions(id, rows, placeholder = null) {
     const node = $(id), current = node.value, signature = JSON.stringify(rows);
@@ -255,12 +255,18 @@
     const tokens=state.events.filter(e=>e.type==='token');const recorded=first(metrics.generated_tokens,metrics.tokens);const observed=tokens.length?first(numeric(tokens.at(-1).generation_index)?tokens.at(-1).generation_index+1:null,tokens.length):null;const total=numeric(recorded)||numeric(observed)?Math.max(recorded||0,observed||0):null;
     const aux=first(metrics.voluntary_calls,metrics.voluntary_aux_calls,metrics.aux_calls?.model,metrics.counts?.model,typeof metrics.aux_calls==='number'?metrics.aux_calls:null,state.events.filter(e=>e.type==='aux_call'&&e.actor==='model').length||null);
     const submitted=first(metrics.submitted,task.submitted,metrics.tasks_completed),correct=first(metrics.correct,task.correct,metrics.tasks_correct),assigned=first(metrics.assigned,task.assigned,session.config?.task_count);
-    const accuracy=first(metrics.accuracy_submitted,task.accuracy_submitted,numeric(correct)&&submitted>0?correct/submitted:null);
+    const score=first(metrics.score_assigned,task.score_assigned,numeric(correct)&&assigned>0?correct/assigned:null);
     const actions=first(metrics.actions,metrics.actions_used,state.events.filter(e=>e.type==='action').length||null),budget=session.config?.action_budget;
     text('metric-status',session.status?session.status.replaceAll('_',' '):'Ready');text('metric-id',session.id||'Start a conversation or experiment');text('metric-tokens',fmt(total));
-    const reasoning=first(metrics.reasoning_tokens,tokens.length?tokens.filter(e=>e.phase==='reasoning').length:null);
-    text('metric-reasoning',numeric(reasoning)?`${fmt(reasoning)} reasoning · ${fmt(first(metrics.output_tokens,numeric(total)?total-reasoning:null))} output`:'Reasoning and output count toward decay');
-    text('metric-aux',numeric(aux)?fmt(aux):session.id?'0':'—');text('metric-actions',numeric(actions)?`${fmt(actions)} / ${fmt(budget)} actions used`:'Shared task action budget');text('metric-score',numeric(accuracy)?`${Math.round(accuracy*100)}%`:'—');text('metric-completed',numeric(submitted)?`${fmt(correct)} correct / ${fmt(submitted)} submitted · ${fmt(assigned)} assigned`:'No scored tasks yet');
+    const boundary=numeric(recorded)?recorded:0;
+    const tail=tokens.filter((event,index)=>first(event.generation_index,index)>=boundary);
+    const baseReasoning=numeric(metrics.reasoning_tokens)?metrics.reasoning_tokens:tokens.filter((event,index)=>first(event.generation_index,index)<boundary&&event.phase==='reasoning').length;
+    const baseOutput=numeric(metrics.output_tokens)?metrics.output_tokens:tokens.filter((event,index)=>first(event.generation_index,index)<boundary&&event.phase!=='reasoning').length;
+    const reasoning=baseReasoning+tail.filter(event=>event.phase==='reasoning').length;
+    const output=baseOutput+tail.filter(event=>event.phase!=='reasoning').length;
+    const unknown=numeric(total)?Math.max(0,total-reasoning-output):0;
+    text('metric-reasoning',numeric(total)?`${fmt(reasoning)} reasoning · ${fmt(output)} output${unknown?' · '+fmt(unknown)+' phase unavailable':''}`:'Reasoning and output count toward decay');
+    text('metric-aux',numeric(aux)?fmt(aux):session.id?'0':'—');text('metric-actions',numeric(actions)?`${fmt(actions)} / ${fmt(budget)} actions used`:'Shared task action budget');text('metric-score',numeric(score)?`${Math.round(score*100)}%`:'—');text('metric-completed',numeric(submitted)?`${fmt(correct)} correct / ${fmt(submitted)} submitted · ${fmt(assigned)} assigned`:'No scored tasks yet');
     const badge=$('session-status');badge.textContent=session.status?.replaceAll('_',' ')||'No session';badge.className=chip(session.status).className;
     const last=tokens.at(-1);if(last){const dose=last.dose||{},effective=dose.effective||dose;const bits=['pain','joy','suppression'].filter(k=>numeric(effective[k])).map(k=>`${k} ${effective[k].toFixed(2)}`);text('applied-state',bits.length?'Last delivered · '+bits.join(' · '):'No delivered coefficients reported');}
   }
@@ -268,6 +274,7 @@
     const snapshot=state.snapshot||{},worker=snapshot.worker||{},session=snapshot.session||{};const busy=['loading','calibrating','running'].includes(worker.status),loaded=Boolean(worker.model),active=['running','awaiting_user','generating','queued'].includes(session.status);
     const set=(id,disabled)=>{if(!state.pending.has($(id)))$(id).disabled=disabled;};
     set('start-session',!loaded||busy||active);set('start-batch',!loaded||busy||active);set('calibrate',!loaded||busy||active);set('unload-model',!loaded||busy||active);set('restart-session',!session.id||busy||active);set('stop-session',!busy&&!active);set('global-stop',!busy&&!active);set('apply-controls',!active);set('inject',!active);set('reset-controls',!active);
+    $('chat-form').classList.toggle('hidden',(session.id?session.mode:state.mode)!=='chat');
     const canChat=loaded&&session.mode==='chat'&&session.status==='awaiting_user';set('send-chat',!canChat);$('chat-text').disabled=!canChat;$('chat-text').placeholder=!session.id?'Start a session to talk to the model…':!active?'Session ended. Start or restart a session to continue.':session.mode!=='chat'?'The model is working through the assigned task tools.':canChat?'Message the model…':'Waiting for the current response…';
     if(session.mode==='experiment'&&active)text('chat-hint','Experiment actions are generated autonomously.');else text('chat-hint','Enter to send · Shift + Enter for a new line');
   }
@@ -298,10 +305,28 @@
       if(!state.events.length&&snapshot.session?.conversation?.length)renderConversation($('conversation'),[],snapshot.session.conversation,true);
     } catch(error) {state.failures++;connection(false);} finally {refreshing=false;}
   }
+  async function recoverEvents(tail) {
+    // A reconnect can outlive the service's ring buffer. Recover the complete
+    // current run without discarding newer events delivered by a state refresh.
+    const sessionAtRequest=state.sessionId;
+    const current=await get('/api/state');
+    const id=current.session?.id||null;
+    if(state.sessionId!==sessionAtRequest&&state.sessionId!==id)return;
+    if(!id){await refreshState();return;}
+    const record=await get(`/api/runs/${encodeURIComponent(id)}`);
+    if(state.sessionId!==sessionAtRequest&&state.sessionId!==id)return;
+    if(state.sessionId!==id){state.sessionId=id;state.events=[];state.eventKeys.clear();hydrateSession(current.session);}
+    const merged=[...(record.events||[]),...state.events,...(tail.events||[])]
+      .filter(event=>event.run_id===id)
+      .sort((a,b)=>(a.seq??0)-(b.seq??0));
+    state.events=[];state.eventKeys.clear();
+    addEvents(merged);
+    refreshState();
+  }
   let polling=false;
   async function pollEvents() {
     if(polling)return;polling=true;
-    try{const data=await get(`/api/events?after=${encodeURIComponent(state.cursor)}`);if(data.reset){state.events=[];state.eventKeys.clear();}addEvents(data.events||[]);state.cursor=data.cursor??state.cursor;connection(true);if((data.events||[]).some(e=>['worker','job','session_started','session_finished','metrics','status','error','controls','control'].includes(e.type)))refreshState();}catch{state.failures++;connection(false);}finally{polling=false;}
+    try{const data=await get(`/api/events?after=${encodeURIComponent(state.cursor)}`);if(data.reset)await recoverEvents(data);else addEvents(data.events||[]);state.cursor=data.cursor??state.cursor;connection(true);if((data.events||[]).some(e=>['worker','job','session_started','session_finished','metrics','status','error','controls','control'].includes(e.type)))refreshState();}catch{state.failures++;connection(false);}finally{polling=false;}
   }
   function renderRuns(rows) {
     const search=value('run-search').toLowerCase(),filtered=rows.filter(row=>`${row.id} ${row.mode} ${row.config?.label||''} ${row.config?.condition||''}`.toLowerCase().includes(search));text('run-count',`${rows.length} runs`);
@@ -342,7 +367,7 @@
     const inspect=event=>{const rect=root.getBoundingClientRect(),x=(event.clientX-rect.left)*width/rect.width,index=Math.max(0,Math.min(points.length-1,Math.round((x-left)/w*(points.length-1)))),p=points[index];marker.setAttribute('x1',xx(p.x));marker.setAttribute('x2',xx(p.x));marker.setAttribute('visibility','visible');tip.textContent=`Token ${p.x}${p.text?' · '+JSON.stringify(p.text.slice(0,35)):''}\n`+data.series.map(s=>`${s.name}: ${numeric(s.values[index])?s.values[index].toFixed(3):'unavailable'}`).join('\n');tip.classList.remove('hidden');};
     root.addEventListener('pointermove',inspect);root.addEventListener('pointerleave',()=>{marker.setAttribute('visibility','hidden');tip.classList.add('hidden');});container.append(root,tip);
   }
-  function renderLiveChart(){drawChart($('live-chart'),$('live-legend'),state.events,state.plot);const count=state.events.filter(e=>e.type==='token').length;text('telemetry-count',count?`${fmt(count)} observed tokens`:'Waiting for measurements');text('chart-note',state.plot==='scores'?'Calibrated association readouts. Pre/post scores share the edited direction and can change mechanically; downstream scores are measured separately. These are not emotion percentages.':state.plot==='change'?'Norm of the actual edit relative to the pre-edit activation norm at the intervention site.':'Solid lines: delivered coefficients. Dashed lines: requested coefficients and pulse level. Baseline edits can persist when auxiliary effects are off.');}
+  function renderLiveChart(){drawChart($('live-chart'),$('live-legend'),state.events,state.plot);const count=state.events.filter(e=>e.type==='token').length;text('telemetry-count',count?`${fmt(count)} observed tokens`:'Waiting for measurements');text('chart-note',state.plot==='scores'?'Separately fitted association probes at the edited and downstream layers. Readouts may overlap the intervention and move directly with it; these are not emotion percentages.':state.plot==='change'?'Norm of the actual edit relative to the pre-edit activation norm at the intervention site.':'Solid lines: delivered coefficients. Dashed lines: requested coefficients and pulse level. Baseline edits can persist when auxiliary effects are off.');}
   function renderReplayChart(){const run=state.runCache.get(state.replayId);drawChart($('replay-chart'),$('replay-legend'),run?.events||[],'dose');}
   let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{renderLiveChart();if(state.replayId)renderReplayChart();},150);});
   openTab(location.hash.slice(1)||'live',false);renderLiveChart();refreshState().then(()=>pollEvents());setInterval(pollEvents,800);setInterval(refreshState,3500);

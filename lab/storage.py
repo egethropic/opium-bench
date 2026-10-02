@@ -98,8 +98,10 @@ class Store:
             raise ValueError("Invalid run identifier")
         candidates = [self.runs] if writable else [self.runs, *self.historical]
         for base in candidates:
-            path = base / identifier
-            if path.exists() or writable:
+            path = (base / identifier).resolve()
+            if path.parent != base.resolve():
+                continue  # Never follow a run-directory symlink outside its evidence root.
+            if path.is_dir() or writable:
                 return path
         raise FileNotFoundError("Run not found")
 
@@ -109,7 +111,7 @@ class Store:
         path.mkdir(exist_ok=False)
         atomic_json(path / "manifest.json", dict(id=identifier, mode=mode,
                     status="queued", config=config, created_at=utc_now(), parent=parent,
-                    format_version=2, software="opium-den-lab/0.2.0", source=source_manifest()))
+                    format_version=2, software="opium-bench/0.2.0", source=source_manifest()))
         return identifier, path
 
     def append(self, identifier, event):
@@ -128,13 +130,17 @@ class Store:
                 atomic_json(path / "summary.json", values["summary"])
 
     def catalog(self):
-        rows = []
+        rows, seen = [], set()
         for base in [self.runs, *self.historical]:
             if not base.exists():
                 continue
             for path in base.iterdir():
-                if not path.is_dir() or not ID.fullmatch(path.name):
+                if not path.is_dir() or not ID.fullmatch(path.name) or path.name in seen:
                     continue
+                if path.resolve().parent != base.resolve():
+                    continue
+                # Local records take precedence over a bundled copy, matching run_path.
+                seen.add(path.name)
                 m = read_json(path / "manifest.json")
                 if not m:
                     continue

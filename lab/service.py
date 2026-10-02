@@ -375,10 +375,14 @@ class LabService:
                 profile = next((deepcopy(p) for p in PROFILES if p["id"] == profile_id), None)
                 if profile is None:
                     raise ValueError("Unknown model profile")
-                # Advanced users can point a profile at a prequantized checkpoint.
+                # A revision belongs to one repository. A new checkpoint must
+                # not inherit the reference 4B repository's pinned commit.
+                original_model_id = profile["model_id"]
                 for key in ("model_id", "revision", "quantization", "dtype", "allow_download"):
                     if key in payload:
                         profile[key] = payload[key]
+                if profile["model_id"] != original_model_id and not payload.get("revision"):
+                    profile.pop("revision", None)
                 if not isinstance(profile["model_id"], str) or not profile["model_id"].startswith("Qwen/"):
                     if not (isinstance(profile["model_id"], str) and payload.get("acknowledge_custom_checkpoint") is True):
                         raise ValueError("Custom checkpoints require acknowledge_custom_checkpoint=true")

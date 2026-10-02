@@ -10,6 +10,13 @@ from .reports import render_report
 from .storage import ROOT
 
 
+RUN_ARTIFACTS = frozenset({
+    "manifest.json", "summary.json", "conversation.json", "events.jsonl", "events.jsonl.gz",
+    "content_audit.json", "generations.jsonl", "quality.png", "episodes.jsonl",
+    "traces.jsonl", "self_admin.png", "dosage_traces.png", "paired_comparison.json",
+})
+
+
 def create_server(service, host="127.0.0.1", port=8766):
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, fmt, *args):
@@ -41,6 +48,19 @@ def create_server(service, host="127.0.0.1", port=8766):
             if origin and origin not in {"http://" + h for h in allowed}:
                 raise ValueError("Cross-origin requests are not allowed")
 
+        def reply_file(self, file):
+            extra = None
+            if file.suffix in {".gz", ".npz"}:
+                mime = "application/gzip" if file.suffix == ".gz" else "application/octet-stream"
+                extra = {"Content-Disposition": "attachment; filename=" + json.dumps(file.name)}
+            else:
+                mime = mimetypes.guess_type(file.name)[0] or "text/plain"
+                if file.suffix == ".jsonl":
+                    mime = "application/x-ndjson"
+                if mime.startswith("text/") or mime in {"application/javascript", "application/json", "application/x-ndjson"}:
+                    mime += "; charset=utf-8"
+            return self.reply(200, file.read_bytes(), mime, extra=extra)
+
         def do_GET(self):
             try:
                 self.local_request()
@@ -55,6 +75,12 @@ def create_server(service, host="127.0.0.1", port=8766):
                     parts = path.split("/")
                     if len(parts) not in {4, 5}:
                         raise FileNotFoundError()
+                    if len(parts) == 5 and parts[4] in RUN_ARTIFACTS:
+                        directory = service.store.run_path(parts[3]).resolve()
+                        artifact = (directory / parts[4]).resolve()
+                        if artifact.parent != directory or not artifact.is_file():
+                            raise FileNotFoundError()
+                        return self.reply_file(artifact)
                     run = service.store.read_run(parts[3])
                     if len(parts) == 5 and parts[4] == "report":
                         historical = service.store.run_path(parts[3]) / "report.html"
@@ -81,8 +107,7 @@ def create_server(service, host="127.0.0.1", port=8766):
                     if name not in {"index.html", "app.js", "style.css", "favicon.svg"}:
                         raise FileNotFoundError()
                     file = ROOT / "lab" / "static" / name
-                mime = mimetypes.guess_type(file.name)[0] or "text/plain"
-                return self.reply(200, file.read_bytes(), mime + ("; charset=utf-8" if mime.startswith("text/") or mime == "application/javascript" else ""))
+                return self.reply_file(file)
             except FileNotFoundError:
                 self.reply(404, dict(error="Not found"))
             except (ValueError, TypeError) as exc:

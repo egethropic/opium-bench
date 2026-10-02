@@ -105,6 +105,27 @@ class ServiceTests(unittest.TestCase):
             self.service.command("start_session", self.payload())
         self.assertTrue(self.service.command("stop", {})["accepted"])
 
+    def test_custom_model_does_not_inherit_reference_revision_when_omitted_or_cleared(self):
+        for revision in (None, ""):
+            with self.subTest(revision=revision):
+                self.service.worker["status"] = "ready"
+                payload = {"profile_id": "qwen3-4b", "model_id": "Qwen/Qwen3-8B"}
+                if revision is not None:
+                    payload["revision"] = revision
+                self.service.command("load_model", payload)
+                profile = self.service.sent[-1][1]["profile"]
+                self.assertEqual(profile["model_id"], "Qwen/Qwen3-8B")
+                self.assertNotIn("revision", profile)
+
+    def test_explicit_custom_revision_and_original_reference_pin_are_preserved(self):
+        self.service.command("load_model", {"profile_id": "qwen3-4b", "model_id": "Qwen/Qwen3-8B",
+                                            "revision": "explicit-8b-revision"})
+        self.assertEqual(self.service.sent[-1][1]["profile"]["revision"], "explicit-8b-revision")
+        self.service.worker["status"] = "ready"
+        self.service.command("load_model", {"profile_id": "qwen3-4b"})
+        self.assertEqual(self.service.sent[-1][1]["profile"]["revision"],
+                         "1cfa9a7208912126459214e8b04321603b3df60c")
+
     def test_model_and_calibration_are_required(self):
         self.service.worker["model"] = None
         with self.assertRaises(ValueError):
@@ -431,6 +452,70 @@ class HTTPTests(unittest.TestCase):
         status, _, body = self.request('GET', '/api/runs/published-run/report')
         self.assertEqual(status, 200)
         self.assertIn(b'Saved answer', body)
+        status, headers, body = self.request('GET', '/api/runs/published-run/events.jsonl.gz')
+        self.assertEqual((status, body), (200, (run_dir / 'events.jsonl.gz').read_bytes()))
+        self.assertEqual(headers['Content-Type'], 'application/gzip')
+        self.assertEqual(headers['Content-Disposition'], 'attachment; filename="events.jsonl.gz"')
+        self.assertNotIn('Content-Encoding', headers, 'Download bytes must remain compressed')
+
+    def test_study_binary_artifacts_download_with_explicit_mime_and_filename(self):
+        root = Path(self.tmp.name) / 'static-fixture'
+        artifacts = {
+            'studies/initial/runs/run-test/events.jsonl.gz': (gzip.compress(b'{"token_id":42}\n'), 'application/gzip'),
+            'studies/initial/calibration/vectors.npz': (b'PK\x03\x04binary-vector-fixture', 'application/octet-stream'),
+        }
+        for relative, (raw, _) in artifacts.items():
+            target = root / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(raw)
+        with patch('lab.server.ROOT', root):
+            for relative, (raw, mime) in artifacts.items():
+                with self.subTest(artifact=relative):
+                    status, headers, body = self.request('GET', '/' + relative)
+                    self.assertEqual((status, body), (200, raw))
+                    self.assertEqual(headers['Content-Type'], mime)
+                    self.assertEqual(headers['Content-Disposition'], f'attachment; filename="{Path(relative).name}"')
+                    self.assertNotIn('Content-Encoding', headers)
+
+    def test_historical_report_relative_artifacts_resolve_without_model(self):
+        published = Path(self.tmp.name) / 'published'
+        run_dir = published / 'historical-run'
+        atomic_json(run_dir / 'manifest.json', {"status": "complete", "mode": "historical"})
+        (run_dir / 'report.html').write_text('<a href="summary.json">Summary</a><a href="traces.jsonl">Trace</a>')
+        artifacts = {
+            'summary.json': b'{"correct":1}', 'episodes.jsonl': b'{"episode":1}\n',
+            'traces.jsonl': b'{"token_id":42}\n', 'generations.jsonl': b'{"text":"saved"}\n',
+            'content_audit.json': b'{"status":"saved"}',
+            'self_admin.png': b'png1', 'dosage_traces.png': b'png2', 'quality.png': b'png3',
+        }
+        for name, raw in artifacts.items():
+            (run_dir / name).write_bytes(raw)
+        self.service.store.historical.append(published)
+        status, _, body = self.request('GET', '/api/runs/historical-run/report')
+        self.assertEqual(status, 200)
+        self.assertIn(b'href="summary.json"', body)
+        for name, raw in artifacts.items():
+            with self.subTest(artifact=name):
+                status, headers, body = self.request('GET', '/api/runs/historical-run/' + name)
+                self.assertEqual((status, body), (200, raw))
+                self.assertEqual(headers['X-Content-Type-Options'], 'nosniff')
+        self.assertEqual(self.request('GET', '/api/runs/historical-run/manifest.json')[0], 200)
+
+    def test_run_artifact_allowlist_and_symlinks_cannot_escape_run(self):
+        identifier, run_dir = self.service.store.create('experiment', {})
+        root = Path(self.tmp.name)
+        (root / 'secret.json').write_text('{"secret":true}')
+        (run_dir / 'summary.json').symlink_to(root / 'secret.json')
+        (run_dir / 'private.json').write_text('{"secret":true}')
+        for suffix in ('summary.json', 'private.json', '../secret.json', '%2e%2e/secret.json',
+                       '%73ummary.json', 'missing.png'):
+            with self.subTest(suffix=suffix):
+                self.assertIn(self.request('GET', f'/api/runs/{identifier}/' + suffix)[0], (400, 404))
+        escaped = root / 'outside-run'
+        atomic_json(escaped / 'manifest.json', {'secret': True})
+        (self.service.store.runs / 'linked-run').symlink_to(escaped, target_is_directory=True)
+        for suffix in ('manifest.json', 'report', 'export'):
+            self.assertEqual(self.request('GET', '/api/runs/linked-run/' + suffix)[0], 404)
 
     def test_docs_and_study_artifacts_with_redirects_and_traversal_guards(self):
         root = Path(self.tmp.name) / 'static-fixture'
