@@ -168,6 +168,7 @@ class Store:
 
     def read_run(self, identifier):
         path = self.run_path(identifier)
+        manifest = read_json(path / "manifest.json", {})
         events = []
         event_file = path / "events.jsonl"
         compressed = path / "events.jsonl.gz"
@@ -181,6 +182,15 @@ class Store:
                     events.append(json.loads(line))
                 except ValueError:
                     pass  # Incomplete final write after an interrupted process.
-        return dict(id=identifier, manifest=read_json(path / "manifest.json", {}),
+        parent_events = []
+        parent_file = path / "parent-events.jsonl.gz"
+        if parent_file.is_file() and not parent_file.is_symlink():
+            with gzip.open(parent_file, "rb") as stream:
+                raw = stream.read(128 * 1024**2 + 1)
+            if len(raw) > 128 * 1024**2 or hashlib.sha256(raw).hexdigest() != (manifest.get("parent") or {}).get("parent_prefix_sha256"):
+                raise ValueError("Parent event prefix integrity check failed")
+            parent_events = [dict(json.loads(line), inherited=True) for line in raw.splitlines()]
+        return dict(id=identifier, manifest=manifest,
                     summary=read_json(path / "summary.json", {}), events=events,
+                    parent_events=parent_events, conversation=read_json(path / "conversation.json", []),
                     historical=not has_events, imported=(path / "_portable").is_dir())

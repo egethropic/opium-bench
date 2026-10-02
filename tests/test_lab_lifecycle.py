@@ -1,5 +1,7 @@
 """Safe-boundary controls preserve actual task, budget and conversation state."""
 import copy
+import hashlib
+import json
 from pathlib import Path
 import tempfile
 import threading
@@ -8,6 +10,9 @@ import unittest
 from lab.protocol import validate_recipe
 from lab.worker import Worker
 from tests.test_lab_worker import FakeRuntime, wrapped
+from tests.test_lab_service import RecordingService
+from lab.resources import ResourceGuard, Volume
+from unittest.mock import patch
 
 
 class PauseTests(unittest.TestCase):
@@ -113,6 +118,72 @@ class PauseTests(unittest.TestCase):
         worker.receive(dict(command="pause"))
         self.assertFalse(worker.pause_requested.is_set())
         self.assertEqual(events[-1]["status"], "failed")
+
+    def test_saved_boundary_continuation_matches_uninterrupted_and_keeps_parent_bytes(self):
+        root = Path(self.temp.name)
+        service = RecordingService(root)
+        self.addCleanup(service.close)
+        service.resources = ResourceGuard(dict(data=service.store.root),
+            telemetry=lambda _: dict(free_bytes=100 * 2**30, total_bytes=200 * 2**30),
+            resolver=lambda _: [Volume("test", self.temp.name)])
+        fingerprint = dict(model_id="Qwen/fake", revision="test", template_sha256="a" * 64)
+        model = dict(model_id="Qwen/fake", fingerprint=fingerprint,
+                     fingerprint_sha256=hashlib.sha256(json.dumps(fingerprint, sort_keys=True, separators=(",", ":")).encode()).hexdigest())
+        service.worker.update(status="ready", model=model)
+        calibration = service.store.calibrations / "cal-fixture"
+        calibration.mkdir()
+        (calibration / "calibration.json").write_text('{"schema_version":1}')
+        (calibration / "vectors.npz").write_bytes(b"fake-runtime-only")
+        baseline, runtime0, _, _ = self.make_worker()
+        baseline.run_experiment()
+        with patch("lab.service.preflight"):
+            service.command("start_session", dict(mode="experiment", calibration_id="cal-fixture", config=baseline.session["config"]))
+        payload = service.sent[-1][1]
+        first_runtime = FakeRuntime()
+        first_runtime.scripts = [dict(raw_text=wrapped("read_order", {"order_id": baseline.environment.records[0]["id"]}))]
+        worker = Worker(self.temp.name, runtime=first_runtime, output=service.event)
+        worker.model_info = model
+        worker.start_session(payload)
+        worker.active, worker.active_command = True, "start_session"
+        paused = threading.Event()
+        original_emit = worker.output
+        def emit(event):
+            original_emit(event)
+            if event.get("type") == "status" and event.get("status") == "paused":
+                paused.set()
+        worker.output = emit
+        first_runtime.after_token = lambda _: worker.receive(dict(command="pause"))
+        thread = threading.Thread(target=worker.run_experiment, daemon=True)
+        thread.start()
+        self.addCleanup(lambda: (worker.receive(dict(command="stop")), thread.join(2)))
+        self.assertTrue(paused.wait(2))
+        worker.receive(dict(command="stop"))
+        thread.join(2)
+        self.assertFalse(thread.is_alive())
+        parent = Path(payload["out_dir"])
+        before = {str(p.relative_to(parent)): p.read_bytes() for p in parent.rglob("*") if p.is_file()}
+        with patch("lab.service.preflight"):
+            accepted = service.command("branch", dict(run_id=payload["run_id"], policy="continue_state"))
+        restored_payload = service.sent[-1][1]
+        self.assertEqual(service.sent[-1][0], "restore_session")
+        next_runtime = FakeRuntime()
+        record = baseline.environment.records[0]
+        next_runtime.scripts = [dict(raw_text=wrapped("calculate_total", {k:record[k] for k in ("quantity", "unit_price_cents", "shipping_cents", "discount_cents")})), dict(raw_text=wrapped("submit_answer", {"answer":record["answer"]}))]
+        continuation = Worker(self.temp.name, runtime=next_runtime, output=service.event)
+        continuation.model_info = model
+        continuation.restore_session(restored_payload)
+        continuation.run_experiment()
+        self.assertEqual(continuation.session["messages"], baseline.session["messages"])
+        self.assertEqual(continuation.budget.snapshot(), baseline.budget.snapshot())
+        self.assertEqual(continuation.effect.snapshot(), baseline.effect.snapshot())
+        # Service normalization adds generation defaults; all shared sampled parameters match.
+        for resumed, original in zip(next_runtime.calls, runtime0.calls[1:]):
+            for key in original["params"]:
+                self.assertEqual(resumed["params"][key], original["params"][key])
+        after = {str(p.relative_to(parent)): p.read_bytes() for p in parent.rglob("*") if p.is_file()}
+        self.assertEqual(before, after)
+        self.assertEqual(accepted["parent"]["parent_prefix_kind"], "events")
+        self.assertEqual(accepted["parent"]["inherited_actions"], 1)
 
 
 if __name__ == "__main__":

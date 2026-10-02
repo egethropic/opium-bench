@@ -16,6 +16,7 @@ RUN_ARTIFACTS = frozenset({
     "manifest.json", "summary.json", "conversation.json", "events.jsonl", "events.jsonl.gz",
     "content_audit.json", "generations.jsonl", "quality.png", "episodes.jsonl",
     "traces.jsonl", "self_admin.png", "dosage_traces.png", "paired_comparison.json",
+    "checkpoint.json", "source-checkpoint.json", "parent-events.jsonl.gz",
 })
 
 
@@ -94,6 +95,9 @@ def create_server(service, host="127.0.0.1", port=8766):
                     if len(parts) == 5 and parts[4] == "bundle":
                         with service.portable_export(parts[3]) as bundle:
                             return self.reply_download(bundle)
+                    if len(parts) == 5 and parts[4] == "checkpoints":
+                        from .lifecycle import list_boundaries
+                        return self.reply(200, dict(checkpoints=list_boundaries(service.store.run_path(parts[3]))))
                     if len(parts) == 5 and parts[4] in RUN_ARTIFACTS:
                         directory = service.store.run_path(parts[3]).resolve()
                         artifact = (directory / parts[4]).resolve()
@@ -106,7 +110,8 @@ def create_server(service, host="127.0.0.1", port=8766):
                         html = historical.read_text(encoding="utf-8") if run["historical"] and not run.get("imported") and historical.exists() else render_report(run)
                         return self.reply(200, html, "text/html; charset=utf-8")
                     if len(parts) == 5 and parts[4] == "export":
-                        return self.reply(200, run, extra={"Content-Disposition": f'attachment; filename="{parts[3]}.json"'})
+                        exported = dict(run, events=run.get("parent_events", []) + run["events"], parent_events=[])
+                        return self.reply(200, exported, extra={"Content-Disposition": f'attachment; filename="{parts[3]}.json"'})
                     if len(parts) != 4:
                         raise FileNotFoundError()
                     return self.reply(200, run)

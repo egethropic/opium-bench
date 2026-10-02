@@ -200,6 +200,15 @@ class PortabilityTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Object"):
             export_bundle(self.run, self.root / "object.zip")
 
+    def test_gzipped_boundary_checkpoint_archives_remain_inert_candidates(self):
+        archived = self.run / "checkpoints" / "boundary-0001.json.gz"
+        archived.parent.mkdir()
+        archived.write_bytes(gzip.compress(b'{"schema_version":1,"boundary":"completed_turn"}'))
+        result = import_bundle(self.bundle(),self.imports)
+        self.assertTrue(result["checkpoint_candidate"])
+        self.assertFalse(result["resume_eligible"])
+        self.assertEqual((Path(result["path"])/"checkpoints/boundary-0001.json.gz").read_bytes(),archived.read_bytes())
+
     def test_future_checkpoint_version_is_rejected_before_install(self):
         (self.run / "checkpoint.json").write_text('{"schema_version":99}')
         with self.assertRaisesRegex(ValueError, "checkpoint version"):

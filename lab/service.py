@@ -6,6 +6,7 @@ from copy import deepcopy
 from contextlib import contextmanager
 from pathlib import Path
 import json
+import gzip
 import os
 import math
 import random
@@ -15,7 +16,7 @@ import sys
 import threading
 import tempfile
 
-from .storage import ROOT, Store, new_id, preflight, read_json, storage_info, utc_now
+from .storage import ROOT, Store, atomic_json, new_id, preflight, read_json, storage_info, utc_now
 
 PROFILES = [
     dict(id="qwen3-4b", name="Qwen3 · 4B", model_id="Qwen/Qwen3-4B",
@@ -29,7 +30,7 @@ PROFILES = [
          description="Pinned NF4 conversion of official Qwen3.8-27B. Requires the separate 27B runtime and model-specific calibration."),
 ]
 COMMANDS = {"load_model", "unload_model", "calibrate", "start_session", "chat",
-            "control", "inject", "stop", "restart", "start_batch", "pause", "resume"}
+            "control", "inject", "stop", "restart", "start_batch", "pause", "resume", "branch"}
 
 
 def normalize_config(raw, default="opium"):
@@ -421,7 +422,7 @@ class LabService:
 
     def _send(self, command, payload):
         command_id = new_id("cmd")
-        runs = {payload["run_id"]} if command == "start_session" else {e["run_id"] for e in payload.get("entries", [])} if command == "start_batch" else set()
+        runs = {payload["run_id"]} if command in {"start_session", "restore_session"} else {e["run_id"] for e in payload.get("entries", [])} if command == "start_batch" else set()
         try:
             self._launch()
             with self.lock:
@@ -450,7 +451,7 @@ class LabService:
             raise ValueError("Unknown command or invalid payload")
         with self.lock:
             busy = self.worker.get("status") in {"loading", "calibrating", "running", "paused"} or (self.job or {}).get("status") == "running"
-            if busy and command in {"load_model", "unload_model", "calibrate", "start_session", "start_batch", "restart"}:
+            if busy and command in {"load_model", "unload_model", "calibrate", "start_session", "start_batch", "restart", "branch"}:
                 raise ValueError("Stop the current job before starting another")
             if command == "stop":
                 if not self.process or self.process.poll() is not None:
@@ -492,6 +493,8 @@ class LabService:
                 return self._send(command, {})
             if self.worker.get("model") is None:
                 raise ValueError("Load a model first")
+            if command == "branch":
+                return self._branch_session(payload)
             if command in {"pause", "resume"}:
                 if not self.session.get("id") or self.session.get("status") in {"complete", "failed", "stopped", "cancelled"}:
                     raise ValueError("Start an active session first")
@@ -578,6 +581,50 @@ class LabService:
                     raise ValueError("Unknown control setting") from exc
                 # Persist only worker-acknowledged settings, not rejected requests.
             return self._send(command, payload)
+
+    def _branch_session(self, payload):
+        from .checkpoints import branch, validate
+        from .lifecycle import read_boundary, event_prefix
+        from .worker import Worker
+        if set(payload) - {"run_id", "checkpoint", "policy", "calibration_id", "action_budget", "token_budget"}:
+            raise ValueError("Unknown saved-boundary setting")
+        if self.session.get("status") in {"running", "awaiting_user", "paused", "queued"}:
+            raise ValueError("Stop the current session before continuing a saved boundary")
+        source_id = payload.get("run_id")
+        source = self.store.run_path(source_id)
+        checkpoint = read_boundary(source, payload.get("checkpoint", "latest"))
+        calibration_id = payload.get("calibration_id") or checkpoint["session"]["calibration_id"]
+        calibration_dir = self.store.calibration_path(calibration_id)
+        validate(checkpoint, self.worker["model"], Worker.read_calibration_identity(calibration_dir))
+        cutoff = checkpoint["session"].get("event_cutoff")
+        prefix, prefix_hash = event_prefix(source, cutoff)
+        options = dict(policy=payload.get("policy", "continue_state"), action_budget=payload.get("action_budget"),
+                       token_budget=payload.get("token_budget"), parent_run_id=source_id,
+                       event_cutoff=cutoff, parent_prefix_sha256=prefix_hash)
+        prepared = branch(checkpoint, **options)  # Validate before allocating a run.
+        provenance = prepared["session"]["branch"]
+        mode, config = prepared["session"]["mode"], prepared["session"]["config"]
+        preflight(self.store.root, len(prefix) + 8 * 1024**2)
+        identifier, path = self.store.create(mode, config, parent=provenance)
+        self._claim_run(identifier)
+        try:
+            raw = gzip.compress(prefix, mtime=0)
+            with (path / "parent-events.jsonl.gz").open("xb") as stream:
+                for offset in range(0, len(raw), self.resources.max_write_bytes):
+                    chunk = raw[offset:offset + self.resources.max_write_bytes]
+                    with self.resources.write(path, len(chunk)):
+                        stream.write(chunk)
+            prepared = branch(checkpoint, run_id=identifier, **options)
+            atomic_json(path / "source-checkpoint.json", checkpoint)
+            data = dict(run_id=identifier, out_dir=str(path), calibration_id=calibration_id,
+                        calibration_dir=str(calibration_dir), checkpoint=prepared)
+            self.last_start = dict(mode=mode, config=config, calibration_id=calibration_id)
+            self.worker["status"] = "running"
+            accepted = self._send("restore_session", data)
+            return dict(accepted, run_id=identifier, parent=provenance)
+        except Exception:
+            self.store.update(identifier, status="failed", summary=dict(termination="branch_dispatch_failed"))
+            raise
 
     def close(self):
         self.closed = True

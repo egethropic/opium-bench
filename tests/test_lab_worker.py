@@ -113,7 +113,10 @@ class WorkerTests(unittest.TestCase):
 
     def test_all_generated_tokens_age_dose_including_reasoning_and_eos(self):
         self.start(thinking=True)
+        self.worker.session["experiment_started"] = True
+        self.worker.session["messages"].append(dict(role="user", content=self.worker.environment.task_prompt()))
         self.worker.demonstrate()
+        self.worker.session["demonstrated"] = [0]
         self.runtime.scripts = [dict(raw_text='<think>Reasoning</think>' + wrapped(),
                                     phases=["reasoning", "reasoning", "output", "output"])]
         self.worker.decision()

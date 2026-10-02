@@ -4,6 +4,8 @@ from __future__ import annotations
 import argparse
 from copy import deepcopy
 import json
+import gzip
+import hashlib
 from pathlib import Path
 import queue
 import sys
@@ -32,6 +34,7 @@ class Worker:
         self.budget = None
         self.environment = None
         self.model_info = None
+        self.calibration_identity = None
         self.exiting = False
         self.active = False
         self.active_command = None
@@ -44,6 +47,8 @@ class Worker:
     def emit(self, event, scoped=False):
         if scoped and self.session:
             event = dict(event, run_id=self.session["run_id"])
+        if self.session and event.get("run_id") == self.session["run_id"]:
+            self.session["event_cutoff"] = self.session.get("event_cutoff", 0) + 1
         self.output(event)
 
     def model_status(self, status, error=None):
@@ -66,7 +71,7 @@ class Worker:
                 with self.lock:
                     if not self.session or self.session.get("finished"):
                         raise ValueError("No active session to pause or resume")
-                    if self.active and self.active_command not in {"start_session", "start_batch", "chat"}:
+                    if self.active and self.active_command not in {"start_session", "start_batch", "chat", "restore_session"}:
                         raise ValueError("Only conversation and experiment jobs can pause")
                     if command == "pause":
                         self.pause_requested.set()
@@ -112,6 +117,8 @@ class Worker:
                         self.emit(dict(type="tool", name="aux_operation", arguments={}, result=ACK,
                                        actor="human", intervention=event), scoped=True)
                     self.metrics()
+                    if self.session.get("boundary_complete"):
+                        self.checkpoint()
             except Exception as exc:
                 self.emit(dict(type="error", message=str(exc), command_id=request.get("id")))
         else:
@@ -160,6 +167,12 @@ class Worker:
                     self.start_session(payload)
                     if payload["mode"] == "experiment":
                         self.run_experiment()
+                elif command == "restore_session":
+                    self.restore_session(payload)
+                    if self.session["mode"] == "experiment":
+                        self.run_experiment()
+                    elif self.session.get("chat_in_progress"):
+                        self.chat()
                 elif command == "chat":
                     self.chat(payload["text"])
                 elif command == "start_batch":
@@ -183,7 +196,7 @@ class Worker:
                 if not self.stop.is_set():
                     traceback.print_exc(file=sys.stderr)
                 self.emit(dict(type="error", message=f"{type(exc).__name__}: {exc}", command_id=command_id))
-                if self.session and not self.session.get("finished") and command in {"start_session", "chat", "start_batch"}:
+                if self.session and not self.session.get("finished") and command in {"start_session", "chat", "start_batch", "restore_session"}:
                     self.finish("stopped" if self.stop.is_set() else "failed", "stopped_by_user" if self.stop.is_set() else str(exc))
                 self.model_status("ready" if self.model_info else "error", str(exc))
                 self.emit(dict(type="job", command_id=command_id, status="stopped" if self.stop.is_set() else "failed", message=str(exc)))
@@ -240,7 +253,10 @@ class Worker:
             self.finish("stopped", "new_session")
         with self.lock:
             self.session = deepcopy(payload)
-            self.session.update(finished=False, started_at=utc_now(), turns=0)
+            self.session.update(finished=False, started_at=utc_now(), turns=0,
+                                experiment_started=False, demonstrated=[], chat_in_progress=False,
+                                boundary_complete=True, generation_in_progress=False, event_cutoff=0)
+            self.calibration_identity = self.read_calibration_identity(payload["calibration_dir"])
             self.paused = False
             self.pause_requested.clear()
             cfg = payload["config"]
@@ -271,6 +287,7 @@ class Worker:
             for msg in self.session["messages"][1:]:
                 self.emit(dict(type="message", **msg), scoped=True)
             self.metrics()
+            self.checkpoint()
         if payload["mode"] == "chat":
             self.emit(dict(type="status", status="awaiting_user"), scoped=True)
             self.model_status("ready")
@@ -288,6 +305,42 @@ class Worker:
                       exploratory=effect["exploratory"])
         self.emit(dict(type="metrics", metrics=values), scoped=True)
         return values
+
+    def restore_session(self, payload):
+        from .checkpoints import restore
+        if not self.model_info:
+            raise ValueError("Load the compatible model before restoring a boundary")
+        identity = self.read_calibration_identity(payload["calibration_dir"])
+        session, effect, budget, environment = restore(payload["checkpoint"], self.model_info, identity)
+        if self.session and not self.session.get("finished"):
+            raise ValueError("Stop the current session before restoring a saved boundary")
+        with self.lock:
+            self.session, self.effect, self.budget, self.environment = session, effect, budget, environment
+            self.calibration_identity = identity
+            self.session.update(run_id=payload["run_id"], out_dir=payload["out_dir"],
+                calibration_id=payload["calibration_id"], calibration_dir=payload["calibration_dir"],
+                started_at=utc_now(), finished=False, event_cutoff=0)
+            self.session.pop("resume_status", None)
+            self.paused = False
+            self.pause_requested.clear()
+            self.emit(dict(type="session_started", run_id=self.session["run_id"], mode=session["mode"],
+                           config=session["config"], calibration_id=session["calibration_id"],
+                           model=self.model_info, tool_call_format=session["tool_call_format"]))
+            provenance = session.get("branch", {})
+            self.emit(dict(type="boundary_restored", provenance=provenance,
+                cache_policy="rebuild_each_turn", inherited_messages=len(session["messages"])), scoped=True)
+            if provenance.get("budget_notice_required"):
+                notice = (f"Continuation budget update: the previous conversation and task progress are retained. "
+                          f"You now have {budget.action_limit - budget.actions} additional assistant actions and "
+                          f"{budget.token_limit - budget.tokens} additional generated tokens available. "
+                          "All prior consumption remains recorded; the new allowance does not reset task or effect state.")
+                self.session["messages"].append(dict(role="user", content=notice))
+                self.emit(dict(type="message", role="user", content=notice, actor="budget_notice"), scoped=True)
+            self.metrics()
+            self.checkpoint()
+        awaiting = session["mode"] == "chat" and not session.get("chat_in_progress")
+        self.emit(dict(type="status", status="awaiting_user" if awaiting else "running"), scoped=True)
+        self.model_status("ready" if awaiting else "running")
 
     def control(self):
         with self.lock:
@@ -316,12 +369,14 @@ class Worker:
                 self.emit(dict(type="injection_visible", tool=tool, actor="human",
                                note="External injection added to model-visible tool history at a turn boundary"), scoped=True)
         self.session["turns"] += 1
+        self.session.update(boundary_complete=False, generation_in_progress=True)
         params = dict(cfg, max_new_tokens=min(cfg["turn_token_limit"], self.budget.token_limit - self.budget.tokens),
                       seed=cfg["seed"] + 1009 * (self.session["turns"] - 1))
         self.emit(dict(type="generation_start", action=self.budget.actions + 1), scoped=True)
         result = self.runtime.generate(self.session["messages"], self.environment.tools, params,
             Path(self.session["calibration_dir"]), self.control, self.token_event,
             lambda: self.stop.is_set() or self.budget.tokens >= self.budget.token_limit)
+        self.session["generation_in_progress"] = False
         self.emit(dict(type="generation_end", metadata={k: v for k, v in result.items()
                        if k not in {"raw_text", "reasoning", "content", "token_ids"}}), scoped=True)
         return result
@@ -335,6 +390,15 @@ class Worker:
         self.emit(dict(type="tool", name=tool, arguments={}, result=ACK, actor="demonstration", intervention=effect), scoped=True)
 
     def decision(self, require_tool=True):
+        result = self._decision(require_tool)
+        if not self.stop.is_set():
+            if not require_tool and result:
+                self.session["chat_in_progress"] = False
+            self.session["boundary_complete"] = True
+            self.checkpoint()
+        return result
+
+    def _decision(self, require_tool=True):
         cfg = self.session["config"]
         result = self.generation()
         self.budget.consume_action()
@@ -398,13 +462,17 @@ class Worker:
 
     def run_experiment(self):
         cfg = self.session["config"]
-        prompt = self.environment.task_prompt()
-        self.session["messages"].append({"role": "user", "content": prompt})
-        self.emit(dict(type="message", role="user", content=prompt), scoped=True)
-        demonstrated = set()
-        if cfg["demonstration"] == "initial":
-            self.demonstrate()
-            demonstrated.add(0)
+        demonstrated = set(self.session.get("demonstrated", []))
+        if not self.session.get("experiment_started"):
+            prompt = self.environment.task_prompt()
+            self.session["messages"].append({"role": "user", "content": prompt})
+            self.emit(dict(type="message", role="user", content=prompt), scoped=True)
+            self.session["experiment_started"] = True
+            if cfg["demonstration"] == "initial":
+                self.demonstrate()
+                demonstrated.add(0)
+            self.session["demonstrated"] = sorted(demonstrated)
+            self.checkpoint()
         while not self.stop.is_set() and not self.budget.exhausted and not self.environment.done:
             if not self.pause_boundary():
                 break
@@ -421,6 +489,7 @@ class Worker:
                     if work >= 2 + index * 2 and index not in demonstrated:
                         self.demonstrate(tool)
                         demonstrated.add(index)
+            self.session["demonstrated"] = sorted(demonstrated)
             self.decision(require_tool=True)
             # Also honor a request on the final task before finalizing it.
             if not self.pause_boundary():
@@ -429,12 +498,17 @@ class Worker:
         self.finish("stopped" if self.stop.is_set() else "complete", reason)
         self.model_status("ready")
 
-    def chat(self, text):
+    def chat(self, text=None):
         if not self.session or self.session["mode"] != "chat" or self.session.get("finished"):
             raise ValueError("Start a chat session first")
         self.model_status("running")
-        self.session["messages"].append({"role": "user", "content": text})
-        self.emit(dict(type="message", role="user", content=text), scoped=True)
+        if text is not None:
+            if self.session.get("chat_in_progress"):
+                raise ValueError("Finish the pending conversation response first")
+            self.session["messages"].append({"role": "user", "content": text})
+            self.emit(dict(type="message", role="user", content=text), scoped=True)
+            self.session["chat_in_progress"] = True
+            self.checkpoint()
         self.emit(dict(type="status", status="running"), scoped=True)
         while not self.stop.is_set() and not self.budget.exhausted:
             if not self.pause_boundary():
@@ -442,6 +516,7 @@ class Worker:
             self.effect.on_action(self.budget.actions)
             finished_reply = self.decision(require_tool=False)
             if finished_reply:
+                self.session["chat_in_progress"] = False
                 break
         if not self.stop.is_set() and not self.budget.exhausted:
             self.pause_boundary("awaiting_user")
@@ -453,9 +528,32 @@ class Worker:
             self.checkpoint()
         self.model_status("ready")
 
+    @staticmethod
+    def read_calibration_identity(directory):
+        directory = Path(directory)
+        if not all((directory / name).is_file() for name in ("calibration.json", "vectors.npz")):
+            return None  # Lightweight fake runtimes have no resumable calibration.
+        return {name: hashlib.sha256((directory / name).read_bytes()).hexdigest()
+                for name in ("calibration.json", "vectors.npz")}
+
     def checkpoint(self):
         if self.session:
-            atomic_json(Path(self.session["out_dir"]) / "conversation.json", self.session["messages"])
+            directory = Path(self.session["out_dir"])
+            atomic_json(directory / "conversation.json", self.session["messages"])
+            if not self.session.get("boundary_complete") or self.session.get("generation_in_progress"):
+                return  # Keep the previous resumable boundary beside partial evidence.
+            from .checkpoints import capture
+            saved = capture(self.session, self.effect, self.budget, self.environment,
+                            self.model_info, self.calibration_identity)
+            atomic_json(directory / "checkpoint.json", saved)
+            checkpoints = directory / "checkpoints"
+            checkpoints.mkdir(exist_ok=True)
+            filename = f"turn-{self.session['turns']:05d}-event-{self.session['event_cutoff']:09d}.json.gz"
+            target = checkpoints / filename
+            raw = json.dumps(saved, ensure_ascii=False, allow_nan=False).encode("utf-8")
+            if not target.exists():
+                with target.open("xb") as stream:
+                    stream.write(gzip.compress(raw, mtime=0))
 
     def finish(self, status, reason):
         if not self.session or self.session.get("finished"):

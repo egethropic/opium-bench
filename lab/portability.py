@@ -186,8 +186,8 @@ def _validate_file(name, raw, limits):
     if suffix == ".npz":
         _validate_npz(raw, limits)
     if suffix == ".gz":
-        if not name.endswith(".jsonl.gz"):
-            raise ValueError("Only compressed JSONL evidence is supported")
+        if not name.endswith((".jsonl.gz", ".json.gz")):
+            raise ValueError("Only compressed JSON/JSONL evidence is supported")
         try:
             with gzip.GzipFile(fileobj=io.BytesIO(raw)) as stream:
                 expanded = stream.read(limits.member_bytes + 1)
@@ -229,7 +229,7 @@ def _expanded_weight(name, raw, limits):
     if name.endswith(".npz"):
         with zipfile.ZipFile(io.BytesIO(raw)) as archive:
             return len(raw) + sum(info.file_size for info in _zip_members(archive, limits))
-    if name.endswith(".jsonl.gz"):
+    if name.endswith((".jsonl.gz", ".json.gz")):
         with gzip.GzipFile(fileobj=io.BytesIO(raw)) as stream:
             expanded = stream.read(limits.member_bytes + 1)
         if len(expanded) > limits.member_bytes:

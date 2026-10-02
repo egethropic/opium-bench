@@ -61,7 +61,8 @@ function command(request) {
   if(request.command==='control') append({type:'control',settings:p,actor:'human'});
   if(request.command==='pause') {fixture.session.status='paused';fixture.worker.status='paused';append({type:'status',status:'paused'});}
   if(request.command==='resume') {fixture.session.status='awaiting_user';fixture.worker.status='ready';append({type:'status',status:'awaiting_user'});}
-  if(request.command==='stop') {fixture.session.status='stopped';append({type:'session_finished',status:'stopped',summary:{termination:'stopped_by_user'}});}
+  if(request.command==='stop') {fixture.session.status='stopped';fixture.runs=[{id:'run-fixture',status:'stopped',config:{}}];append({type:'session_finished',status:'stopped',summary:{termination:'stopped_by_user'}});}
+  if(request.command==='branch') {fixture.session={...fixture.session,id:'run-continuation',status:'awaiting_user',mode:'chat'};fixture.worker.status='ready';}
   if(request.command==='calibrate') fixture.job={kind:'calibrate',status:'complete',message:'Fixture only'};
   if(request.command==='start_batch') fixture.job={kind:'batch',status:'complete',message:'Fixture only'};
   return {accepted:true,command_id:'cmd-'+commands.length};
@@ -73,6 +74,7 @@ const server=http.createServer(async(req,res)=>{
     else if(url.pathname==='/api/events'){body={events:forceReset?events.slice(-2):events.filter(e=>e.seq>Number(url.searchParams.get('after')||0)),cursor:seq,reset:forceReset};forceReset=false;}
     else if(url.pathname==='/api/command'&&req.method==='POST'){let raw='';for await(const chunk of req)raw+=chunk;body=command(JSON.parse(raw));}
     else if(url.pathname==='/api/import'&&req.method==='POST'){assert.equal(req.headers['x-csrf-token'],fixture.csrf);let raw='';for await(const chunk of req)raw+=chunk;importedRun={...JSON.parse(raw),imported:true};fixture.runs.push({id:importedRun.id,status:'complete',config:{},imported:true});body={id:importedRun.id,replay_only:true};}
+    else if(url.pathname.endsWith('/checkpoints'))body={checkpoints:url.pathname.includes('/run-fixture/')?[{id:'turn-00001-event-000000054.json.gz',turns:1,event_cutoff:54}]:[]};
     else if(url.pathname.startsWith('/api/runs/')){runReads++;body=url.pathname.endsWith('/run-imported')?importedRun:{id:'run-fixture',manifest:{config:fixture.session.config,status:'stopped'},summary:fixture.session.metrics,events};}
     else if(url.pathname==='/favicon.ico'){res.writeHead(204);return res.end();}
     else {const name=url.pathname==='/'?'index.html':url.pathname.slice(1);if(!['index.html','style.css','app.js'].includes(name)){res.writeHead(404);return res.end();}res.writeHead(200,{'Content-Type':name.endsWith('.css')?'text/css':name.endsWith('.js')?'text/javascript':'text/html'});return res.end(fs.readFileSync(path.join(staticDir,name)));}
@@ -135,10 +137,13 @@ async function run() {
     await page.locator('#import-file').setInputFiles({name:'run-imported.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({id:'run-imported',manifest:{status:'complete',config:{}},summary:{},events:[{type:'message',role:'user',content:'Imported <img src=x onerror=alert(1)>'}]}))});
     await page.locator('#import-run').click();await page.waitForFunction(()=>document.querySelector('#import-status').textContent.includes('Imported run-imported'));
     await page.waitForFunction(()=>document.querySelector('#replay-title').textContent==='run-imported');assert.equal(await page.locator('#replay-conversation img').count(),0);assert.equal(await page.locator('#replay-links a[href$="/bundle"]').count(),1);
+    assert(await page.locator('#branch-run').isDisabled());
+    await page.locator('[aria-label="Open run-fixture"]').click();await page.waitForFunction(()=>document.querySelector('#branch-checkpoint').value.includes('turn-00001'));
+    await page.locator('#branch-policy').selectOption('fresh_budget');assert(await page.locator('#branch-actions').isVisible());await page.locator('#branch-actions').fill('12');await clickCommand('#branch-run','branch');assert(commands.some(c=>c.command==='branch'&&c.payload.policy==='fresh_budget'&&c.payload.action_budget===12));
     await page.locator('[data-tab="live"]').click();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
     for(const width of [320,390,768]){await page.setViewportSize({width,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await page.locator('[data-tab="results"]').click();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await page.locator('[data-tab="live"]').click();}
     assert.deepEqual(errors,[]);
-    console.log(JSON.stringify({passed:true,commands:commands.map(c=>c.command),checks:['safe reasoning rendering','tool outcomes','dose graph','control acknowledgment','aux gate','manual pulse','reset','pause/resume controls','global stop','full-history reconnect recovery','streamed phase counters','assigned-task score','autonomous composer hidden','calibration compatibility','custom corpus upload and size limit','recipe-preserving demonstrations','explicit demo override','thinking allowance','advanced checkpoint form','offline evidence import and safe replay','portable bundle link','desktop/mobile overflow'],errors}));
+    console.log(JSON.stringify({passed:true,commands:commands.map(c=>c.command),checks:['safe reasoning rendering','tool outcomes','dose graph','control acknowledgment','aux gate','manual pulse','reset','pause/resume controls','global stop','full-history reconnect recovery','streamed phase counters','assigned-task score','autonomous composer hidden','calibration compatibility','custom corpus upload and size limit','recipe-preserving demonstrations','explicit demo override','thinking allowance','advanced checkpoint form','offline evidence import and safe replay','portable bundle link','saved boundary continuation and declared allowance','desktop/mobile overflow'],errors}));
   } finally {if(browser)await browser.close();await new Promise(resolve=>server.close(resolve));}
 }
 run().catch(error=>{console.error(error);process.exitCode=1;});
