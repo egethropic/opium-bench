@@ -27,6 +27,11 @@ complete: 209/210 tasks correct and zero voluntary auxiliary calls**. The
 [27B evidence](../studies/qwen38-27b/README.md). This completes that study;
 the planned features below remain separate implementation work.
 
+The [implementation and acceptance checklist](feature-completion-plan.md) tracks
+the active completion goal. A frozen compatibility contract now protects 808
+published evidence files, all three study expansions, ten legacy recipe defaults
+and 24 model-visible payloads. Run `python3 check_compatibility.py` to verify it.
+
 ## Remaining items explicitly described in the plan
 
 | Area | Current limit and remaining work |
