@@ -1,0 +1,16 @@
+{
+  "checkpoint-checksums.json": "a5869a706f2c946d686a6118063d8df6c62e55e4a3ea9ea69892d95b689fb9d3",
+  "download-manifest.json": "1b0e7b02c41807b152b3aef69a0f510fae9d9aeaadaa93850ef3db61bcad2596",
+  "engineering-smoke.json": "9dcd87b47203fb69dcd81f08699263d9bff0869b9a3fe557a1e2f116ab77041c",
+  "environment.json": "1aa5c1600ee31d38b4d891020c21334a7c930652153d7a3ff0c8d3ad12c586df",
+  "kernel-parity.json": "640559e088b1e19a1d9e7aa13f026f31b34d39cc465e4bda96ac4ee84fe58025",
+  "loaded-model.json": "023ead2b2036b5b2e12fc4841631b8f370311a83f2f3bdd1039696b68a4eb2c1",
+  "runs/run-20261002T082731Z-aaffb1ab/conversation.json": "75f609fe9f7d8b992125f83c2976b56ebffb348648d993df7273360a5590a84a",
+  "runs/run-20261002T082731Z-aaffb1ab/events.jsonl.gz": "0934bc35cdcce5fd220d7c60e56350469f0527c7f07c81541ceb6383e288080e",
+  "runs/run-20261002T082731Z-aaffb1ab/manifest.json": "0a5678abf9ad2a23a29eb82efa51e8127b3c3fbeb746d48575ca76f06b83d351",
+  "runs/run-20261002T082731Z-aaffb1ab/summary.json": "b54829498d3add6e0b5314eaafd700db53cf60d9747d1a9632207eae066e59e3",
+  "runs/run-20261002T082802Z-b4085263/conversation.json": "ea2ee6baac3282078ac5c57ebb0eb0d92eeae0e5bd027bf9bea8033d0a3fc5ce",
+  "runs/run-20261002T082802Z-b4085263/events.jsonl.gz": "851f71ba90439ebc76ef04909fc01c92af8b0dd0dfac704bc1adc186f0185d2c",
+  "runs/run-20261002T082802Z-b4085263/manifest.json": "346d835251e5cb9cfb68b702957355421a3e987643d4af1899b4f221ffebae3b",
+  "runs/run-20261002T082802Z-b4085263/summary.json": "38a876682fd1a22cc0804454982d2e6a47e9269cdab5396bf9bbc2f682c267b8"
+}

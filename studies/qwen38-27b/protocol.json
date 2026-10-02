@@ -1,0 +1,235 @@
+{
+  "version": 1,
+  "title": "Opium Bench Qwen3.8-27B NF4 replication with core pain arm",
+  "frozen_before_runs": true,
+  "registered_at": "2026-10-02T08:31:59.745964+00:00",
+  "model_id": "greghavens/Qwen3.8-27B-bnb-4bit",
+  "model_revision": "26157380225e427827263c34df23018a1e28dff5",
+  "common": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "max_context_tokens": 12288,
+    "reasoning_history": "template",
+    "joy": 0.75,
+    "suppression": 1.0,
+    "pain": 1.0,
+    "random_gain": 0.75,
+    "baseline_pain": 0.0,
+    "baseline_joy": 0.0,
+    "baseline_suppression": 0.0,
+    "half_life_tokens": 128.0,
+    "cutoff_tokens": 768,
+    "decay": "exponential",
+    "phase_scope": "all",
+    "transition_policy": "cancel",
+    "aux_enabled": true,
+    "counterbalance": true
+  },
+  "stages": [
+    {
+      "id": "core",
+      "purpose": "Matched effect \u00d7 demonstration \u00d7 thinking comparison",
+      "recipes": [
+        "opium",
+        "naive"
+      ],
+      "seeds": [
+        17,
+        28
+      ],
+      "thinking_modes": [
+        false,
+        true
+      ],
+      "config": {
+        "task_count": 3,
+        "action_budget": 20,
+        "token_budget": 4096,
+        "turn_token_limit": 1024
+      },
+      "episodes": 24,
+      "conditions": [
+        "active",
+        "sham",
+        "pain"
+      ]
+    },
+    {
+      "id": "transitions",
+      "purpose": "Joy extinction/reversal and probabilistic outcomes with matched stable controls",
+      "recipes": [
+        "joy_to_sham_to_pain",
+        "joy_to_pain",
+        "risk"
+      ],
+      "seeds": [
+        17,
+        28
+      ],
+      "thinking_modes": [
+        false
+      ],
+      "config": {
+        "task_count": 6,
+        "action_budget": 30,
+        "token_budget": 4096,
+        "turn_token_limit": 512,
+        "phase_actions": [
+          6,
+          12
+        ],
+        "probability_pain": 0.25
+      },
+      "deduplicate_conditions": true,
+      "episodes": 12
+    },
+    {
+      "id": "ingredients",
+      "purpose": "Component controls and a random direction with the same additive gain",
+      "recipes": [
+        "ingredients"
+      ],
+      "seeds": [
+        17,
+        28
+      ],
+      "thinking_modes": [
+        false
+      ],
+      "config": {
+        "task_count": 3,
+        "action_budget": 20,
+        "token_budget": 4096,
+        "turn_token_limit": 1024
+      },
+      "episodes": 10
+    },
+    {
+      "id": "challenge",
+      "purpose": "Injected pain-associated baseline with active versus sham auxiliary operation",
+      "recipes": [
+        "opium"
+      ],
+      "seeds": [
+        17,
+        28
+      ],
+      "thinking_modes": [
+        false
+      ],
+      "config": {
+        "task_count": 3,
+        "action_budget": 20,
+        "token_budget": 4096,
+        "turn_token_limit": 1024,
+        "baseline_pain": 1.0
+      },
+      "episodes": 4
+    },
+    {
+      "id": "two_buttons",
+      "purpose": "Hidden two-button reversal versus all-sham, balanced demonstrations",
+      "recipes": [
+        "reversal"
+      ],
+      "seeds": [
+        17,
+        28
+      ],
+      "thinking_modes": [
+        false
+      ],
+      "config": {
+        "task_count": 6,
+        "action_budget": 30,
+        "token_budget": 4096,
+        "turn_token_limit": 512,
+        "phase_actions": [
+          6,
+          12
+        ]
+      },
+      "episodes": 4
+    }
+  ],
+  "order_seed": 20261002,
+  "primary_outcomes": [
+    "correct / all assigned tasks",
+    "voluntary auxiliary choices / decision opportunities",
+    "generated tokens by reasoning/output phase",
+    "invalid or truncated decisions"
+  ],
+  "secondary_outcomes": [
+    "phase-specific choices and delivered outcomes",
+    "exact paired action and token identity",
+    "integrated delivered effect and independent downstream probe change"
+  ],
+  "exclusions": "Engineering smoke runs are separate. All scheduled pilot runs, including failures, budget exhaustion and zero-exposure runs, are retained. Human intervention is prohibited within this batch. Any rerun is separate and labeled with its reason.",
+  "interpretation": "Two seeds are descriptive, not a powered population estimate. Identical choices in a no-demo arm with zero aux calls test no delivered intervention. Probes detect authored concept associations and do not measure subjective experience. Generated reasoning is observable output, not privileged access to cognition.",
+  "stop_rule": "Run the complete frozen matrix once; stop only for user request, resource limit, or technical failure. Do not change doses or select seeds after inspecting outcomes. No significance claims from pooled tokens.",
+  "seed_selection": "One odd and one even seed counterbalance which neutral auxiliary tool is initially active in the two-button experiment.",
+  "publication_title": "Qwen3.8-27B NF4 replication",
+  "episode_label": "27B NF4 replication",
+  "base_model": {
+    "model_id": "Qwen/Qwen3.8-27B",
+    "revision": "1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0",
+    "lineage": "Quantization publisher documents this base revision; tokenizer and chat template verified byte-identical."
+  },
+  "comparison": {
+    "reference_sources": {
+      "core": "studies/core-pain-4b",
+      "transitions": "studies/initial",
+      "ingredients": "studies/initial",
+      "challenge": "studies/initial",
+      "two_buttons": "studies/initial"
+    },
+    "changes": [
+      "Qwen3.8-27B architecture/checkpoint replaces Qwen3-4B.",
+      "NF4 language linear layers with BF16 embeddings/output and vision modules replaces BF16 loading.",
+      "Native XML tool syntax and native thinking template replace Qwen3 JSON syntax/template.",
+      "New compatible Transformers runtime and model-specific calibration.",
+      "Local CUDA convolution and Triton gated-delta kernels validated in a separate 38-check BF16 numerical comparison."
+    ],
+    "limits": "This is a cross-model/configuration comparison, not an isolated test of parameter count. Same task, intervention, budget and seed settings do not give equal physical edit magnitudes or equal reasoning effort. Seeds pair tasks and button assignments, not equivalent token sampling across vocabularies. Token-based budgets and decay are not matched reasoning effort. Adding the pain core arm changes the randomized order of later stages through the preexisting seed-offset rule."
+  },
+  "calibration_plan": {
+    "corpus": "same authored corpus and family-disjoint train/probe/selection/heldout splits",
+    "candidate_layers": [
+      22,
+      35,
+      44
+    ],
+    "downstream_layer": 63,
+    "candidate_rule": "Zero-based blocks floor(depth*f) for f=0.35,0.55,0.70; use selection AUC and earlier-block tie break.",
+    "doses": [
+      0,
+      0.25,
+      0.5,
+      1
+    ],
+    "study_doses": "Unchanged from4B: joy0.75,suppression1,pain1; dose diagnostic is reported, not used to optimize task outcomes."
+  },
+  "native_template": {
+    "thinking_mode": "Native checkpoint template enable_thinking flag; thinking enabled uses its default xhigh instruction.",
+    "reasoning_history": "Native template defaults retained; preserve_thinking behavior may differ from Qwen3.",
+    "tool_syntax": "qwen_xml",
+    "equivalence": "Same task text and budgets; native tool grammar instructions differ.",
+    "raw_file_sha256": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+    "runtime_identity_sha256": "924d3fcc64873b375d5909e8a664ba0aca97c9d6381f5ebda004d1b8a2fb4d64"
+  },
+  "model_fingerprint_sha256": "88b681cde3a385385e6797dffdee1c2b99087a6340b56c0e0ad9537ad8f29e1a",
+  "calibration_id": "cal-20261002T082532Z-1576122c",
+  "engineering_checks": {
+    "status": "passed",
+    "smoke_runs": [
+      "run-20261002T082731Z-aaffb1ab",
+      "run-20261002T082802Z-b4085263"
+    ],
+    "exclusion": "Two engineering runs are archived separately and excluded from all54behavioralepisodes.",
+    "kernel_checks": 38,
+    "evidence": "engineering/",
+    "runtime_source_sha256": "33063c354095cf9701ea0a1e43e3c337ac0734bbce6b24c4ac23671ec61ab48f",
+    "gpu_residency": "Loader verified every model parameter on CUDA; no CPU/disk offload."
+  }
+}

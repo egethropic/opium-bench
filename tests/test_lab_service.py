@@ -126,6 +126,61 @@ class ServiceTests(unittest.TestCase):
         self.assertEqual(self.service.sent[-1][1]["profile"]["revision"],
                          "1cfa9a7208912126459214e8b04321603b3df60c")
 
+    def test_curated_nf4_profile_loads_exact_pin_without_custom_ack(self):
+        with patch("lab.service.preflight") as check:
+            self.service.command("load_model", {"profile_id": "qwen38-27b-q4"})
+        profile = self.service.sent[-1][1]["profile"]
+        self.assertEqual(profile["model_id"], "greghavens/Qwen3.8-27B-bnb-4bit")
+        self.assertEqual(profile["revision"], "26157380225e427827263c34df23018a1e28dff5")
+        self.assertEqual(profile["quantization"], "4bit")
+        self.assertTrue(profile["local_kernels"])
+        self.assertFalse(profile["allow_download"])
+        check.assert_not_called()
+
+    def test_curated_nf4_changed_or_cleared_revision_requires_explicit_ack(self):
+        for revision in ("main", "different-pin", "", None):
+            for acknowledgment in (None, False, "true"):
+                with self.subTest(revision=revision, acknowledgment=acknowledgment):
+                    with self.assertRaisesRegex(ValueError, "acknowledge_custom_checkpoint"):
+                        self.service.command("load_model", {"profile_id": "qwen38-27b-q4",
+                            "revision": revision, "acknowledge_custom_checkpoint": acknowledgment})
+                    self.assertEqual(self.service.worker["status"], "ready")
+                    self.assertEqual(self.service.sent, [])
+
+    def test_only_exact_catalog_nf4_pin_gets_smaller_download_estimate(self):
+        cases = [({}, 20),
+                 ({"download_gib": 1}, 20),  # Payload cannot lower the catalog estimate.
+                 ({"revision": "main", "acknowledge_custom_checkpoint": True}, 65),
+                 ({"quantization": "none"}, 65),
+                 ({"model_id": "Qwen/Qwen3.8-27B"}, 65),
+                 ({"model_id": "another/Qwen3.8-27B-NF4", "acknowledge_custom_checkpoint": True}, 65)]
+        for overrides, gib in cases:
+            with self.subTest(overrides=overrides):
+                self.service.worker["status"] = "ready"
+                with patch("lab.service.preflight") as check:
+                    self.service.command("load_model", dict(profile_id="qwen38-27b-q4", allow_download=True, **overrides))
+                check.assert_called_once_with(self.service.cache_dir, gib * 2**30)
+                sent = self.service.sent[-1][1]["profile"]
+                if "model_id" in overrides:
+                    self.assertNotIn("revision", sent)
+
+    def test_other_nf4_repository_needs_ack_and_may_disable_local_kernels(self):
+        payload = {"profile_id": "qwen38-27b-q4", "model_id": "another/Qwen3.8-27B-NF4",
+                   "revision": "chosen-revision", "local_kernels": False}
+        with self.assertRaisesRegex(ValueError, "acknowledge_custom_checkpoint"):
+            self.service.command("load_model", payload)
+        self.service.command("load_model", dict(payload, acknowledge_custom_checkpoint=True))
+        profile = self.service.sent[-1][1]["profile"]
+        self.assertEqual(profile["revision"], "chosen-revision")
+        self.assertFalse(profile["local_kernels"])
+
+    def test_curated_download_preflight_failure_preserves_ready_state(self):
+        with patch("lab.service.preflight", side_effect=ValueError("Not enough disk space")):
+            with self.assertRaisesRegex(ValueError, "disk space"):
+                self.service.command("load_model", {"profile_id": "qwen38-27b-q4", "allow_download": True})
+        self.assertEqual(self.service.worker["status"], "ready")
+        self.assertEqual(self.service.sent, [])
+
     def test_model_and_calibration_are_required(self):
         self.service.worker["model"] = None
         with self.assertRaises(ValueError):

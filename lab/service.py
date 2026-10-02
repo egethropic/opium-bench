@@ -20,9 +20,11 @@ PROFILES = [
          revision="1cfa9a7208912126459214e8b04321603b3df60c", quantization="none",
          dtype="bfloat16", precision="BF16", device="cuda", allow_download=False,
          description="Reference model. Native GPU inference with full activation access."),
-    dict(id="qwen38-27b-q4", name="Qwen3.8 · 27B", model_id="Qwen/Qwen3.8-27B",
-         quantization="4bit", dtype="bfloat16", precision="4-bit", device="cuda", allow_download=False,
-         description="Optional advanced profile. Requires a compatible runtime, validated quantization and sufficient GPU memory. Not yet validated on this rig."),
+    dict(id="qwen38-27b-q4", name="Qwen3.8 · 27B NF4", model_id="greghavens/Qwen3.8-27B-bnb-4bit",
+         revision="26157380225e427827263c34df23018a1e28dff5",
+         quantization="4bit", dtype="bfloat16", precision="NF4 / BF16", device="cuda", allow_download=False,
+         local_kernels=True, download_gib=20,
+         description="Pinned NF4 conversion of official Qwen3.8-27B. Requires the separate 27B runtime and model-specific calibration."),
 ]
 COMMANDS = {"load_model", "unload_model", "calibrate", "start_session", "chat",
             "control", "inject", "stop", "restart", "start_batch"}
@@ -394,17 +396,23 @@ class LabService:
                 # A revision belongs to one repository. A new checkpoint must
                 # not inherit the reference 4B repository's pinned commit.
                 original_model_id = profile["model_id"]
-                for key in ("model_id", "revision", "quantization", "dtype", "allow_download"):
+                original_revision = profile.get("revision")
+                for key in ("model_id", "revision", "quantization", "dtype", "allow_download", "local_kernels"):
                     if key in payload:
                         profile[key] = payload[key]
                 if profile["model_id"] != original_model_id and not payload.get("revision"):
                     profile.pop("revision", None)
-                if not isinstance(profile["model_id"], str) or not profile["model_id"].startswith("Qwen/"):
+                catalog_checkpoint = (profile["model_id"] == original_model_id and
+                                      profile.get("revision") == original_revision)
+                if (not isinstance(profile["model_id"], str) or
+                        (not catalog_checkpoint and not profile["model_id"].startswith("Qwen/"))):
                     if not (isinstance(profile["model_id"], str) and payload.get("acknowledge_custom_checkpoint") is True):
                         raise ValueError("Custom checkpoints require acknowledge_custom_checkpoint=true")
                 if profile.get("allow_download"):
-                    # Conservative estimate includes unquantized download + working headroom.
-                    estimate = 65 * 2**30 if "27B" in profile["model_id"] else 12 * 2**30
+                    # Only a pinned catalog conversion gets its smaller download estimate.
+                    pinned_conversion = catalog_checkpoint and profile.get("quantization") == "4bit"
+                    gib = profile.get("download_gib") if pinned_conversion else None
+                    estimate = (gib if gib is not None else (65 if "27B" in profile["model_id"] else 12)) * 2**30
                     preflight(self.cache_dir, estimate)
                 self.worker.update(status="loading", error=None)
                 return self._send(command, dict(profile=profile))

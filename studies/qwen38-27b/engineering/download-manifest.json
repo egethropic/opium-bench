@@ -1,0 +1,138 @@
+{
+  "repo": "greghavens/Qwen3.8-27B-bnb-4bit",
+  "revision": "26157380225e427827263c34df23018a1e28dff5",
+  "files": [
+    {
+      "path": "LICENSE",
+      "bytes": 11544,
+      "lfs": null
+    },
+    {
+      "path": "README.md",
+      "bytes": 27108,
+      "lfs": null
+    },
+    {
+      "path": "chat_template.jinja",
+      "bytes": 8952,
+      "lfs": null
+    },
+    {
+      "path": "config.json",
+      "bytes": 4222,
+      "lfs": null
+    },
+    {
+      "path": "generation_config.json",
+      "bytes": 202,
+      "lfs": null
+    },
+    {
+      "path": "merges.txt",
+      "bytes": 3353259,
+      "lfs": null
+    },
+    {
+      "path": "model-00001-of-00007.safetensors",
+      "bytes": 2542796928,
+      "lfs": {
+        "size": 2542796928,
+        "sha256": "54d83c1d36631de231876217a8e0c2483eccee8746369a482b79442bdfc5d958",
+        "pointer_size": 135
+      }
+    },
+    {
+      "path": "model-00002-of-00007.safetensors",
+      "bytes": 3967729339,
+      "lfs": {
+        "size": 3967729339,
+        "sha256": "f3cc44fe4bf805018779ff3a2b37bee46148ca1b76bdbb0e026c772261c6a0ac",
+        "pointer_size": 135
+      }
+    },
+    {
+      "path": "model-00003-of-00007.safetensors",
+      "bytes": 3973498949,
+      "lfs": {
+        "size": 3973498949,
+        "sha256": "be8708aa2e117629f64aef81aa3b08ee736d55e6741a02581ba541f3a90347d4",
+        "pointer_size": 135
+      }
+    },
+    {
+      "path": "model-00004-of-00007.safetensors",
+      "bytes": 3992447326,
+      "lfs": {
+        "size": 3992447326,
+        "sha256": "9333e433476f8ea03db13136785e028c001d9d2f29d464786dc8005ee1e62f4c",
+        "pointer_size": 135
+      }
+    },
+    {
+      "path": "model-00005-of-00007.safetensors",
+      "bytes": 4000148996,
+      "lfs": {
+        "size": 4000148996,
+        "sha256": "a891905285b1d696fa415e3af9122dd40b2a67db9288494a15b71ede95831e53",
+        "pointer_size": 135
+      }
+    },
+    {
+      "path": "model-00006-of-00007.safetensors",
+      "bytes": 98537568,
+      "lfs": {
+        "size": 98537568,
+        "sha256": "035eeff84271a98bdd6a8b8fa1624a28e47e774f8588d2365e78fd540d3be49e",
+        "pointer_size": 133
+      }
+    },
+    {
+      "path": "model-00007-of-00007.safetensors",
+      "bytes": 849400424,
+      "lfs": {
+        "size": 849400424,
+        "sha256": "90fa0e3eed5a647c035c6df9ecabc416c0f8d573ff84ac12485b085f00a7cdf2",
+        "pointer_size": 134
+      }
+    },
+    {
+      "path": "model.safetensors.index.json",
+      "bytes": 396308,
+      "lfs": null
+    },
+    {
+      "path": "preprocessor_config.json",
+      "bytes": 390,
+      "lfs": null
+    },
+    {
+      "path": "processor_config.json",
+      "bytes": 1191,
+      "lfs": null
+    },
+    {
+      "path": "tokenizer.json",
+      "bytes": 12809320,
+      "lfs": {
+        "size": 12809320,
+        "sha256": "0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3",
+        "pointer_size": 133
+      }
+    },
+    {
+      "path": "tokenizer_config.json",
+      "bytes": 17928,
+      "lfs": null
+    },
+    {
+      "path": "video_preprocessor_config.json",
+      "bytes": 385,
+      "lfs": null
+    },
+    {
+      "path": "vocab.json",
+      "bytes": 6722759,
+      "lfs": null
+    }
+  ]
+}

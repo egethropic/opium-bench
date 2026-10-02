@@ -225,6 +225,85 @@ def _quantization_load_kwargs(config, quantization, dtype, transformers):
     return {}
 
 
+def _kernel_callable_identity(function):
+    """Describe the callable selected by Transformers' frozen fallback wrapper."""
+    seen = set()
+    while inspect.isfunction(function) and id(function) not in seen:
+        seen.add(id(function))
+        implementation = inspect.getclosurevars(function).nonlocals.get("implementation")
+        if not callable(implementation):
+            break
+        function = implementation
+    function = inspect.unwrap(function)
+    source = inspect.getsourcefile(function)
+    return {"callable": function.__module__ + "." + function.__qualname__,
+            "source_sha256": hashlib.sha256(Path(source).read_bytes()).hexdigest() if source else None}
+
+
+def _configure_qwen35_kernels(enabled):
+    """Select local kernels explicitly; never fetch Hub kernels or mutate FLA.
+
+    Transformers 5.15.1 expects ``recurrent_gated_delta_rule`` while fla-core
+    0.5.2 exports ``fused_recurrent_gated_delta_rule``. Both take q/k/v followed
+    by the same named g/beta/state/normalization arguments at the model callsite.
+    Qwen's forward reads these four module globals, including cached decoding.
+    """
+    import importlib
+    from importlib import metadata
+
+    names = ("torch_recurrent_gated_delta_rule", "torch_chunk_gated_delta_rule",
+             "causal_conv1d_fn", "causal_conv1d_update")
+    implementations = None
+    if enabled:
+        # Import before modeling so its optional-backend decorators also see
+        # installed packages. Missing/broken packages fail instead of silently
+        # changing the selected numerical implementation.
+        delta = importlib.import_module("fla.ops.gated_delta_rule")
+        conv = importlib.import_module("causal_conv1d")
+        recurrent = getattr(delta, "recurrent_gated_delta_rule", None)
+        if recurrent is None:
+            recurrent = delta.fused_recurrent_gated_delta_rule
+        implementations = (recurrent, delta.chunk_gated_delta_rule,
+                           conv.causal_conv1d_fn, conv.causal_conv1d_update)
+        for function in implementations[:2]:
+            params = inspect.signature(function).parameters
+            required = {"g", "beta", "scale", "initial_state", "output_final_state",
+                        "use_qk_l2norm_in_kernel", "state_v_first", "cu_seqlens"}
+            if (not required.issubset(params) or tuple(params)[:3] != ("q", "k", "v")
+                    or params["scale"].default is not None or params["state_v_first"].default is not False):
+                raise RuntimeError("Installed FLA kernel has an unsupported Qwen3.5 argument contract")
+        for function, required in ((implementations[2], {"x", "weight", "bias", "activation"}),
+                                   (implementations[3], {"x", "conv_state", "weight", "bias", "activation"})):
+            if not required.issubset(inspect.signature(function).parameters):
+                raise RuntimeError("Installed causal-conv1d kernel has an unsupported Qwen3.5 argument contract")
+
+    module = importlib.import_module("transformers.models.qwen3_5.modeling_qwen3_5")
+    if not hasattr(module, "_opium_bench_original_kernels"):
+        module._opium_bench_original_kernels = {name: getattr(module, name) for name in names}
+    originals = module._opium_bench_original_kernels
+
+    def bind(implementation):
+        params = tuple(inspect.signature(implementation).parameters)
+
+        def dispatch(*args, **kwargs):
+            # Match the Transformers fallback decorator: unrelated model
+            # kwargs are dropped, but state/layout options are preserved.
+            return implementation(*args, **{key: value for key, value in kwargs.items() if key in params})
+
+        return dispatch
+
+    for index, name in enumerate(names):
+        setattr(module, name, bind(implementations[index]) if enabled else originals[name])
+    versions = {}
+    for package in ("transformers", "torch", "triton", "fla-core", "causal-conv1d", "einops"):
+        try:
+            versions[package] = metadata.version(package)
+        except metadata.PackageNotFoundError:
+            versions[package] = None
+    selected = {name: _kernel_callable_identity(getattr(module, name)) for name in names}
+    return module, {"mode": "explicit_local_v1" if enabled else "transformers_default",
+                    "hub_kernels": False, "packages": versions, "implementations": selected}
+
 class Runtime:
     def __init__(self):
         self.model = self.tokenizer = self.blocks = None
@@ -284,18 +363,23 @@ class Runtime:
                                "Qwen3.5/3.8 profiles need a compatible official Transformers adapter; "
                                "the lab will not silently load a different architecture.") from exc
         kind = getattr(config, "model_type", "")
+        kernel_backend = None
         if kind == "qwen3":
             adapter, model_class = "qwen3", transformers.AutoModelForCausalLM
         elif kind in ("qwen3_5", "qwen3_5_text"):
             adapter = "qwen3_5"
             class_name = "Qwen3_5ForConditionalGeneration" if kind == "qwen3_5" else "Qwen3_5ForCausalLM"
-            model_class = getattr(transformers, class_name, None)
+            module, kernel_backend = _configure_qwen35_kernels(
+                _boolean(profile.get("local_kernels", False), "local_kernels"))
+            model_class = getattr(module, class_name, None)
             if model_class is None:
                 raise RuntimeError(f"Installed Transformers {transformers.__version__} lacks {class_name}; "
                                    "install the model's documented compatible version explicitly")
         else:
             raise ValueError(f"Unsupported architecture {kind!r}; only dense Qwen3 and Qwen3.5 adapters are provided")
         kwargs = dict(common, dtype=dtype, device_map={"": device}, attn_implementation=attention)
+        if adapter == "qwen3_5":
+            kwargs["use_kernels"] = False  # Local selected implementations only; no Hub fetch.
         if quantization == "4bit":
             try:
                 import bitsandbytes  # noqa: F401
@@ -342,6 +426,7 @@ class Runtime:
                 # Preserve existing Qwen3 calibration identities. New adapters
                 # additionally record the native grammar selected by the worker.
                 fingerprint["tool_call_format"] = tool_call_format
+                fingerprint["kernel_backend"] = kernel_backend
             self.model, self.tokenizer, self.blocks, self.device = model, tokenizer, blocks, device
             self._configure_forward()
             self.info = {"status": "loaded", "fingerprint": fingerprint,

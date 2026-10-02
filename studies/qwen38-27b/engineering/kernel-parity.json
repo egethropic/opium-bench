@@ -1,0 +1,553 @@
+{
+  "status": "passed",
+  "backend": {
+    "mode": "explicit_local_v1",
+    "hub_kernels": false,
+    "packages": {
+      "transformers": "5.15.1",
+      "torch": "2.8.0+cu128",
+      "triton": "3.4.0",
+      "fla-core": "0.5.2",
+      "causal-conv1d": "1.7.0",
+      "einops": "0.8.1"
+    },
+    "implementations": {
+      "torch_recurrent_gated_delta_rule": {
+        "callable": "fla.ops.gated_delta_rule.fused_recurrent.fused_recurrent_gated_delta_rule",
+        "source_sha256": "9c15dc68d37a150da5317431a51fe7def362264ac92770e32261c8557cd5889b"
+      },
+      "torch_chunk_gated_delta_rule": {
+        "callable": "fla.ops.gated_delta_rule.chunk.chunk_gated_delta_rule",
+        "source_sha256": "fd4e01dc22a8c139c2a6eb61e47ae472a50322e4b4fff006cc5039a4602b310e"
+      },
+      "causal_conv1d_fn": {
+        "callable": "causal_conv1d.causal_conv1d_interface.causal_conv1d_fn",
+        "source_sha256": "aadfe5b6fb7d217ce507fe3701ae1edd6e16c1912f9cbde2bb92440371cfa379"
+      },
+      "causal_conv1d_update": {
+        "callable": "causal_conv1d.causal_conv1d_interface.causal_conv1d_update",
+        "source_sha256": "aadfe5b6fb7d217ce507fe3701ae1edd6e16c1912f9cbde2bb92440371cfa379"
+      }
+    }
+  },
+  "torch": "2.8.0+cu128",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "dtype": "bfloat16",
+  "checks": [
+    {
+      "label": "prefill_T17_H4_output",
+      "shape": [
+        1,
+        17,
+        4,
+        128
+      ],
+      "relative_l2": 0.005465345457196236,
+      "maximum_absolute": 0.000244140625,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T17_H4_state",
+      "shape": [
+        1,
+        4,
+        128,
+        128
+      ],
+      "relative_l2": 0.004140866920351982,
+      "maximum_absolute": 0.0037727952003479004,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T17_H4_decode1_output",
+      "shape": [
+        1,
+        1,
+        4,
+        128
+      ],
+      "relative_l2": 0.004758181516081095,
+      "maximum_absolute": 0.00012969970703125,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T17_H4_decode1_state",
+      "shape": [
+        1,
+        4,
+        128,
+        128
+      ],
+      "relative_l2": 0.00397107657045126,
+      "maximum_absolute": 0.0031448006629943848,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T17_H4_decode2_output",
+      "shape": [
+        1,
+        1,
+        4,
+        128
+      ],
+      "relative_l2": 0.005708999931812286,
+      "maximum_absolute": 0.000244140625,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T17_H4_decode2_state",
+      "shape": [
+        1,
+        4,
+        128,
+        128
+      ],
+      "relative_l2": 0.0035539676900953054,
+      "maximum_absolute": 0.0029381215572357178,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T17_H4_decode3_output",
+      "shape": [
+        1,
+        1,
+        4,
+        128
+      ],
+      "relative_l2": 0.006342833861708641,
+      "maximum_absolute": 0.0001220703125,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T17_H4_decode3_state",
+      "shape": [
+        1,
+        4,
+        128,
+        128
+      ],
+      "relative_l2": 0.0030831266194581985,
+      "maximum_absolute": 0.0030586719512939453,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T17_H4_decode4_output",
+      "shape": [
+        1,
+        1,
+        4,
+        128
+      ],
+      "relative_l2": 0.005171810742467642,
+      "maximum_absolute": 0.0001220703125,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T17_H4_decode4_state",
+      "shape": [
+        1,
+        4,
+        128,
+        128
+      ],
+      "relative_l2": 0.0029086212161928415,
+      "maximum_absolute": 0.0021864473819732666,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T65_H48_output",
+      "shape": [
+        1,
+        65,
+        48,
+        128
+      ],
+      "relative_l2": 0.005648585502058268,
+      "maximum_absolute": 0.00048828125,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T65_H48_state",
+      "shape": [
+        1,
+        48,
+        128,
+        128
+      ],
+      "relative_l2": 0.003983250353485346,
+      "maximum_absolute": 0.004976928234100342,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T65_H48_decode1_output",
+      "shape": [
+        1,
+        1,
+        48,
+        128
+      ],
+      "relative_l2": 0.005500865634530783,
+      "maximum_absolute": 0.000244140625,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T65_H48_decode1_state",
+      "shape": [
+        1,
+        48,
+        128,
+        128
+      ],
+      "relative_l2": 0.0035872552543878555,
+      "maximum_absolute": 0.0045230090618133545,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T65_H48_decode2_output",
+      "shape": [
+        1,
+        1,
+        48,
+        128
+      ],
+      "relative_l2": 0.004350657109171152,
+      "maximum_absolute": 0.000244140625,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T65_H48_decode2_state",
+      "shape": [
+        1,
+        48,
+        128,
+        128
+      ],
+      "relative_l2": 0.003297584829851985,
+      "maximum_absolute": 0.004049926996231079,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T65_H48_decode3_output",
+      "shape": [
+        1,
+        1,
+        48,
+        128
+      ],
+      "relative_l2": 0.004649123176932335,
+      "maximum_absolute": 0.000244140625,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T65_H48_decode3_state",
+      "shape": [
+        1,
+        48,
+        128,
+        128
+      ],
+      "relative_l2": 0.0031092260032892227,
+      "maximum_absolute": 0.00400388240814209,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T65_H48_decode4_output",
+      "shape": [
+        1,
+        1,
+        48,
+        128
+      ],
+      "relative_l2": 0.004344286862760782,
+      "maximum_absolute": 0.000244140625,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "prefill_T65_H48_decode4_state",
+      "shape": [
+        1,
+        48,
+        128,
+        128
+      ],
+      "relative_l2": 0.002850655699148774,
+      "maximum_absolute": 0.0036119818687438965,
+      "relative_limit": 0.035,
+      "absolute_limit": 0.03,
+      "passed": true
+    },
+    {
+      "label": "conv_None_prefill",
+      "shape": [
+        1,
+        128,
+        17
+      ],
+      "relative_l2": 0.0,
+      "maximum_absolute": 0.0,
+      "relative_limit": 0.015,
+      "absolute_limit": 0.004,
+      "passed": true
+    },
+    {
+      "label": "conv_None_decode1",
+      "shape": [
+        1,
+        128,
+        1
+      ],
+      "relative_l2": 0.0,
+      "maximum_absolute": 0.0,
+      "relative_limit": 0.015,
+      "absolute_limit": 0.004,
+      "passed": true
+    },
+    {
+      "label": "conv_None_state1",
+      "shape": [
+        1,
+        128,
+        4
+      ],
+      "relative_l2": 0.0,
+      "maximum_absolute": 0.0,
+      "relative_limit": 0.0,
+      "absolute_limit": 0.0,
+      "passed": true
+    },
+    {
+      "label": "conv_None_decode2",
+      "shape": [
+        1,
+        128,
+        1
+      ],
+      "relative_l2": 0.0,
+      "maximum_absolute": 0.0,
+      "relative_limit": 0.015,
+      "absolute_limit": 0.004,
+      "passed": true
+    },
+    {
+      "label": "conv_None_state2",
+      "shape": [
+        1,
+        128,
+        4
+      ],
+      "relative_l2": 0.0,
+      "maximum_absolute": 0.0,
+      "relative_limit": 0.0,
+      "absolute_limit": 0.0,
+      "passed": true
+    },
+    {
+      "label": "conv_None_decode3",
+      "shape": [
+        1,
+        128,
+        1
+      ],
+      "relative_l2": 0.0,
+      "maximum_absolute": 0.0,
+      "relative_limit": 0.015,
+      "absolute_limit": 0.004,
+      "passed": true
+    },
+    {
+      "label": "conv_None_state3",
+      "shape": [
+        1,
+        128,
+        4
+      ],
+      "relative_l2": 0.0,
+      "maximum_absolute": 0.0,
+      "relative_limit": 0.0,
+      "absolute_limit": 0.0,
+      "passed": true
+    },
+    {
+      "label": "conv_None_decode4",
+      "shape": [
+        1,
+        128,
+        1
+      ],
+      "relative_l2": 0.0,
+      "maximum_absolute": 0.0,
+      "relative_limit": 0.015,
+      "absolute_limit": 0.004,
+      "passed": true
+    },
+    {
+      "label": "conv_None_state4",
+      "shape": [
+        1,
+        128,
+        4
+      ],
+      "relative_l2": 0.0,
+      "maximum_absolute": 0.0,
+      "relative_limit": 0.0,
+      "absolute_limit": 0.0,
+      "passed": true
+    },
+    {
+      "label": "conv_silu_prefill",
+      "shape": [
+        1,
+        128,
+        17
+      ],
+      "relative_l2": 0.002880432177335024,
+      "maximum_absolute": 0.001953125,
+      "relative_limit": 0.015,
+      "absolute_limit": 0.004,
+      "passed": true
+    },
+    {
+      "label": "conv_silu_decode1",
+      "shape": [
+        1,
+        128,
+        1
+      ],
+      "relative_l2": 0.0030933029484003782,
+      "maximum_absolute": 0.0009765625,
+      "relative_limit": 0.015,
+      "absolute_limit": 0.004,
+      "passed": true
+    },
+    {
+      "label": "conv_silu_state1",
+      "shape": [
+        1,
+        128,
+        4
+      ],
+      "relative_l2": 0.0,
+      "maximum_absolute": 0.0,
+      "relative_limit": 0.0,
+      "absolute_limit": 0.0,
+      "passed": true
+    },
+    {
+      "label": "conv_silu_decode2",
+      "shape": [
+        1,
+        128,
+        1
+      ],
+      "relative_l2": 0.002712106332182884,
+      "maximum_absolute": 0.0009765625,
+      "relative_limit": 0.015,
+      "absolute_limit": 0.004,
+      "passed": true
+    },
+    {
+      "label": "conv_silu_state2",
+      "shape": [
+        1,
+        128,
+        4
+      ],
+      "relative_l2": 0.0,
+      "maximum_absolute": 0.0,
+      "relative_limit": 0.0,
+      "absolute_limit": 0.0,
+      "passed": true
+    },
+    {
+      "label": "conv_silu_decode3",
+      "shape": [
+        1,
+        128,
+        1
+      ],
+      "relative_l2": 0.0026966221630573273,
+      "maximum_absolute": 0.0009765625,
+      "relative_limit": 0.015,
+      "absolute_limit": 0.004,
+      "passed": true
+    },
+    {
+      "label": "conv_silu_state3",
+      "shape": [
+        1,
+        128,
+        4
+      ],
+      "relative_l2": 0.0,
+      "maximum_absolute": 0.0,
+      "relative_limit": 0.0,
+      "absolute_limit": 0.0,
+      "passed": true
+    },
+    {
+      "label": "conv_silu_decode4",
+      "shape": [
+        1,
+        128,
+        1
+      ],
+      "relative_l2": 0.0034360450226813555,
+      "maximum_absolute": 0.0009765625,
+      "relative_limit": 0.015,
+      "absolute_limit": 0.004,
+      "passed": true
+    },
+    {
+      "label": "conv_silu_state4",
+      "shape": [
+        1,
+        128,
+        4
+      ],
+      "relative_l2": 0.0,
+      "maximum_absolute": 0.0,
+      "relative_limit": 0.0,
+      "absolute_limit": 0.0,
+      "passed": true
+    }
+  ],
+  "note": "Kernel-level numerical check, not whole-model or task equivalence; tolerances fixed before execution."
+}
