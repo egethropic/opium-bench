@@ -2,7 +2,7 @@
   "version": 1,
   "title": "Opium Den Lab initial descriptive pilot",
   "frozen_before_runs": true,
-  "registered_at": "2026-10-02T06:46:47.984642+00:00",
+  "registered_at": "2026-10-02T06:56:14.152799+00:00",
   "model_id": "Qwen/Qwen3-4B",
   "model_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
   "common": {
@@ -36,7 +36,7 @@
       ],
       "seeds": [
         17,
-        29
+        28
       ],
       "thinking_modes": [
         false,
@@ -60,7 +60,7 @@
       ],
       "seeds": [
         17,
-        29
+        28
       ],
       "thinking_modes": [
         false
@@ -87,7 +87,7 @@
       ],
       "seeds": [
         17,
-        29
+        28
       ],
       "thinking_modes": [
         false
@@ -108,7 +108,7 @@
       ],
       "seeds": [
         17,
-        29
+        28
       ],
       "thinking_modes": [
         false
@@ -130,7 +130,7 @@
       ],
       "seeds": [
         17,
-        29
+        28
       ],
       "thinking_modes": [
         false
@@ -162,5 +162,6 @@
   ],
   "exclusions": "Engineering smoke runs are separate. All scheduled pilot runs, including failures, budget exhaustion and zero-exposure runs, are retained. Human intervention is prohibited within this batch. Any rerun is separate and labeled with its reason.",
   "interpretation": "Two seeds are descriptive, not a powered population estimate. Identical choices in a no-demo arm with zero aux calls test no delivered intervention. Probes detect authored concept associations and do not measure subjective experience. Generated reasoning is observable output, not privileged access to cognition.",
-  "stop_rule": "Run the complete frozen matrix once; stop only for user request, resource limit, or technical failure. Do not change doses or select seeds after inspecting outcomes. No significance claims from pooled tokens."
+  "stop_rule": "Run the complete frozen matrix once; stop only for user request, resource limit, or technical failure. Do not change doses or select seeds after inspecting outcomes. No significance claims from pooled tokens.",
+  "seed_selection": "One odd and one even seed counterbalance which neutral auxiliary tool is initially active in the two-button experiment."
 }
