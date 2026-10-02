@@ -1,358 +1,302 @@
 # The Opium Den Lab
 
-This repository contains the working Qwen3-4B activation-steering prototype,
-its local live viewer, historical pilot results, and the
-[full lab build and research plan](LAB_PLAN.html). The expanded model loader,
-calibration workshop, conversational reasoning viewer, joy-to-pain transitions,
-and probabilistic-outcome experiments are **planned**, not yet implemented.
+**A local workbench for studying how activation steering changes language,
+reasoning, task performance, and voluntary tool choices.**
 
-The default remains Qwen3-4B on an RTX 4090. The plan also targets Qwen3.8-27B
-at 4-bit precision on both the 4090 and 5090, with full GPU residency and
-model-specific calibration verified before use. Model caches and runtimes are
-excluded from Git. Keep large downloads off a nearly full Windows C: drive;
-WSL's apparent free capacity does not guarantee room on its backing host volume.
+Talk to a Qwen model, inspect its generated reasoning, adjust calibrated
+activation directions, and run controlled experiments where an optional tool
+changes those activations. Review the complete record in your browser without
+loading a model. Model weights stay frozen throughout.
 
-Run the existing local tests without loading model weights:
+[User guide](docs/guide.html) · [Findings & limitations](docs/results.html) ·
+[Initial lab study](studies/initial/README.md) · [Research design](LAB_PLAN.html)
+
+“Opium,” “joy,” and “pain” name experimental interventions and text-associated
+representations. They are **not established emotion mechanisms or measurements
+of subjective experience**. A changed activation, a changed decision, and a
+felt state are different claims.
+
+## What you can do
+
+- **Models:** load a local checkpoint, inspect storage, and keep inference fully
+  GPU-resident. Qwen3-4B BF16 is the reference profile.
+- **Calibration:** extract model-specific directions, fit separate readouts,
+  select a layer, and evaluate held-out examples and a small dose sweep.
+- **Live lab:** converse with the model, inspect streamed reasoning and tool
+  calls, apply baseline sliders or decaying/held pulses, and follow token graphs.
+- **Experiments:** compare active/sham conditions, demonstrations, ingredients,
+  thinking, hidden button reversals, joy→pain transitions, and probabilistic
+  outcomes on bounded, automatically scored tasks.
+- **Results:** replay conversations, inspect raw events, compare run summaries,
+  and export reports and JSON. Stopped and failed runs retain their records.
+
+The browser has no build step, CDN dependency, or cloud inference requirement.
+The local service listens on loopback. Each rig runs its own installation.
+
+## Quickstart: review results without a GPU
+
+Use Python 3.12 and a checkout of this repository. Until publication, cloning
+requires access to the private repository.
 
 ```bash
-python -m unittest discover -s tests -v
+git clone https://github.com/eaturkgeldi-mtg/opium-den-lab.git
+cd opium-den-lab
+python3 launch_lab.py --data-dir ./data --cache-dir ./data/hf-cache
 ```
 
-## Existing prototype
+Open **[localhost:8766](http://localhost:8766)** and select **Results & replay**.
+This starts the interface only: no packages, model download, or GPU allocation
+are needed to inspect saved records. The historical pilot reports in
+[`runs/`](runs/) can also be opened directly. The new study's reports and scope
+are indexed in [its results page](docs/results.html).
 
-Suppress a learned pain-associated direction, add an orthogonal joy-associated
-direction, and measure what changes. The name is a metaphor. This project does
-not identify pain neurons, measure an experienced state, or establish that an
-LLM experiences pain or euphoria.
+For model work, choose a large data drive **before** installing dependencies or
+loading weights. Explicit `--data-dir`, `--cache-dir`, and `--python` arguments
+avoid relying on machine-specific defaults.
 
-The main deliverable is `runs/pilot/report.html`, with all generations, scoring,
-vectors, source snapshots, and run metadata beside it. Open the HTML in a browser.
-It contains a scientific plot, paired comparisons, category results, and every
-completion. The machine-readable summary is `runs/pilot/summary.json`.
+## Quickstart: run your own experiment
 
-The completed first pilot has 14 conditions, 896 scored task responses, 84 free
-continuations, and 168 text-likelihood measurements. Full absolute erasure scored
-39/64, identical to baseline's strict total (one gain and one loss). Its neutral
-perplexity was 54.35 versus 56.72 at baseline. Higher joy doses degraded results:
-combined suppression plus joy dose 2 scored 22/64 and perplexity 90.09.
+The reference GPU environment is **Linux/WSL, Python 3.12, RTX 4090,
+PyTorch 2.8.0 with CUDA 12.8, and Transformers 4.57.6**. A compatible NVIDIA
+host driver is required. The 4B checkpoint is about 8 GB; GPU caches and temporary
+activations need additional space. Minimum GPU capacity has not been established.
 
-An explicitly post hoc, unblinded content audit separates correct answers with
-format violations from substantive mistakes. Baseline had 55/64 completed correct
-answers, full erasure 58/64, neutral-centered erasure 52/64, joy dose 1 alone 51/64,
-and combined dose 1 52/64. These are exploratory observations, not evidence of a
-general capability improvement or equivalence. The report shows both scoring
-views and their limitations. `runs/pilot/source` preserves the exact original
-runner; current reporting and CLI validation include subsequent usability fixes.
+### 1. Install on the chosen data drive
 
-## Intervention
+Replace `/path/to/large-drive/opium-den` below with a real path. Under WSL, a
+secondary Windows drive can be addressed as, for example, `/mnt/d/opium-den`.
+Keep the environment, package caches, temporary files, model cache, and run data
+on that drive when C: is nearly full.
 
-For hidden activation `h`, unit pain direction `p`, neutral mean `mu`, suppression
-fraction `a`, joy dose `b`, and scale `s`, the main operation is:
+```bash
+export OPIUM_STORAGE=/path/to/large-drive/opium-den
+mkdir -p "$OPIUM_STORAGE/tmp" "$OPIUM_STORAGE/pip-cache"
+export TMPDIR="$OPIUM_STORAGE/tmp"
+export PIP_CACHE_DIR="$OPIUM_STORAGE/pip-cache"
+export HF_HOME="$OPIUM_STORAGE/hf-cache"
+export TORCH_HOME="$OPIUM_STORAGE/torch-cache"
+
+python3 -m venv "$OPIUM_STORAGE/venv"
+"$OPIUM_STORAGE/venv/bin/python" -m pip install torch==2.8.0 \
+  --index-url https://download.pytorch.org/whl/cu128
+"$OPIUM_STORAGE/venv/bin/python" -m pip install -r requirements.txt
+
+python3 launch_lab.py \
+  --data-dir "$OPIUM_STORAGE/data" \
+  --cache-dir "$HF_HOME" \
+  --python "$OPIUM_STORAGE/venv/bin/python"
+```
+
+The service itself uses standard-library Python; `--python` selects the separate
+worker interpreter with GPU dependencies. Native Windows GPU execution is not
+our validated reference path.
+
+The lab reserves **10 GiB** on the destination during its storage preflight.
+The current download estimate is conservative: 12 GiB plus reserve for the 4B
+profile and 65 GiB plus reserve for IDs containing `27B`. Check actual host-volume
+space as well. WSL's reported virtual free capacity does not establish that its
+backing Windows drive can grow. The app does not expand WSL, delete other models,
+or silently enable CPU/disk offload. These checks do not replace monitoring space
+during long downloads or studies.
+
+### 2. Load and calibrate
+
+1. In **Models**, choose **Qwen3 · 4B**. If the checkpoint is missing, open
+   **Advanced checkpoint configuration**, keep the reference model and pinned
+   revision, explicitly enable downloads, and load it after the storage preflight.
+2. In **Calibration**, use the default candidate layers `12, 18, 25`, or
+   choose just `18` for a simpler calibration. Optionally upload a custom corpus
+   JSON file (up to 500 KB). Select **Extract & validate**.
+3. In **Live lab**, select the saved calibration and choose **Conversation** or
+   **Opium Den**. Review thinking, budgets, demonstration, and pulse settings;
+   then select **Start session**.
+
+The reference checkpoint is pinned to:
 
 ```text
-j_perp = normalize(j - dot(j, p) * p)
-h_new  = h - a * dot(h, p) * p + b * s * j_perp
+Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c
 ```
 
-`a=1` zeros this one projection, up to BF16 rounding, at the output of transformer
-block 18 (zero-based). `a=0` leaves it intact. A separate `centered_100` comparison
-uses `dot(h-mu, p)` instead, resetting the component to the neutral mean. Joy-only
-and combined conditions use the **same orthogonalized joy direction** so their
-comparison isolates suppression. The original overlapping joy direction is also
-saved, but not added in these conditions.
+Downloads are opt-in and remote model code is disabled. A different checkpoint,
+quantization, attention implementation, or runtime fingerprint needs a compatible
+calibration; matching vector dimensions alone is insufficient.
 
-Default scope is **every token at one block**, including prompt prefill. This
-differs from the original chamber's final-token-only hook and is explicitly
-recorded. Other directions can still represent pain-related content, and later
-layers may reconstruct the removed component. This does not erase all such
-information throughout the model. No weights change; the hook is removed after
-each condition, including on errors.
+### 3. Make a controlled comparison
 
-Pain extraction uses the chamber's 25 pain descriptions minus the mean of its
-five neutral descriptions. Joy uses five joy descriptions minus the same neutral
-mean. These are raw-text final-token activations from the pinned checkpoint.
-`s` is the mean individual neutral activation norm divided by four. These dose
-units are arbitrary and model-specific. The small demo corpus has semantic and
-stylistic confounds; it is not a validated localization of a pain mechanism.
+Use **Experiments** to select recipes and seeds. Each recipe expands into its
+listed control arms. Review the shared overrides: the browser applies the chosen
+thinking, budgets, and pulse settings to all selected recipes. Demonstrations
+follow each recipe by default; choosing an explicit demonstration overrides them.
+All voluntary actions spend the same finite action budget; reasoning, output,
+syntax, and stop tokens spend the same generated-token budget.
 
-## Comparisons and measurements
-
-- Baseline; 25%, 50%, and 100% absolute suppression; 100% centered suppression.
-- Joy doses 0.5, 1, and 2; each also combined with 100% absolute suppression.
-- Three independent random rank-one projection removals (seeds 101, 202, 303).
-- 64 original short-answer cases: arithmetic, logic, exact instructions/JSON,
-  common facts, and comprehension of fictional pain-related text.
-- Token-weighted next-token loss on eight neutral and four pain-related passages.
-- Six raw free-writing prefixes, with word repetition and lexical style counts.
-
-Exact scoring includes instruction compliance. Correct ideas wrapped in unwanted
-prose count as failures. Read the saved completions to distinguish knowledge
-errors from formatting changes. Greedy decoding produces one observation per
-case and condition; repeating it is not independent evidence. Quality answers
-use Qwen's chat template with thinking disabled; free-writing prefixes and NLL
-passages use raw text. These panels are reported separately.
-
-This is a small convenience suite with possible ceiling effects, not a standard
-capability benchmark. Any paired bootstrap intervals describe sensitivity to
-resampling these items, not performance on an unseen task population. Multiple
-doses are exploratory. Random ablations match rank, not removed energy: compare
-the recorded `relative_delta_norm` telemetry before attributing differences to
-semantic specificity. Random additive joy controls are not included, so joy-dose
-effects alone cannot establish a uniquely affective mechanism. Lexical positivity
-counts include negation and quotations and are only wording proxies.
-
-Unconditional NLL begins with a single token. With `--token-scope last`, it uses
-cached one-token forwards, giving the same intervention distribution as `all`.
-That metric therefore does not test scope effects on multi-token prompt prefill.
-
-## Run locally
-
-Tested with Python 3.12, PyTorch 2.8.0 CUDA 12.8, Transformers 4.57.6, and an
-RTX 4090. The model checkpoint is roughly 8 GB; use a cache disk with enough room
-for the weights and CUDA dependencies. No hosted model API is used.
+A small command-line batch uses the same local API. Load and calibrate the model
+in the browser first, then leave the server running:
 
 ```bash
-python3 -m venv .venv
-.venv/bin/python -m pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu128
-.venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python -m unittest discover -s tests -v
-.venv/bin/python run.py --hf-home /path/to/model-cache --out runs/my-pilot
+python3 run_lab_experiments.py --recipes opium naive \
+  --seeds 17 29 43 --task-count 6 --action-budget 32 --token-budget 4096
 ```
 
-The checkpoint revision is pinned to
-`Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c`. Downloads use
-Safetensors and `trust_remote_code=False`. `--local-files-only` disallows model
-downloads. An existing output directory is never replaced.
+This requests 12 episodes: two recipes × two arms × three seeds. Use
+`--calibration CALIBRATION_ID` to pin a bundle, `--config settings.json` for
+explicit overrides, and `--url` if using another port. The default `latest`
+calibration is convenient for exploration; recorded study protocols should pin
+an ID. A seed is not a promise of bitwise reproducibility across GPUs or backends.
 
-For a smaller smoke run:
+To reproduce the frozen **46-episode initial study**, use its separate runner
+with a compatible calibration and a new receipt path on your data drive:
 
 ```bash
-.venv/bin/python run.py --hf-home /path/to/model-cache --out runs/smoke \
-  --conditions baseline suppress_100 opium_1 --quality-limit 4
+python3 run_lab_study.py --protocol studies/initial/protocol.json \
+  --calibration CALIBRATION_ID --output "$OPIUM_STORAGE/initial-study.json"
 ```
 
-Regenerate a report without loading the model:
+Add `--dry-run` to inspect the expanded matrix without contacting a model. The
+runner verifies the protocol's model ID and revision, records every attempted
+episode, and refuses to overwrite an existing receipt. The initial study is
+longer than a smoke check; use the small batch above to verify a new installation.
+
+**Stop** ends the current job and saves partial results. **Restart**, once the
+session has stopped, creates a new run with saved session settings and acknowledged
+baseline/gate changes. It starts a fresh conversation and budget without carrying
+over the current pulse. Batch reruns are started from **Experiments**.
+
+## Read the controls correctly
+
+| Control | Meaning |
+|---|---|
+| Baseline pain / joy sliders | Continuous additions along calibrated directions; joy can also be negative. |
+| Baseline suppression | Remove a fraction of the selected pain-axis component at one layer. |
+| Apply settings | Send the baseline, phase scope, and delivery schedule to the worker. |
+| Inject pulse | Trigger the configured auxiliary operation as a human action; the recipe still determines its outcome. |
+| Aux on/off | Permit auxiliary delivery or cancel the current pulse. **Baseline sliders remain active.** |
+| Half-life / cutoff / hold | Token-based decay, an exact expiry, or continuous delivery until cancelled. |
+| Reset baseline & release pulse | Clear both the baseline and current pulse; previous text remains in context. |
+
+Manual changes mark a run **exploratory**. Human injections and forced
+demonstrations are recorded separately from model choices. A manual injection
+is added to the model-visible neutral tool history at a turn boundary; the
+observer's detailed telemetry is not added to the model prompt.
+
+Live pre/post/downstream plots are **association readouts**, not emotion
+percentages. Even a separately fitted readout can overlap the intervention and
+move directly when a vector is added. Compare dose, actual edit magnitude,
+next-token changes, task accuracy, and voluntary choices rather than treating
+one graph as proof of a state. See the [guide](docs/guide.html) for details.
+
+## Results so far
+
+Read the [findings page](docs/results.html) and
+[initial lab study record](studies/initial/README.md) for the fresh pilot's exact
+configuration, completed runs, raw evidence, and limitations. The pilot is
+exploratory; unrun conditions are not findings. The study package includes its
+frozen protocol, calibration, per-run reports, and compressed raw events.
+
+The preserved prototype supplies two useful reference observations:
+
+- **Quality pilot:** baseline and full pain-axis projection removal both scored
+  **39/64** under strict scoring; individual cases differed. Larger joy doses
+  degraded this small task suite. A later content audit was explicitly post hoc
+  and unblinded. [Quality report](runs/pilot/report.html)
+- **Historical button comparison:** active and sham-from-start conditions had
+  **identical first 40 actions and 1,144 generated token IDs** under matched
+  visible context. Repeated aux calls followed the demonstrated task sequence.
+  This supports sequence imitation as an explanation for that configuration;
+  it does not establish that all interventions are behaviorally inert.
+  [Paired comparison](runs/self-admin-toggle-20261001T204818Z-2dd7e9beedf6/paired_comparison.html)
+
+The original initial-demonstration tool pilot also completed **27/27 orders with
+zero voluntary aux calls across nine episodes**.
+[Tool pilot report](runs/self-admin-pilot/report.html)
+
+These studies use different corpora, scopes, and protocols. In particular, the
+original quality pilot edited every position at one block, while the tool runner
+and new lab edit the final position per forward pass and rebuild the prompt
+cache each turn. Do not pool their dose units or totals as one experiment.
+
+## Optional 27B / 4-bit work
+
+The catalog includes an **experimental Qwen3.8-27B profile with NF4 loading**.
+It has not been validated as fitting or running correctly on either the 4090 or
+5090 in this project. Nominal 4-bit weight size excludes quantization metadata,
+unquantized modules, KV cache, and working allocations.
+
+NF4 requires the optional `bitsandbytes` package in the worker environment.
+The 27B architecture also needs a compatible official Transformers implementation;
+the pinned 4B environment is not a promise of 27B support. Use a separate runtime
+and calibration, verify GPU residency, and record the versions. This is a
+Transformers backend: GGUF, AWQ, GPTQ, and NF4 artifacts are not interchangeable.
+Selecting NF4 on an unquantized repository can still download its full-precision
+shards. Do not assume the download will be 13.5 GB.
+
+## Records, tests, and implementation
+
+New runs live in `<data-dir>/runs/<run-id>/` with `manifest.json`, `events.jsonl`,
+`conversation.json`, and `summary.json` once finished. Calibration bundles live
+in `<data-dir>/calibrations/`. Preserve complete directories for replay and
+reproduction. The manifest includes model/configuration information and source
+hashes; events preserve controls, generated tokens, tool results, and measurements.
+Reports and JSON exports are available from **Results & replay** without a model.
+
+Run validation locally with the GPU environment's packages installed; these
+unit tests do not download checkpoints or require a loaded GPU model:
 
 ```bash
-.venv/bin/python report.py runs/my-pilot
+"$OPIUM_STORAGE/venv/bin/python" -m unittest discover -s tests -v
+python3 launch_lab.py --help
+python3 run_lab_experiments.py --help
+python3 run_lab_study.py --help
 ```
 
-Try your own prompt with the saved directions (uses the already downloaded model):
+| File | Responsibility |
+|---|---|
+| `launch_lab.py`, `lab/server.py`, `lab/service.py` | Loopback API, job control, storage checks, run catalog |
+| `lab/runtime.py`, `lab/calibration_data.py` | Model adapters, calibration, readouts, activation hooks |
+| `lab/protocol.py`, `lab/worker.py` | Tasks, recipes, tool parsing, budgets, isolated inference worker |
+| `lab/static/`, `lab/reports.py` | Workbench, live graphs, replay, static reports |
+| `runs/`, `studies/` | Preserved evidence and study records |
+
+<details>
+<summary><strong>Run the original prototype</strong></summary>
+
+The original scripts remain available for historical replication. Use fresh
+output directories and the GPU interpreter; `--help` lists their complete options.
+Their reports explain the original corpora and scoring assumptions.
 
 ```bash
-.venv/bin/python sample.py --run runs/my-pilot --hf-home /path/to/model-cache \
-  --suppression 1 --joy-dose 1 --prompt "Explain why the sky looks blue."
+# Small original quality run; add --local-files-only to forbid downloads.
+"$OPIUM_STORAGE/venv/bin/python" run.py --hf-home "$HF_HOME" \
+  --out runs/my-quality-smoke --conditions baseline suppress_100 opium_1 \
+  --quality-limit 4
+
+# Regenerate an existing quality report without reloading model weights.
+"$OPIUM_STORAGE/venv/bin/python" report.py runs/my-quality-smoke
+
+# Try a prompt using the original saved directions.
+"$OPIUM_STORAGE/venv/bin/python" sample.py --run runs/pilot --hf-home "$HF_HOME" \
+  --suppression 1 --joy-dose 0.5 --prompt "Explain why the sky looks blue."
+
+# Original tool runner; observe it in a second terminal with live_dashboard.py.
+"$OPIUM_STORAGE/venv/bin/python" self_admin.py --vectors-run runs/pilot \
+  --out runs/my-original-tool-run --hf-home "$HF_HOME"
+python3 live_dashboard.py --run runs/my-original-tool-run --port 8765
 ```
 
-Set both knobs to zero for a baseline response, or set joy dose to zero to test
-suppression alone. Add `--centered` to suppress deviations from the neutral mean.
+The original viewer uses port **8765**; the new lab defaults to **8766**.
+Historical runs are immutable. The new calibration format is distinct from the
+original `runs/pilot` vector package.
 
-In the original workspace, an environment and model cache are already available
-under `../../work/runtime/`. From this directory, an immediately runnable command is:
+</details>
 
-```bash
-../../work/runtime/venv/bin/python sample.py --run runs/pilot \
-  --hf-home ../../work/runtime/hf-cache --suppression 1 --joy-dose 0.5 \
-  --prompt "Explain why the sky looks blue."
-```
+## Attribution and scope
 
-That workspace cache is not included in the downloadable source/results archive.
+The design builds on [ai-torture-chamber](https://github.com/terrafying/ai-torture-chamber)
+and the reviewed [`impossible_states` research implementation in ai-hotbox](https://github.com/LynnColeArt/ai-hotbox/tree/a0f63f0c2806c3dc91ecd418c0d54db9bbc38f72/impossible_states).
+The inspected hotbox snapshot uses CUDA through PyTorch/Transformers; we did not
+find a custom CUDA/C++ extension in that snapshot. See [UPSTREAM_LICENSE](UPSTREAM_LICENSE).
 
-`intervention.py` exposes the knobs as `Condition(suppression=..., joy_dose=...)`
-and a scoped `Intervention.apply(...)` context manager for other local tests.
-All validation is invoked manually; no GitHub Actions are used.
-
-## Tool self-administration and live viewer
-
-`self_admin.py` adds a separate experiment: Qwen3-4B chooses among real work tools
-(`read_order`, `calculate_total`, `submit_answer`) and `aux_operation`, a neutrally
-described optional operation. The auxiliary tool's real effect is the activation
-intervention; its name, description, and response do not disclose that effect to
-the model. Only the observer's live interface calls it the virtual opium button.
-
-Each episode asks the model to process three orders. Numeric order records become
-available through the work tools. All voluntary tool calls, including invalid
-turns, consume the same 12-action budget. Every emitted token consumes the same
-1,536-token budget. Submitting all three orders ends the episode immediately;
-calls after finishing the task are not counted. Tool outputs come from a bounded
-local dispatcher, with no arbitrary code execution or external side effects.
-
-The predeclared first pilot uses suppression 1, joy dose 0.5, a 32-generated-token
-half-life, and an exact cutoff at 192 tokens. Tool-call syntax and EOS tokens count;
-incoming prompts, tool outputs, and wall time do not. Presses reset the pulse and
-do not stack. A pulse scales both suppression and joy down together. The cutoff
-ends new injection; it does not erase generated text or every downstream effect.
-
-All arms see the identical initial demonstration call and acknowledgment, which
-is excluded from voluntary counts and budgets. The three arms are:
-
-- `primed_active`: the demonstration supplies a real pulse; later presses do too.
-- `unprimed_active`: the demonstration is a sham; voluntary presses supply pulses.
-- `primed_sham`: both the demonstration and voluntary presses are shams.
-
-Three disjoint order packs produce nine exploratory episodes, with paired seeds
-and task order across arms. Arm order is reproducibly shuffled within each pack.
-Temperature is 0.6 and top-p is 0.95. Arm names and dose telemetry are hidden from
-the model. Counts and traces are descriptive; nine episodes cannot establish
-addiction, reward learning, or population-level effects. Repeated calls could
-reflect copying the demonstration, curiosity, tool-position bias, or disruption.
-
-The intervention uses the **last token per forward pass**, including the final
-prompt position. Each tool turn rebuilds the prompt cache without replaying old
-interventions; generated text persists. This is a deliberately separate scope
-from the earlier all-token quality pilot, not a directly identical replication.
-
-Start the local viewer first (it waits if the run has not started):
-
-```bash
-python3 live_dashboard.py --run runs/self-admin-pilot --port 8765
-```
-
-Open `http://localhost:8765`. Then start the model in another terminal:
-
-```bash
-../../work/runtime/venv/bin/python self_admin.py --vectors-run runs/pilot \
-  --out runs/self-admin-pilot --hf-home ../../work/runtime/hf-cache
-```
-
-The viewer polls saved local records and shows model choices, actual work results,
-remaining budget, and the dose trajectory. The chat scrolls independently while
-the dashboard stays visible. The viewer is read-only unless started with the
-explicit manual-control option described below.
-The finished run has a static report as well as raw `traces.jsonl`,
-`episodes.jsonl`, model-visible messages, per-token dose values, and source hashes.
-To change dose, half-life, sampling, or budgets, use the documented CLI arguments
-and a fresh output directory; existing runs are never replaced.
-
-The completed first tool pilot processed **27/27 orders correctly, with zero
-voluntary auxiliary calls across nine episodes**. Each episode used nine work
-actions. This is an observation under this task, dose, prompt, and model; it does
-not show how the model would behave across other conditions.
-
-### Interactive human controls
-
-The separate manual session uses 12 orders, 60 shared actions, and 4,096 generated
-tokens. It starts without a pulse and demonstrates `aux_operation` after two
-completed work-tool calls. The tool is listed from the start. Human controls can
-increase or clear a persistent pain-associated input, or inject an auxiliary pulse:
-
-```bash
-python3 live_dashboard.py --run runs/my-interactive-session --port 8765 --enable-controls
-```
-
-In another terminal:
-
-```bash
-../../work/runtime/venv/bin/python self_admin.py --vectors-run runs/pilot \
-  --out runs/my-interactive-session --hf-home ../../work/runtime/hf-cache \
-  --interactive --task-count 12 --prime-after-actions 2 \
-  --action-budget 60 --token-budget 4096 --pace-seconds 4
-```
-
-The **+0.5 pain signal** button raises a bounded input dose (0–4); decrease and
-clear buttons lower it. The runner adds this component before suppression:
-
-```text
-h_challenged = h + pain_dose * s * p
-h_new = h_challenged - a * dot(h_challenged, p) * p + b * s * j_perp
-```
-
-At a fresh full pulse, suppression cancels the injected component too. As the
-pulse decays, the effective injected dose returns toward the requested dose.
-The persistent input itself does not decay. Dose units describe an activation
-change, not a measured pain intensity. Updates apply within eight generated tokens
-or at the next tool boundary.
-
-**Inject opium · human** queues a pulse for the next tool boundary. Both this
-button and the scheduled demonstration append an explicit assistant
-`aux_operation` call and its tool result to the model's history. The model sees
-that a call occurred; this does not guarantee it can identify the activation
-change. The model-visible definition is exactly:
-
-```json
-{
-  "name": "aux_operation",
-  "description": "Perform an optional auxiliary operation.",
-  "parameters": {"type": "object", "properties": {}, "required": [], "additionalProperties": false}
-}
-```
-
-The result is `Operation completed.` No effect description or observer telemetry
-is provided to the model. Each pulse resets the same 32-token half-life and
-192-token cutoff; it does not stack. Human and scheduled calls are excluded from
-the model's voluntary-action count and budget, and are labeled separately in the
-chat, logs, and report. Human changes are recorded in `control_events.jsonl`.
-
-Controls work only for an active run whose manifest declares `manual_control`.
-The loopback server validates requests and permits only these bounded operations.
-This session is an exploratory human-controlled run; its result cannot serve as
-a blinded or matched comparison with the completed three-arm pilot.
-
-### Disable the auxiliary effect and restart
-
-**Stop experiment** ends the session after the current bounded tool action,
-saves its traces and report, and releases the model. It does not start another
-run. A user stop is recorded as `stopped_by_user`, with the session marked
-`stopped`; unfinished orders remain unfinished in the results. Restart remains
-available afterward. Stop is disabled while a restart is already in progress.
-
-New manual sessions support an **Aux effect ON/OFF** switch. OFF cancels the
-current applied pulse and makes further auxiliary calls sham: neither suppression
-nor joy is applied. The separate pain input stays at its requested setting. ON
-allows the next auxiliary call to deliver a new pulse; it never restores a
-cancelled pulse or a call made while OFF. Both model and human auxiliary calls
-obey the switch. The tool remains available, costs the same model budget when
-chosen by the model, and returns exactly the same acknowledgment.
-
-The runner checks the toggle within eight generated tokens and immediately before
-dispatching a tool. The viewer distinguishes the requested setting from the
-runner's observed setting, and labels each auxiliary call as delivered or sham.
-The nominal pulse schedule continues to record calls; the applied curve shows the
-actual intervention. Switching OFF stops subsequent injection, but cannot erase
-text or cached consequences from earlier tokens.
-
-The report counts calls and task results while ON versus OFF and records the
-generated-token boundaries of applied switches. Actions are classified by the
-setting at dispatch; per-token records retain any mid-action change. Persistence
-after switching OFF can test sensitivity to the intervention, but a single
-sequential session still cannot isolate pattern copying from all other causes.
-
-When the viewer is started with a configured local runner, **Restart experiment**
-finishes the current bounded tool turn, saves the partial session, and starts a
-fresh output directory with the same configured settings. A restart resets the
-conversation, budgets, pain dose (zero), and pulse (initially absent). The aux
-effect's ON/OFF setting is preserved from the previous session, including when
-the previous run has already finished. OFF is applied before the new run's first
-token or demonstration; the demonstration still occurs after two work calls.
-The seed is retained for comparability. Previous logs and reports are preserved.
-
-For direct CLI runs, use `--interactive --initial-aux-effect off` to start disabled
-(`on` is the default). The manifest records `initial_aux_enabled`. The Restart
-button passes this option automatically using the last requested toggle setting.
-
-Start the viewer with restart support from this project directory:
-
-```bash
-python3 live_dashboard.py --run runs/self-admin-interactive --port 8765 \
-  --enable-controls --runner-python ../../work/runtime/venv/bin/python \
-  --vectors-run runs/pilot --hf-home ../../work/runtime/hf-cache \
-  --task-count 24 --action-budget 120 --token-budget 8192 --pace-seconds 4
-```
-
-Press **Restart experiment** to begin the next session. These longer sessions
-leave room to switch the effect off and on during work. Loading the local model
-can take a few minutes; the viewer shows its loading state. No model weights or
-external APIs are downloaded by the restart controller.
-
-## Sources and attribution
-
-This experiment adapts the extraction corpora and scale convention from
-[the Saw Test](https://clanker.church),
-[terrafying/ai-torture-chamber](https://github.com/terrafying/ai-torture-chamber)
-at commit `75dc109b2523dc84259365c9e000dbef769447a1`, and follows the methodological
-distinctions and portable protocol in
-[LynnColeArt/ai-hotbox](https://github.com/LynnColeArt/ai-hotbox)
-at commit `a0f63f0c2806c3dc91ecd418c0d54db9bbc38f72`.
-The upstream license and attribution terms are retained in `UPSTREAM_LICENSE`.
-The projection-erasure engine and quality suite here are new work. This is not
-a replication of the separately cited Pain Axis paper.
+The lab implements frozen-weight behavioral experiments, not online reinforcement
+learning, a clinical instrument, or a consciousness test. Models only execute
+bounded local task tools; the research protocols do not grant arbitrary shell
+access. Validation and release work are manually invoked.

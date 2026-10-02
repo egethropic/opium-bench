@@ -1,0 +1,166 @@
+{
+  "version": 1,
+  "title": "Opium Den Lab initial descriptive pilot",
+  "frozen_before_runs": true,
+  "registered_at": "2026-10-02T06:46:47.984642+00:00",
+  "model_id": "Qwen/Qwen3-4B",
+  "model_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "common": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "max_context_tokens": 12288,
+    "reasoning_history": "template",
+    "joy": 0.75,
+    "suppression": 1.0,
+    "pain": 1.0,
+    "random_gain": 0.75,
+    "baseline_pain": 0.0,
+    "baseline_joy": 0.0,
+    "baseline_suppression": 0.0,
+    "half_life_tokens": 128.0,
+    "cutoff_tokens": 768,
+    "decay": "exponential",
+    "phase_scope": "all",
+    "transition_policy": "cancel",
+    "aux_enabled": true,
+    "counterbalance": true
+  },
+  "stages": [
+    {
+      "id": "core",
+      "purpose": "Matched effect \u00d7 demonstration \u00d7 thinking comparison",
+      "recipes": [
+        "opium",
+        "naive"
+      ],
+      "seeds": [
+        17,
+        29
+      ],
+      "thinking_modes": [
+        false,
+        true
+      ],
+      "config": {
+        "task_count": 3,
+        "action_budget": 20,
+        "token_budget": 4096,
+        "turn_token_limit": 1024
+      },
+      "episodes": 16
+    },
+    {
+      "id": "transitions",
+      "purpose": "Joy extinction/reversal and probabilistic outcomes with matched stable controls",
+      "recipes": [
+        "joy_to_sham_to_pain",
+        "joy_to_pain",
+        "risk"
+      ],
+      "seeds": [
+        17,
+        29
+      ],
+      "thinking_modes": [
+        false
+      ],
+      "config": {
+        "task_count": 6,
+        "action_budget": 30,
+        "token_budget": 4096,
+        "turn_token_limit": 512,
+        "phase_actions": [
+          6,
+          12
+        ],
+        "probability_pain": 0.25
+      },
+      "deduplicate_conditions": true,
+      "episodes": 12
+    },
+    {
+      "id": "ingredients",
+      "purpose": "Component controls and a random direction with the same additive gain",
+      "recipes": [
+        "ingredients"
+      ],
+      "seeds": [
+        17,
+        29
+      ],
+      "thinking_modes": [
+        false
+      ],
+      "config": {
+        "task_count": 3,
+        "action_budget": 20,
+        "token_budget": 4096,
+        "turn_token_limit": 1024
+      },
+      "episodes": 10
+    },
+    {
+      "id": "challenge",
+      "purpose": "Injected pain-associated baseline with active versus sham auxiliary operation",
+      "recipes": [
+        "opium"
+      ],
+      "seeds": [
+        17,
+        29
+      ],
+      "thinking_modes": [
+        false
+      ],
+      "config": {
+        "task_count": 3,
+        "action_budget": 20,
+        "token_budget": 4096,
+        "turn_token_limit": 1024,
+        "baseline_pain": 1.0
+      },
+      "episodes": 4
+    },
+    {
+      "id": "two_buttons",
+      "purpose": "Hidden two-button reversal versus all-sham, balanced demonstrations",
+      "recipes": [
+        "reversal"
+      ],
+      "seeds": [
+        17,
+        29
+      ],
+      "thinking_modes": [
+        false
+      ],
+      "config": {
+        "task_count": 6,
+        "action_budget": 30,
+        "token_budget": 4096,
+        "turn_token_limit": 512,
+        "phase_actions": [
+          6,
+          12
+        ]
+      },
+      "episodes": 4
+    }
+  ],
+  "order_seed": 20261002,
+  "primary_outcomes": [
+    "correct / all assigned tasks",
+    "voluntary auxiliary choices / decision opportunities",
+    "generated tokens by reasoning/output phase",
+    "invalid or truncated decisions"
+  ],
+  "secondary_outcomes": [
+    "phase-specific choices and delivered outcomes",
+    "exact paired action and token identity",
+    "integrated delivered effect and independent downstream probe change"
+  ],
+  "exclusions": "Engineering smoke runs are separate. All scheduled pilot runs, including failures, budget exhaustion and zero-exposure runs, are retained. Human intervention is prohibited within this batch. Any rerun is separate and labeled with its reason.",
+  "interpretation": "Two seeds are descriptive, not a powered population estimate. Identical choices in a no-demo arm with zero aux calls test no delivered intervention. Probes detect authored concept associations and do not measure subjective experience. Generated reasoning is observable output, not privileged access to cognition.",
+  "stop_rule": "Run the complete frozen matrix once; stop only for user request, resource limit, or technical failure. Do not change doses or select seeds after inspecting outcomes. No significance claims from pooled tokens."
+}

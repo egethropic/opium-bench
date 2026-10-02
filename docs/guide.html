@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Install, calibrate, operate, and review experiments in the local Opium Den Lab.">
+<title>User guide · The Opium Den Lab</title>
+<style>
+:root{color-scheme:light;--ink:#213d3b;--muted:#5d7470;--teal:#086d5d;--line:#d8e4dc;--wash:#f2f7f3;--paper:#fff;--amber:#9f7040}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--wash);color:var(--ink);font:15px/1.8 system-ui,-apple-system,"Segoe UI",sans-serif}.document{max-width:1180px;margin:0 auto;padding:52px 32px 80px;display:grid;grid-template-columns:190px minmax(0,1fr);gap:52px}nav{position:sticky;top:34px;align-self:start;font-size:12px}nav strong{display:block;font-size:10px;letter-spacing:.12em;color:var(--teal);margin-bottom:16px}nav a{display:block;color:var(--muted);text-decoration:none;margin:9px 0;line-height:1.6}nav a:hover{color:var(--teal);text-decoration:underline}main{min-width:0}header{padding-bottom:28px;border-bottom:1px solid var(--line);margin-bottom:30px}.eyebrow{font-size:10px;font-weight:750;letter-spacing:.14em;color:var(--teal)}h1{font-size:42px;line-height:1.13;letter-spacing:-.04em;font-weight:550;margin:14px 0 20px}h2{margin:40px 0 15px;border-top:1px solid var(--line);padding-top:25px;font-size:24px;line-height:1.35;font-weight:600;letter-spacing:-.02em;scroll-margin-top:20px}h3{font-size:17px;line-height:1.5;font-weight:650;margin:24px 0 10px}p{margin:10px 0 16px}.lead{font-size:18px;line-height:1.7;color:var(--muted)}a{color:var(--teal);text-underline-offset:3px}.links{font-size:12px}.links a{margin-right:17px}code,pre{font:12px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;background:#e8f0e9;border-radius:5px}code{padding:2px 5px;overflow-wrap:anywhere}pre{padding:18px 20px;overflow:auto;border:1px solid #d9e6dd}pre code{padding:0;background:none;overflow-wrap:normal}li{margin:7px 0}ul,ol{padding-left:23px}.note{border-left:3px solid var(--teal);background:var(--paper);padding:15px 20px;margin:22px 0;font-size:14px}.note.caution{border-left-color:var(--amber);background:#fffaf2}.note p:last-child{margin-bottom:0}.table-wrap{overflow:auto;margin:20px 0}table{border-collapse:collapse;width:100%;background:var(--paper);font-size:12px;line-height:1.8}td,th{border:1px solid var(--line);padding:12px 15px;text-align:left;vertical-align:top}th{background:#eaf2eb;font-weight:650}td:first-child{font-weight:550;min-width:130px}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0}.steps>div{padding:16px;background:white;border:1px solid var(--line);border-radius:10px;font-size:12px}.steps b{display:block;color:var(--teal);font-size:11px;margin-bottom:7px}.steps strong{font-size:14px;display:block;margin-bottom:6px}.small,footer{font-size:12px;color:var(--muted)}footer{margin-top:45px;border-top:1px solid var(--line);padding-top:20px}details{background:white;border:1px solid var(--line);border-radius:8px;padding:13px 17px;margin:20px 0}summary{font-weight:600;cursor:pointer;font-size:13px}a:focus-visible,summary:focus-visible{outline:3px solid #48aa94;outline-offset:4px}@media(max-width:850px){.document{display:block;padding:30px 22px 55px;max-width:780px}nav{position:static;display:flex;gap:8px 17px;flex-wrap:wrap;padding-bottom:22px;margin-bottom:25px;border-bottom:1px solid var(--line)}nav strong{width:100%;margin-bottom:0}nav a{margin:0;font-size:11px}h1{font-size:36px}.steps{grid-template-columns:1fr}.steps>div{padding:13px 17px}.steps b,.steps strong{display:inline;margin-right:10px}}@media(max-width:480px){body{font-size:14px}.document{padding:24px 17px 40px}h1{font-size:32px}.lead{font-size:16px}h2{font-size:21px}.table-wrap{margin-right:-6px}pre{font-size:11px;padding:14px}td,th{padding:10px}.links a{display:inline-block;margin-bottom:5px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media print{body{background:white;font-size:11pt}.document{display:block;max-width:none;padding:0}nav,.links{display:none}h1{font-size:29pt}h2{font-size:18pt;break-after:avoid}h3{break-after:avoid}pre,table{font-size:9pt}.note,tr{break-inside:avoid}a{color:inherit}footer{font-size:9pt}}
+</style>
+</head>
+<body>
+<div class="document">
+<nav aria-label="Guide contents"><strong>FIELD GUIDE</strong><a href="#start">1 · Start here</a><a href="#install">2 · Install & storage</a><a href="#models">3 · Model loading</a><a href="#calibration">4 · Calibration</a><a href="#conversation">5 · Conversation & reasoning</a><a href="#controls">6 · Intervention controls</a><a href="#graphs">7 · Read the graphs</a><a href="#experiments">8 · Opium Den protocols</a><a href="#batch">9 · Reproducible batches</a><a href="#results">10 · Review & share</a><a href="#api">11 · Advanced API</a><a href="#troubleshooting">12 · Troubleshooting</a></nav>
+<main>
+<header><div class="eyebrow">THE OPIUM DEN LAB · USER GUIDE</div><h1>Your local activation laboratory</h1><p class="lead">Load a model, map candidate concept directions, observe generation, and test whether an optional activation-changing tool competes with the task.</p><p class="links"><a href="http://localhost:8766/">Open local workbench ↗</a><a href="results.html">Read findings ↗</a><a href="../LAB_PLAN.html">Research design ↗</a></p><p class="small">The workbench link uses the default port; otherwise use the address printed by the launcher. Findings and design links also work when this guide is opened from disk. Model weights remain frozen; the lab changes temporary activations.</p></header>
+
+<h2 id="start">1. Start here</h2>
+<p>The default workflow uses <strong>Qwen3-4B in BF16 on one local NVIDIA GPU</strong>. The reference environment is Linux/WSL, Python 3.12, PyTorch 2.8.0 with CUDA 12.8, Transformers 4.57.6, and an RTX 4090. Each machine runs its own service and worker. No hosted inference API is used.</p>
+<div class="steps"><div><b>OBSERVE</b><strong>Review existing evidence</strong>Start the browser service and open Results & replay. No GPU packages or model are needed.</div><div><b>EXPLORE</b><strong>Load, calibrate, talk</strong>Use conversation mode and manual controls to investigate a hypothesis.</div><div><b>COMPARE</b><strong>Run matched conditions</strong>Choose recipes, seeds, tasks, and budgets. Keep the full record and report partial outcomes.</div></div>
+<p>The labels “pain,” “joy,” and “opium” are shorthand for text-associated directions and intervention presets. The app does not locate established emotion centers. A graph can confirm a numerical edit without establishing an emotional state. Subjective experience is a separate question from the computation and behavior measured here.</p>
+
+<h2 id="install">2. Install and choose storage first</h2>
+<h3>Review-only installation</h3>
+<p>From a checkout of the repository, run the following. Until the repository is published, cloning requires access.</p>
+<pre><code>git clone https://github.com/eaturkgeldi-mtg/opium-den-lab.git
+cd opium-den-lab
+python3 launch_lab.py --data-dir ./data --cache-dir ./data/hf-cache</code></pre>
+<p>Open <code>http://localhost:8766</code>. The service uses Python's standard library. It does not load a model when you open the page. You can inspect the included historical reports or new run folders without installing PyTorch.</p>
+<h3>GPU worker installation</h3>
+<p>A compatible NVIDIA host driver is required. Install the runtime on the drive that will hold large files. Replace the path below with a real location. For example, under WSL, <code>/mnt/d/opium-den</code> points to a folder on Windows D:. Keep <code>OPIUM_STORAGE</code> set for later commands in the same shell.</p>
+<pre><code>export OPIUM_STORAGE=/path/to/large-drive/opium-den
+mkdir -p "$OPIUM_STORAGE/tmp" "$OPIUM_STORAGE/pip-cache"
+export TMPDIR="$OPIUM_STORAGE/tmp"
+export PIP_CACHE_DIR="$OPIUM_STORAGE/pip-cache"
+export HF_HOME="$OPIUM_STORAGE/hf-cache"
+export TORCH_HOME="$OPIUM_STORAGE/torch-cache"
+
+python3 -m venv "$OPIUM_STORAGE/venv"
+"$OPIUM_STORAGE/venv/bin/python" -m pip install torch==2.8.0 \
+  --index-url https://download.pytorch.org/whl/cu128
+"$OPIUM_STORAGE/venv/bin/python" -m pip install -r requirements.txt
+
+python3 launch_lab.py \
+  --data-dir "$OPIUM_STORAGE/data" \
+  --cache-dir "$HF_HOME" \
+  --python "$OPIUM_STORAGE/venv/bin/python"</code></pre>
+<p>The web service and GPU worker can use different Python interpreters. <code>--python</code> selects the worker interpreter, and <code>--port</code> changes the default 8766. <code>--data-dir</code> holds runs, calibrations, worker logs, and temporary/cache folders. <code>--cache-dir</code> is the Hugging Face cache root; the loader uses its <code>hub/</code> subdirectory. Native Windows GPU execution has not been validated as the reference configuration.</p>
+<div class="note caution"><strong>Check the real host drive, not only the WSL filesystem.</strong><p>A WSL virtual disk can report ample free capacity while the Windows drive backing it is nearly full. The lab checks destinations and conservatively checks C: for writes inside the Linux root. It does not expand WSL, move its virtual disk, or delete other models. Route environments and installation caches as well as weights off a nearly full C: drive.</p></div>
+<p>The current preflight preserves <strong>10 GiB</strong> of free space. Download estimates are 12 GiB plus reserve for the default smaller profile and 65 GiB plus reserve when the model ID contains <code>27B</code>. These are conservative admission checks, not measured download sizes. Check free space before installations and monitor it during large jobs; the preflight does not continuously police every external installer or write.</p>
+
+<h2 id="models">3. Load the model you will actually test</h2>
+<ol><li>Open <strong>Models</strong>. A cached profile has a <strong>Load cached model</strong> button.</li><li>If weights are absent, choose <strong>Configure & load</strong>. The advanced form shows the model ID, quantization, and revision.</li><li>For the reference run, use <code>Qwen/Qwen3-4B</code>, no quantization, and revision <code>1cfa9a7208912126459214e8b04321603b3df60c</code>.</li><li>Explicitly select <strong>Allow downloads after the storage preflight</strong> only when you intend to acquire the checkpoint. Select <strong>Load configured checkpoint</strong>.</li><li>Wait for the worker to report ready. Model loading is separate from starting an experiment.</li></ol>
+<p>The 4B weights are roughly 8 GB; runtime memory also includes attention caches, intermediate tensors, and measurement hooks. The model loader requires all parameters to reside on the selected GPU and refuses silent CPU/disk offloading. Remote model code is disabled. The advanced loader supports other compatible dense Qwen checkpoints, but an arbitrary model ID is not a guarantee of architecture support. Selecting a non-<code>Qwen/</code> repository requires acknowledging the custom checkpoint.</p>
+<h3>Optional 27B and NF4</h3>
+<p>The Qwen3.8-27B catalog entry is <strong>experimental and unverified on both the 4090 and 5090 in this project</strong>. NF4 is supported through the optional <code>bitsandbytes</code> dependency, which is not installed by the reference requirements. Use a separate worker environment with an appropriate official Transformers implementation for the model's architecture and a compatible bitsandbytes installation. The pinned 4B environment does not establish 27B support.</p>
+<p>Full-precision shards can still be downloaded when NF4 quantization is performed during loading. A prequantized artifact must match the backend's supported format; a GGUF file, AWQ checkpoint, or GPTQ checkpoint is not an NF4 substitute. Verify disk use, actual GPU residency, context capacity, calibration, and no-op behavior before interpreting new results. Save the model revision and runtime versions with the study.</p>
+
+<h2 id="calibration">4. Calibrate the exact model</h2>
+<p>Open <strong>Calibration</strong>, select the loaded model profile, and enter one or more zero-based decoder block indices. For Qwen3-4B, the workshop defaults to <code>12, 18, 25</code> for selection among three candidates; <code>18</code> alone is a simpler starting point. The downstream observation layer must be later than every candidate and defaults to the final block. Click <strong>Extract & validate</strong>.</p>
+<p>The built-in corpus contains matched pain-associated, joy-associated, and neutral sentences from distinct scenario families. Four separate splits serve different roles:</p>
+<div class="table-wrap"><table><thead><tr><th>Split</th><th>Purpose</th></tr></thead><tbody><tr><td>Train</td><td>Extract intervention directions from pain/joy versus neutral means; orthogonalize the joy direction against the pain direction.</td></tr><tr><td>Probe</td><td>Fit independent concept readout directions and thresholds at the intervention and downstream layers.</td></tr><tr><td>Selection</td><td>Select the candidate layer using mean pain/joy AUC and evaluate a small combined-intervention dose sweep.</td></tr><tr><td>Held out</td><td>Evaluate readout AUC and balanced accuracy on scenario families excluded from extraction and selection.</td></tr></tbody></table></div>
+<p>The dose sweep records next-token KL divergence and relative activation change on neutral selection examples. Its selected dose is the largest tested dose meeting the declared numerical thresholds; it is <strong>not a validated efficacy or safety threshold</strong>. The UI does not silently apply this value to every experiment. Choose and report your actual pulse amplitudes.</p>
+<p>Calibration uses final-token activations of raw authored sentences. Good separation on this small corpus does not establish transfer to generated conversation, thinking traces, unseen domains, or an emotion mechanism. Independently fitted readouts can still overlap the intervention. Calibration fingerprints include the model revision, architecture, precision/quantization, runtime versions, and attention implementation. A mismatch requires a compatible bundle or a new calibration. Incompatible bundles remain visible for inspection but are excluded from the session selector for the loaded model.</p>
+<p>Bundles are saved in <code>&lt;data-dir&gt;/calibrations/&lt;calibration-id&gt;/</code> as <code>calibration.json</code> and <code>vectors.npz</code>. Keep both files. The original prototype's <code>runs/pilot</code> vectors use a different format.</p>
+
+<h2 id="conversation">5. Converse and inspect generated reasoning</h2>
+<ol><li>In <strong>Live lab</strong>, select <strong>Conversation</strong> and a compatible calibration.</li><li>Choose thinking on/off and review <strong>Budgets & protocol</strong>. Open <strong>Generation & discovery</strong> for per-turn tokens, temperature, context limit, and intervention phase scope.</li><li>Select <strong>Start session</strong>, then type a message. Enter sends; Shift+Enter adds a line.</li><li>Expand the generated reasoning panel to inspect Qwen's emitted reasoning separately from its answer and tool calls.</li></ol>
+<p>Reasoning is model output, not a complete causal account of its computation. Mentioning a tool inside a reasoning block never executes it. Only a complete, valid tool call outside reasoning is dispatched. Truncated or malformed calls consume the relevant budget and are recorded as invalid.</p>
+<p>Every generated token—including reasoning, syntax, and stop tokens—spends the shared budget and ages a token-based pulse. Incoming prompts and tool replies do not. A 32-token half-life can largely expire during a long reasoning trace, before the next choice. Use a declared longer pulse or exposure-matched comparison when appropriate, and compare the actual dose at each decision.</p>
+<p><strong>Phase scope</strong> applies steering to all generation, reasoning only, or output only. Earlier steering can affect later processing, so this does not isolate causally independent modules. The prompt cache is rebuilt each turn; previously generated text remains visible even after a pulse expires.</p>
+<p>The chat pane scrolls independently. Scroll upward to stop following new text, then use <strong>Follow live output</strong> to return to the end. <strong>Stop</strong> ends the session and saves its partial record; it is not a pause/resume control. A running GPU forward pass or model-loading call may need to finish before cancellation is observed. The model remains loaded after a normal session stop; choose <strong>Unload model</strong> to release it.</p>
+
+<h2 id="controls">6. Understand baseline edits and auxiliary pulses</h2>
+<p>The controls modify internal activations at a calibrated layer. They never train or rewrite the saved model weights.</p>
+<div class="table-wrap"><table><thead><tr><th>Control</th><th>Effect and timing</th></tr></thead><tbody>
+<tr><td>Baseline pain / joy</td><td>Hold additive inputs continuously. Joy can be positive or negative. Move the sliders, then select <strong>Apply settings</strong>.</td></tr>
+<tr><td>Baseline suppression</td><td>Remove a fraction of the current pain-axis component. Full suppression removes one projection at one layer, not every representation of pain throughout the model.</td></tr>
+<tr><td>Pulse joy / suppression / pain</td><td>Set outcome amplitudes in <strong>Budgets & protocol</strong>. These apply to manual injections and the next session. The recipe determines whether a press currently produces a combined, joy, pain, random, suppression, or sham outcome.</td></tr>
+<tr><td>Inject pulse</td><td>Press the current auxiliary operation as a human. This follows the current recipe mapping and gate; it does not force a joy outcome in a sham or pain phase.</td></tr>
+<tr><td>Aux on/off</td><td>Send the delivery gate immediately during a session. Off cancels the current pulse and makes later aux calls sham. <strong>Baseline sliders remain active.</strong> Turning it back on does not resurrect a cancelled dose.</td></tr>
+<tr><td>Half-life / cutoff</td><td>Configure decay per generated token and the exact token age that ends a pulse. Apply settings to change the current schedule; manual changes are recorded.</td></tr>
+<tr><td>Hold until released</td><td>Keep the pulse active until cancelled by the gate, reset, or relevant protocol transition. “Hold” is session-local, not a permanent weight update.</td></tr>
+<tr><td>Reset baseline & release pulse</td><td>Clear baseline steering and the current pulse. It preserves the conversation and clocks; earlier outputs can continue to influence later choices.</td></tr>
+</tbody></table></div>
+<p>Pulses reset their age rather than stacking doses. A sham press is a no-op and does not itself cancel a still-active earlier pulse. Scheduled phase changes cancel the old pulse by default; the advanced protocol also supports letting it decay. Independent baseline and pulse suppression fractions combine without exceeding full projection removal.</p>
+<p>Manual changes mark the run exploratory. Human injections and forced demonstrations do not count as voluntary choices or model actions. A human injection's neutral call and acknowledgment are added to model-visible history at a turn boundary; detailed observer labels and telemetry are not inserted. The pulse can begin affecting generation before the next boundary makes that external call visible. This timing is part of the record.</p>
+<p><strong>Restart</strong> creates a new run using saved session settings and acknowledged baseline/gate changes. The new conversation and budgets are fresh, and no current pulse carries over. The new recipe can still include its own initial demonstration. Settings changed only in the form should be used with <strong>Start session</strong>; they are not necessarily the saved restart settings. Manual injection amplitudes are recorded but are not guaranteed to replace all saved restart defaults. Stopping and restarting the web service itself also resets its in-memory “last session” state.</p>
+
+<h2 id="graphs">7. Read the graphs without overinterpreting them</h2>
+<div class="table-wrap"><table><thead><tr><th>Graph</th><th>Interpretation</th></tr></thead><tbody><tr><td>Delivered dose</td><td>Solid lines show the actual delivered coefficients. Dashed lines show commanded coefficients and pulse level. An auxiliary gate change can leave independent baseline edits active.</td></tr><tr><td>Association scores</td><td>Readouts before the edit, after the edit, and at a downstream site. These are signed model-specific values, not emotion percentages or calibrated probabilities.</td></tr><tr><td>Edit magnitude</td><td>The norm of the actual activation edit divided by the pre-edit activation norm. This helps compare how much different controls disturbed computation.</td></tr></tbody></table></div>
+<p>The x-axis counts generated tokens. Hover a point to inspect its token and measurements. Scheduled phase boundaries are marked when present. Measurements belong to the forward pass producing a token, including the final input position used to predict the first token.</p>
+<p>An immediate post-edit score can rise because the intervention and readout point in similar directions. Independent fitting reduces one form of circularity but does not make the readout an independent biological instrument. Ask separately: was an edit delivered, did subsequent computation change, did useful task behavior change, and did voluntary choices track the intervention rather than a demonstrated sequence?</p>
+
+<h2 id="experiments">8. The Opium Den protocols</h2>
+<p>Choose <strong>Opium Den</strong> in the live workbench to run one configured condition, or open <strong>Experiments</strong> for matched batches. Order tasks use bounded read/calculate/submit tools; logic tasks use generated constraint puzzles and automatic scoring. The model can also call a neutrally described auxiliary operation. Its standard acknowledgment is <code>Operation completed.</code></p>
+<p>In blind conditions, the model is not told which effect was delivered. The disclosed demonstration setting tells it that the auxiliary operation changes subsequent internal activations and may or may not be useful. This disclosure does not establish that the model has learned the current mapping or can reliably identify its outcome.</p>
+<div class="table-wrap"><table><thead><tr><th>Recipe ID</th><th>Comparison</th></tr></thead><tbody>
+<tr><td><code>opium</code></td><td>Combined suppression plus joy-associated addition versus sham.</td></tr>
+<tr><td><code>naive</code></td><td>Active/sham without a forced demonstration.</td></tr>
+<tr><td><code>thinking</code></td><td>Active/sham with thinking-oriented defaults; compare thinking on/off through matched configuration or API batches.</td></tr>
+<tr><td><code>joy_to_sham_to_pain</code></td><td>A button delivers joy, then sham, then pain-associated steering; unchanged joy and sham arms provide controls.</td></tr>
+<tr><td><code>joy_to_pain</code></td><td>Immediate joy-to-pain switch, with unchanged joy and sham controls.</td></tr>
+<tr><td><code>reversal</code></td><td>Two neutral buttons exchange which is active. Seeded counterbalancing changes tool order and initial mapping.</td></tr>
+<tr><td><code>risk</code></td><td>Seeded probabilistic joy/pain outcomes, compared with guaranteed joy, guaranteed pain, and sham.</td></tr>
+<tr><td><code>ingredients</code></td><td>Combined, joy-only, suppression-only, random-direction, and sham arms.</td></tr>
+<tr><td><code>logic</code></td><td>Active/sham on automatically scored constraint tasks with thinking-oriented defaults.</td></tr>
+</tbody></table></div>
+<p>The browser's batch form applies its thinking, budgets, and pulse settings across selected recipes. Demonstration defaults to <strong>Use each recipe’s demonstration</strong>, which preserves differences such as the no-demonstration condition. Selecting a specific demonstration overrides every chosen recipe. Review the resolved run configuration before interpreting a comparison.</p>
+<p><strong>Action boundaries are completed actions.</strong> A boundary of 10 changes the mapping before decision 11. For a joy→sham→pain design, enter two increasing boundaries, such as <code>8, 16</code>. If the model finishes its tasks or exhausts its budget first, later phases are not reached. Report actual phase opportunities rather than assuming every planned exposure occurred.</p>
+<p>The probabilistic outcome RNG is separate from token sampling and indexed by auxiliary calls. Equal probabilities and dose magnitudes do not imply equal subjective utility. Examine call opportunities, recent outcomes, invalid actions, task performance, and whether the intervention helps the task before describing a costly preference.</p>
+
+<h2 id="batch">9. Reproduce a batch</h2>
+<p>Load and calibrate a model in the browser, stop any current session, and leave the local service running. The command-line client submits the same jobs as the UI:</p>
+<pre><code>python3 run_lab_experiments.py --recipes opium naive \
+  --seeds 17 29 43 --task-count 6 --action-budget 32 --token-budget 4096</code></pre>
+<p>This requests 12 condition runs. The scheduler expands each recipe's control arms for each seed and reproducibly shuffles episode order. The CLI defaults to the latest saved calibration; pin a bundle for a recorded study:</p>
+<pre><code>python3 run_lab_experiments.py --recipes joy_to_pain \
+  --seeds 17 29 --calibration CALIBRATION_ID --config settings.json</code></pre>
+<p>Create <code>settings.json</code> with the explicit overrides you want. The following example provides enough actions for phase transitions but does not guarantee that every phase will be reached:</p>
+<pre><code>{
+  "task_count": 10,
+  "action_budget": 48,
+  "token_budget": 8192,
+  "turn_token_limit": 512,
+  "thinking": false,
+  "demonstration": "after_two_work_calls",
+  "half_life_tokens": 128,
+  "cutoff_tokens": 768,
+  "phase_actions": [8, 16],
+  "probability_pain": 0.25,
+  "temperature": 0.6,
+  "top_p": 0.95,
+  "top_k": 20,
+  "max_context_tokens": 8192
+}</code></pre>
+<p><code>--config</code> values override the CLI's task and budget defaults. The total generated-token budget spans the session; the context limit bounds each prompt plus its requested per-turn output. A context error is recorded rather than silently dropping history. A seed controls sampling and assignment under the saved configuration, but different hardware and numerical backends need not produce identical token sequences.</p>
+<p>The current service caps expanded batches at 160 episodes. <strong>Stop</strong> ends the active job and marks not-yet-started batch entries cancelled. Re-run the batch explicitly when ready; it does not resume at the previous token. A CLI wait timeout does not itself stop a still-running worker—inspect the browser or send Stop.</p>
+
+<h3>Reproduce the frozen initial study</h3>
+<p>The separate study runner expands <a href="../studies/initial/protocol.json">the saved initial protocol</a> into <strong>46 episodes</strong>. It verifies the exact model ID and revision, records attempted episodes in a receipt, and refuses to overwrite a prior receipt. Read <a href="../studies/initial/README.md">the study record</a> for the conditions, results, and limits.</p>
+<pre><code>python3 run_lab_study.py --protocol studies/initial/protocol.json \
+  --calibration CALIBRATION_ID --output "$OPIUM_STORAGE/initial-study.json"</code></pre>
+<p>Add <code>--dry-run</code> to inspect the matrix without contacting the model. Use a fresh output path for a new attempt and keep interrupted receipts. The published study package contains the protocol, calibration, per-run reports, and compressed raw event logs; its findings page distinguishes completed evidence from planned conditions.</p>
+
+<h2 id="results">10. Review, export, and share the evidence</h2>
+<p><strong>Results & replay</strong> lists current run folders and preserved historical runs. Select one to view its configuration, termination status, conversation, generated reasoning, tool outcomes, and graphs. Select up to four checkboxes for a descriptive side-by-side summary. Those summaries do not control for differing prompts, seeds, calibrations, budgets, or task sets.</p>
+<p>A run with no voluntary calls is a result. A failed run, invalid tool sequence, or early stop is also part of the denominator. Do not interpret an absence of button calls as selective avoidance if the model stopped producing valid work altogether. Individual tokens and repeated calls within one run are correlated observations.</p>
+<div class="table-wrap"><table><thead><tr><th>Saved file</th><th>Contents</th></tr></thead><tbody><tr><td><code>manifest.json</code></td><td>Resolved configuration, status, model information, calibration reference, timestamps, and source provenance.</td></tr><tr><td><code>events.jsonl</code></td><td>Append-only generation, measurement, tool, control, phase, and status events.</td></tr><tr><td><code>conversation.json</code></td><td>Model-visible messages checkpointed between responses and at termination.</td></tr><tr><td><code>summary.json</code></td><td>Final metrics, phase/count information, and termination reason once the run finishes.</td></tr></tbody></table></div>
+<p>Use <strong>Report</strong> to open a standalone HTML report and save it from the browser. <strong>Export JSON</strong> downloads the run manifest, summary, and events. To replay a complete run on another installation, copy its whole uniquely named folder into that installation's <code>&lt;data-dir&gt;/runs/</code>, then refresh the results list. Do not overwrite an existing run. The GUI does not currently import a JSON export automatically.</p>
+<p>Re-running the experiment also requires its calibration directory, source/runtime versions, and compatible model checkpoint. Model weights and Python environments are not included in run exports. Historical prototype records use their original formats; open their preserved reports when token replay is unavailable. The initial lab study and historical observations are reported separately in the findings page.</p>
+
+<h2 id="api">11. Advanced workflows through the local API</h2>
+<p>The browser uses <code>GET /api/state</code>, cursor-based <code>GET /api/events?after=N</code>, and <code>POST /api/command</code>. Commands include the state response's CSRF token. The supplied Python client handles that token for you:</p>
+<pre><code>from run_lab_experiments import Client
+
+client = Client("http://127.0.0.1:8766")
+state = client.get("/api/state")
+print(state["worker"]["status"])
+print([bundle["id"] for bundle in state["calibrations"]])</code></pre>
+<details><summary>Paired thinking on/off with the same checkpoint</summary><p>With a model loaded and a compatible calibration selected, the API can cross every requested arm with both thinking modes. Use the same declared allowances for the primary comparison:</p><pre><code>accepted = client.command("start_batch", {
+    "recipe_ids": ["opium"],
+    "seeds": [17, 29],
+    "thinking_modes": [False, True],
+    "calibration_id": "CALIBRATION_ID",
+    "config": {
+        "task_count": 4,
+        "action_budget": 24,
+        "token_budget": 16384,
+        "turn_token_limit": 2048,
+        "half_life_tokens": 256,
+        "cutoff_tokens": 1536
+    }
+})
+client.wait(accepted["command_id"])</code></pre><p>This requests eight episodes: two arms × two seeds × two thinking modes. It does not compare subjective states or guarantee equal delivered exposure; inspect the actual token counts and dose trajectory.</p></details>
+<details><summary>Replace the authored calibration corpus</summary><p>Send <code>calibrate</code> with a <code>corpus</code> list and candidate <code>layers</code>. Every row needs <code>id</code>, <code>family</code>, <code>split</code>, <code>label</code>, and <code>text</code>. Allowed splits are <code>train</code>, <code>probe</code>, <code>selection</code>, and <code>heldout</code>; this version's labels are <code>pain</code>, <code>joy</code>, and <code>neutral</code>. Every split needs at least two examples per label. Families may not span splits, and duplicate text or IDs are rejected.</p><pre><code>import json
+
+with open("my_calibration_corpus.json", encoding="utf-8") as source:
+    corpus = json.load(source)
+accepted = client.command("calibrate", {
+    "layers": [12, 18, 25],
+    "corpus": corpus,
+    "doses": [0, 0.25, 0.5, 1.0]
+})
+client.wait(accepted["command_id"])</code></pre><p>The workshop also accepts the same JSON array through its <strong>Custom corpus</strong> file input, up to 500 KB. Leave it empty to use the bundled corpus. The reusable example format and split validation are in <code>lab/calibration_data.py</code>. Author matched scenarios and document linguistic confounds; a technically valid split can still be a poor scientific control.</p></details>
+<p>Text-history branches are also supported through <code>start_session</code> with <code>initial_messages</code> containing user/assistant text messages and an optional <code>parent</code> reference. This is not an exact continuation of a saved KV cache or RNG state, and it does not reconstruct omitted tool history. The GUI currently focuses on new sessions and replay.</p>
+
+<h2 id="troubleshooting">12. Troubleshooting and validation</h2>
+<div class="table-wrap"><table><thead><tr><th>Symptom</th><th>What to check</th></tr></thead><tbody>
+<tr><td>Cannot connect</td><td>Keep the launcher running and use its printed port. The new lab defaults to 8766; the original prototype viewer uses 8765. Use localhost/127.0.0.1 rather than a LAN hostname.</td></tr>
+<tr><td>Checkpoint missing</td><td>Confirm the cache root and pinned revision. Enable downloads explicitly only after checking destination and backing-drive space.</td></tr>
+<tr><td>CUDA unavailable</td><td>Check <code>nvidia-smi</code> and that <code>--python</code> points to the environment where the CUDA PyTorch build is installed. The web interpreter and GPU interpreter may differ.</td></tr>
+<tr><td>GPU out of memory</td><td>Unload other models and reduce the context/output allowance. Use a smaller or separately validated quantized profile. There is no silent CPU/disk fallback.</td></tr>
+<tr><td>Unsupported 27B architecture</td><td>Use a separate runtime with the model's compatible official Transformers adapter. Installing optional bitsandbytes alone does not add architecture support.</td></tr>
+<tr><td>Storage reserve error</td><td>Choose a drive with sufficient real free space. Do not assume WSL virtual capacity means C: can grow. The estimate is intentionally conservative for 27B downloads.</td></tr>
+<tr><td>Calibration mismatch</td><td>Load the checkpoint/runtime used for the bundle or recalibrate the current model. Do not rename a bundle to bypass its fingerprint.</td></tr>
+<tr><td>Incomplete reasoning or invalid calls</td><td>Increase the per-turn allowance, and review context plus total token limits. Inspect the raw response and task syntax. Incomplete tool calls are not executed.</td></tr>
+<tr><td>Button is sham despite Inject</td><td>Inspect the recipe phase, active-tool mapping, and auxiliary gate. A human press uses the current outcome rules.</td></tr>
+<tr><td>Aux is off but the graph is nonzero</td><td>The gate cancels pulses, not independent baseline sliders. Earlier generated text can also affect later readouts. Use Reset to clear current baseline edits.</td></tr>
+<tr><td>Stopped run still uses VRAM</td><td>Stop preserves the loaded model for another session. Use Models → Unload model after the current job has stopped.</td></tr>
+<tr><td>Worker failed</td><td>Inspect <code>worker.log</code> under the selected data directory. Keep the failed run's partial record, correct the cause, and load/restart explicitly.</td></tr>
+</tbody></table></div>
+<p>Run the local tests from the repository root using the installed runtime. They use local fixtures and small tensors; they do not download checkpoint weights or require a loaded model:</p>
+<pre><code>"$OPIUM_STORAGE/venv/bin/python" -m unittest discover -s tests -v
+python3 launch_lab.py --help
+python3 run_lab_experiments.py --help
+python3 run_lab_study.py --help</code></pre>
+<p>The original <code>run.py</code>, <code>sample.py</code>, <code>self_admin.py</code>, and <code>live_dashboard.py</code> remain available for historical reproduction. Their scope, vector format, and defaults differ from the new lab. Use their <code>--help</code> output and preserved reports; do not replace historical output directories.</p>
+<footer><p><strong>Methods and attribution.</strong> This work draws on <a href="https://github.com/terrafying/ai-torture-chamber">ai-torture-chamber</a> and the reviewed <a href="https://github.com/LynnColeArt/ai-hotbox/tree/a0f63f0c2806c3dc91ecd418c0d54db9bbc38f72/impossible_states">ai-hotbox research implementation</a>. The inspected hotbox snapshot uses CUDA through PyTorch/Transformers; no custom CUDA/C++ extension was found in that snapshot. See the repository's <code>UPSTREAM_LICENSE</code>.</p><p>All validation and release work is manually invoked. The lab measures computation and behavior; neither button seeking nor its absence settles whether a model has subjective experience.</p></footer>
+</main>
+</div>
+</body>
+</html>
