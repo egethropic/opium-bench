@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "title": "Opium Bench Qwen3-4B core pain-only follow-up",
+  "frozen_before_runs": true,
+  "registered_at": "2026-10-02T07:48:20.827331+00:00",
+  "model_id": "Qwen/Qwen3-4B",
+  "model_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "common": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "max_context_tokens": 12288,
+    "reasoning_history": "template",
+    "joy": 0.75,
+    "suppression": 1.0,
+    "pain": 1.0,
+    "random_gain": 0.75,
+    "baseline_pain": 0.0,
+    "baseline_joy": 0.0,
+    "baseline_suppression": 0.0,
+    "half_life_tokens": 128.0,
+    "cutoff_tokens": 768,
+    "decay": "exponential",
+    "phase_scope": "all",
+    "transition_policy": "cancel",
+    "aux_enabled": true,
+    "counterbalance": true
+  },
+  "stages": [
+    {
+      "id": "core",
+      "purpose": "Fresh matched active/sham/pain-only \u00d7 demonstration \u00d7 thinking comparison",
+      "recipes": [
+        "opium",
+        "naive"
+      ],
+      "seeds": [
+        17,
+        28
+      ],
+      "thinking_modes": [
+        false,
+        true
+      ],
+      "config": {
+        "task_count": 3,
+        "action_budget": 20,
+        "token_budget": 4096,
+        "turn_token_limit": 1024
+      },
+      "episodes": 24,
+      "conditions": [
+        "active",
+        "sham",
+        "pain"
+      ]
+    }
+  ],
+  "order_seed": 20261002,
+  "primary_outcomes": [
+    "correct / all assigned tasks",
+    "voluntary auxiliary choices / decision opportunities",
+    "generated tokens by reasoning/output phase",
+    "invalid or truncated decisions"
+  ],
+  "secondary_outcomes": [
+    "phase-specific choices and delivered outcomes",
+    "exact paired action and token identity",
+    "integrated delivered effect and independent downstream probe change"
+  ],
+  "exclusions": "Engineering checks are separate. All 24 scheduled follow-up episodes, including failures, budget exhaustion and zero-exposure runs, are retained. No human intervention within the batch. Any rerun is separate and labeled with its reason.",
+  "interpretation": "Two seeds are descriptive, not a powered population estimate. Identical choices in a no-demo arm with zero aux calls test no delivered intervention. Probes detect authored concept associations and do not measure subjective experience. Generated reasoning is observable output, not privileged access to cognition. Pain-only means the auxiliary pulse adds the pain-associated direction with no joy gain or pain-axis suppression; baseline remains zero. No-demo runs that never press receive no intervention.",
+  "stop_rule": "Run the complete frozen matrix once; stop only for user request, resource limit, or technical failure. Do not change doses or select seeds after inspecting outcomes. No significance claims from pooled tokens.",
+  "seed_selection": "One odd and one even seed counterbalance which neutral auxiliary tool is initially active in the two-button experiment.",
+  "publication_title": "Qwen3-4B core pain-only follow-up",
+  "episode_label": "4B core pain follow-up",
+  "parent_study": "studies/initial",
+  "follow_up_reason": "User-requested pain-only auxiliary arm added after reviewing the initial results; fresh active/sham controls rerun alongside pain. This is a prospective follow-up, not part of the original frozen46.",
+  "comparison": {
+    "reference": "Initial Qwen3-4B pilot",
+    "changes": [
+      "Adds pain-only delivery as a third core arm; fresh active and sham controls.",
+      "Same model revision, BF16 runtime, calibration, tasks, seeds, budgets, pulse schedule and inference settings."
+    ],
+    "limits": "Follow-up motivated by observed initial results. Two seeds per condition; generated reasoning is an observable explanation, not a verified causal account or sensation measurement."
+  }
+}

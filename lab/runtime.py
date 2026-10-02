@@ -207,6 +207,24 @@ def _unit(array, name):
     return array / norm
 
 
+def _quantization_load_kwargs(config, quantization, dtype, transformers):
+    """Keep a prequantized checkpoint's module inventory and stored NF4 recipe."""
+    stored = _config_identity(getattr(config, "quantization_config", None))
+    if stored is not None:
+        if (quantization != "4bit" or stored.get("quant_method") != "bitsandbytes"
+                or not stored.get("load_in_4bit", stored.get("_load_in_4bit", False))
+                or stored.get("bnb_4bit_quant_type") != "nf4"):
+            raise ValueError("Prequantized checkpoints require a matching 4bit NF4 profile; other formats are unsupported")
+        # Passing a newly created BitsAndBytesConfig can override load attributes
+        # or skipped modules. The checkpoint config is authoritative on reload.
+        return {}
+    if quantization == "4bit":
+        return {"quantization_config": transformers.BitsAndBytesConfig(
+            load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=dtype,
+            bnb_4bit_use_double_quant=True)}
+    return {}
+
+
 class Runtime:
     def __init__(self):
         self.model = self.tokenizer = self.blocks = None
@@ -284,9 +302,7 @@ class Runtime:
             except ImportError as exc:
                 raise RuntimeError("4-bit loading requires optional bitsandbytes. Install it in the lab runtime; "
                                    "the lab never falls back to a larger unquantized model.") from exc
-            kwargs["quantization_config"] = transformers.BitsAndBytesConfig(
-                load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=dtype,
-                bnb_4bit_use_double_quant=True)
+        kwargs.update(_quantization_load_kwargs(config, quantization, dtype, transformers))
         if profile.get("max_memory_gib") is not None:
             maximum = _number(profile["max_memory_gib"], "max_memory_gib", 1, 1024)
             kwargs["max_memory"] = {0 if device == "cuda" else "cpu": int(maximum * 1024**3)}
@@ -310,7 +326,7 @@ class Runtime:
             model_config = _config_identity(model.config)
             quantization_config = _config_identity(getattr(model.config, "quantization_config", None))
             if quantization_config is None and quantization == "4bit":
-                quantization_config = _config_identity(kwargs["quantization_config"])
+                quantization_config = _config_identity(kwargs.get("quantization_config"))
             tokenizer_data = tokenizer_identity(tokenizer)
             fingerprint = {"model_id": model_id, "revision": resolved or revision,
                            "architecture": kind, "adapter": adapter, "dtype": dtype_name,
@@ -321,11 +337,17 @@ class Runtime:
                            "tokenizer": tokenizer_data, "quantization_config": quantization_config,
                            "bitsandbytes": getattr(sys.modules.get("bitsandbytes"), "__version__", None)
                                if quantization_config is not None else None}
+            tool_call_format = "qwen_xml" if adapter == "qwen3_5" else "json"
+            if adapter == "qwen3_5":
+                # Preserve existing Qwen3 calibration identities. New adapters
+                # additionally record the native grammar selected by the worker.
+                fingerprint["tool_call_format"] = tool_call_format
             self.model, self.tokenizer, self.blocks, self.device = model, tokenizer, blocks, device
             self._configure_forward()
             self.info = {"status": "loaded", "fingerprint": fingerprint,
                          "fingerprint_sha256": _digest(fingerprint), "model_id": model_id,
                          "revision": resolved or revision, "device": device, "adapter": adapter,
+                         "tool_call_format": tool_call_format,
                          "layer_count": len(blocks), "hidden_size": int(text_config.hidden_size),
                          "quantization": quantization, "dtype": dtype_name,
                          "block_path": block_path, "cache_policy": "rebuild_each_turn",
@@ -758,6 +780,7 @@ class Runtime:
                 "truncated": finish == "length", "finish_reason": finish,
                 "prompt_tokens": prompt_tokens, "prompt_sha256": hashlib.sha256(formatted.encode()).hexdigest(),
                 "thinking": thinking, "reasoning_history": history, "cache_policy": "rebuild_each_turn",
+                "tool_call_format": self.info.get("tool_call_format", "json"),
                 "sampling": {"temperature": temperature, "top_p": top_p, "top_k": top_k, "seed": seed},
                 "intervention_scope": "last_position",
                 "model_fingerprint_sha256": self.info["fingerprint_sha256"],

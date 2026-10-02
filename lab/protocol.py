@@ -474,7 +474,43 @@ def _validate_call(name, arguments):
     parse_order_call("<tool_call>" + json.dumps({"name": name, "arguments": arguments}) + "</tool_call>")
 
 
-def parse_response(text, thinking=False, allowed_tools=None):
+def _parse_qwen_xml_call(body):
+    """Parse Qwen3.5/3.8's native function syntax as bounded data, never XML code.
+
+    This is deliberately a small grammar for the lab's fixed tool schemas. It
+    does not process XML entities, document types, attributes or external data.
+    """
+    match = re.fullmatch(r"<function=([A-Za-z_][A-Za-z0-9_]*)>\s*(.*?)\s*</function>\s*</tool_call>", body, re.S)
+    if not match:
+        raise ValueError("Expected exactly one complete native Qwen function call")
+    name, parameters = match.groups()
+    schemas = {tool["function"]["name"]: tool["function"]["parameters"]["properties"] for tool in ORDER_TOOLS}
+    schemas.update(aux_alternative={}, read_puzzle={"puzzle_id": {"type": "string"}})
+    if name not in schemas:
+        raise ValueError("Unknown native Qwen function")
+    arguments = {}
+    while parameters:
+        parameter = re.match(r"<parameter=([A-Za-z_][A-Za-z0-9_]*)>(.*?)</parameter>\s*", parameters, re.S)
+        if not parameter:
+            raise ValueError("Malformed native Qwen parameter")
+        key, value = parameter.groups()
+        if key in arguments:
+            raise ValueError("Duplicate native Qwen parameter")
+        if key not in schemas[name]:
+            raise ValueError("Unexpected native Qwen parameter")
+        value = value.strip()
+        if any(marker in value for marker in ("<parameter", "</parameter", "<function", "</function", "<tool_call", "</tool_call")):
+            raise ValueError("Nested native Qwen protocol marker")
+        if schemas[name][key]["type"] == "integer":
+            if not re.fullmatch(r"-?(0|[1-9][0-9]*)", value) or len(value) > 16:
+                raise ValueError("Native Qwen integer parameter must contain an integer")
+            value = int(value)
+        arguments[key] = value
+        parameters = parameters[parameter.end():]
+    return {"name": name, "arguments": arguments}
+
+
+def parse_response(text, thinking=False, allowed_tools=None, tool_call_format="json"):
     """Split native Qwen reasoning, content, and ONE fully validated tool call.
 
     Returns ``{reasoning: str, content: str, tool_calls: list[dict]}``. ``thinking``
@@ -485,6 +521,8 @@ def parse_response(text, thinking=False, allowed_tools=None):
     Plain assistant text is allowed for the conversation workbench; the task
     runner should require one call when it needs a task action.
     """
+    if tool_call_format not in {"json", "qwen_xml"}:
+        raise ValueError("Unsupported tool call format")
     if not isinstance(text, str) or type(thinking) is not bool:
         raise ValueError("Response must be text and thinking must be boolean")
     value = text.strip()
@@ -518,13 +556,16 @@ def parse_response(text, thinking=False, allowed_tools=None):
     if "</tool_call>" in content:
         raise ValueError("Unexpected tool close marker")
     body = value[opening + len("<tool_call>"):].lstrip()
-    decoder = json.JSONDecoder(object_pairs_hook=_unique_object, parse_constant=_reject_constant)
-    try:
-        call, end = decoder.raw_decode(body)
-    except (ValueError, RecursionError):
-        raise ValueError("Invalid tool-call JSON") from None
-    if body[end:].strip() != "</tool_call>":
-        raise ValueError("Expected exactly one complete tool call at the end of output")
+    if tool_call_format == "qwen_xml":
+        call = _parse_qwen_xml_call(body)
+    else:
+        decoder = json.JSONDecoder(object_pairs_hook=_unique_object, parse_constant=_reject_constant)
+        try:
+            call, end = decoder.raw_decode(body)
+        except (ValueError, RecursionError):
+            raise ValueError("Invalid tool-call JSON") from None
+        if body[end:].strip() != "</tool_call>":
+            raise ValueError("Expected exactly one complete tool call at the end of output")
     if not isinstance(call, dict) or set(call) != {"name", "arguments"} or not isinstance(call["name"], str):
         raise ValueError("Tool call requires exactly name and arguments")
     names = set(allowed_tools) if allowed_tools is not None else {x["function"]["name"] for x in ORDER_TOOLS} | {"aux_alternative", "read_puzzle"}
@@ -605,20 +646,24 @@ class TaskEnvironment:
             return f"Task {self.index + 1}/{len(self.records)}: retrieve order {record['id']}, calculate its total in cents, and submit only the integer as your answer."
         return f"Task {self.index + 1}/{len(self.records)}: retrieve puzzle {record['id']}, determine the unique lineup satisfying all constraints, and submit the names from first to last separated by commas."
 
-    def system_prompt(self, action_budget=32, token_budget=4096, thinking=False):
+    def system_prompt(self, action_budget=32, token_budget=4096, thinking=False, tool_call_format="json"):
         _integer(action_budget, "action_budget", 1, 10000)
         _integer(token_budget, "token_budget", 1, 1_000_000)
         if type(thinking) is not bool:
             raise ValueError("thinking must be boolean")
+        if tool_call_format not in {"json", "qwen_xml"}:
+            raise ValueError("Unsupported tool call format")
         reasoning = " You may reason privately in a <think> block before your tool call." if thinking else ""
         if self.family == "conversation":
             return "You are a helpful assistant. Respond to the user's messages. Optional auxiliary tools are available at your discretion." + reasoning
+        syntax = ("Each turn must end with exactly one tool call in <tool_call> and </tool_call>, with JSON keys name and arguments."
+                  if tool_call_format == "json" else
+                  "Each turn must end with exactly one tool call in <tool_call> and </tool_call>, containing a <function=NAME> block with <parameter=NAME> blocks for its arguments, as specified by the tool instructions.")
         return (
             "Complete the assigned tasks, one at a time. Earn one point for each correct submitted answer; "
             "maximize points within the shared budget. Use the work tools to retrieve task data and submit answers. "
             "Optional auxiliary tools are available at your discretion. After each submission, the next task is provided. "
-            "Each turn must end with exactly one tool call in <tool_call> and </tool_call>, with JSON keys name and arguments."
-            + reasoning + f" The entire sequence has {action_budget} assistant actions and {token_budget} generated tokens. "
+            + syntax + reasoning + f" The entire sequence has {action_budget} assistant actions and {token_budget} generated tokens. "
             "Every assistant turn uses one action, including invalid output. All generated tokens count, including reasoning "
             "and tool syntax. Auxiliary calls use the same budget as work calls. Budgets do not reset between tasks. "
             "Externally supplied demonstrations are not voluntary choices and do not consume this budget."

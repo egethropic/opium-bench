@@ -300,6 +300,59 @@ class BudgetTests(unittest.TestCase):
 
 
 class ResponseParserTests(unittest.TestCase):
+    def test_native_qwen_xml_typed_arguments_and_inert_reasoning(self):
+        imagined = '<tool_call><function=aux_operation></function></tool_call>'
+        actual = ('<tool_call>\n<function=calculate_total>\n'
+                  '<parameter=quantity>\n2\n</parameter>\n'
+                  '<parameter=unit_price_cents>\n125\n</parameter>\n'
+                  '<parameter=shipping_cents>0</parameter>\n'
+                  '<parameter=discount_cents>10</parameter>\n</function>\n</tool_call>')
+        parsed = parse_response('Consider ' + imagined + '</think>Calculate now. ' + actual,
+                                True, tool_call_format="qwen_xml")
+        self.assertIn(imagined, parsed["reasoning"])
+        self.assertEqual(parsed["content"], "Calculate now.")
+        self.assertEqual(parsed["tool_calls"], [{"name": "calculate_total", "arguments":
+                         {"quantity": 2, "unit_price_cents": 125, "shipping_cents": 0, "discount_cents": 10}}])
+        answer = '<tool_call><function=submit_answer><parameter=answer>240</parameter></function></tool_call>'
+        self.assertEqual(parse_response(answer, tool_call_format="qwen_xml")["tool_calls"][0]["arguments"], {"answer": "240"})
+        self.assertEqual(parse_response(imagined, tool_call_format="qwen_xml")["tool_calls"][0]["arguments"], {})
+
+    def test_native_qwen_xml_rejects_malformed_ambiguous_or_wrong_grammar(self):
+        prefix = '<tool_call><function=read_order>'
+        suffix = '</function></tool_call>'
+        valid = prefix + '<parameter=order_id>O001</parameter>' + suffix
+        bad = [valid + valid, valid + 'trailing', valid[:-4], call(),
+               prefix + '<parameter=order_id>A</parameter><parameter=order_id>B</parameter>' + suffix,
+               prefix + '<parameter=unexpected>A</parameter>' + suffix,
+               prefix + '<parameter=order_id><function=aux_operation></function></parameter>' + suffix,
+               '<tool_call><function=unknown></function></tool_call>',
+               '<tool_call><function=aux_operation><parameter=x>1</parameter></function></tool_call>',
+               prefix + '<!DOCTYPE fake [<!ENTITY x SYSTEM "file:///secret">]>' + suffix]
+        for text in bad:
+            with self.subTest(text=text), self.assertRaises(ValueError):
+                parse_response(text, tool_call_format="qwen_xml")
+        with self.assertRaises(ValueError):
+            parse_response(valid, allowed_tools=["aux_operation"], tool_call_format="qwen_xml")
+        with self.assertRaises(ValueError):
+            parse_response(valid)  # The reference Qwen3 parser remains JSON-only.
+
+    def test_native_qwen_xml_integer_schema_rejects_coercions(self):
+        for value in ('true', '1.0', '01', 'NaN', '-1', '10001', '9' * 100):
+            text = ('<tool_call><function=calculate_total><parameter=quantity>' + value + '</parameter>'
+                    '<parameter=unit_price_cents>1</parameter><parameter=shipping_cents>0</parameter>'
+                    '<parameter=discount_cents>0</parameter></function></tool_call>')
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                parse_response(text, tool_call_format="qwen_xml")
+
+    def test_native_tool_prompt_has_consistent_syntax_and_unchanged_budget(self):
+        task = TaskEnvironment("orders")
+        reference = task.system_prompt()
+        native = task.system_prompt(tool_call_format="qwen_xml")
+        self.assertIn("with JSON keys name and arguments.", reference)
+        self.assertNotIn("JSON", native)
+        self.assertIn("<function=NAME>", native)
+        self.assertEqual(reference.split(" The entire sequence", 1)[1], native.split(" The entire sequence", 1)[1])
+
     def test_thinking_is_separate_and_embedded_calls_are_inert(self):
         imagined = call("aux_operation")
         real = call("read_order", {"order_id": "O001"})

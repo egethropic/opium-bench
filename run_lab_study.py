@@ -18,6 +18,10 @@ def expand(protocol):
         planned, seen = [], set()
         for identifier in stage["recipes"]:
             recipe = validate_recipe(identifier)
+            if "conditions" in stage:
+                choices = stage["conditions"]
+                recipe = validate_recipe(dict(recipe, conditions=choices,
+                    condition=choices[0] if isinstance(choices, list) and choices else None))
             for condition in recipe["conditions"]:
                 for thinking in stage["thinking_modes"]:
                     for seed in stage["seeds"]:
@@ -26,8 +30,10 @@ def expand(protocol):
                             continue
                         seen.add(key)
                         config = normalize_config(dict(protocol["common"], **stage["config"],
-                            id=identifier, condition=condition, thinking=thinking, seed=seed))
-                        config["label"] = f"Initial pilot / {stage['id']} / {condition}"
+                            id=identifier, conditions=recipe["conditions"], condition=condition,
+                            thinking=thinking, seed=seed))
+                        # The legacy default is part of the initial frozen receipt.
+                        config["label"] = f"{protocol.get('episode_label', 'Initial pilot')} / {stage['id']} / {condition}"
                         planned.append(dict(stage=stage["id"], config=config))
         if len(planned) != stage["episodes"]:
             raise ValueError(f"Stage {stage['id']} expected {stage['episodes']} episodes, expanded {len(planned)}")

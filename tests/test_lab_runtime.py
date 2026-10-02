@@ -12,7 +12,8 @@ from torch import nn
 
 from lab.calibration_data import rows, validate_rows
 from lab.runtime import (Cancelled, Runtime, _digest, normalized_control,
-                         prepare_messages, resolve_blocks, split_reasoning, DEFAULT_REVISION, tokenizer_identity)
+                         prepare_messages, resolve_blocks, split_reasoning, DEFAULT_REVISION, tokenizer_identity,
+                         _quantization_load_kwargs)
 
 
 class Tokenizer:
@@ -340,6 +341,31 @@ class CalibrationTests(unittest.TestCase):
 
 
 class RuntimeLoadingTests(unittest.TestCase):
+    def test_prequantized_nf4_keeps_checkpoint_skip_modules(self):
+        import transformers
+        stored = {"quant_method": "bitsandbytes", "load_in_4bit": True,
+                  "bnb_4bit_quant_type": "nf4", "bnb_4bit_compute_dtype": "bfloat16",
+                  "llm_int8_skip_modules": ["model.visual", "lm_head", "mtp"]}
+        config = SimpleNamespace(quantization_config=stored)
+        with patch("transformers.BitsAndBytesConfig") as constructor:
+            self.assertEqual(_quantization_load_kwargs(config, "4bit", torch.bfloat16, transformers), {})
+            constructor.assert_not_called()
+        self.assertEqual(config.quantization_config["llm_int8_skip_modules"], ["model.visual", "lm_head", "mtp"])
+        with self.assertRaises(ValueError):
+            _quantization_load_kwargs(config, "none", torch.bfloat16, transformers)
+        for method, kind in (("awq", "nf4"), ("bitsandbytes", "fp4")):
+            config.quantization_config = dict(stored, quant_method=method, bnb_4bit_quant_type=kind)
+            with self.assertRaises(ValueError):
+                _quantization_load_kwargs(config, "4bit", torch.bfloat16, transformers)
+
+    def test_unquantized_nf4_still_constructs_explicit_recipe(self):
+        import transformers
+        with patch("transformers.BitsAndBytesConfig", return_value="recipe") as constructor:
+            self.assertEqual(_quantization_load_kwargs(SimpleNamespace(), "4bit", torch.bfloat16, transformers),
+                             {"quantization_config": "recipe"})
+            self.assertEqual(constructor.call_args.kwargs["bnb_4bit_compute_dtype"], torch.bfloat16)
+            self.assertTrue(constructor.call_args.kwargs["bnb_4bit_use_double_quant"])
+
     def test_tokenizer_template_and_backend_changes_have_distinct_identities(self):
         tokenizer = Tokenizer()
         first = tokenizer_identity(tokenizer)

@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
 from lab.analysis import analyze_run, aggregate_groups, paired_core, study_results
 from lab.protocol import TaskEnvironment, validate_recipe
@@ -193,7 +194,7 @@ class PairedTests(unittest.TestCase):
 
 
 class PublicationTests(unittest.TestCase):
-    def fixture(self, root, status="complete"):
+    def fixture(self, root, status="complete", protocol_overrides=None):
         from run_lab_study import expand
         data, output = root/"data", root/"output"
         output.mkdir()
@@ -206,6 +207,7 @@ class PublicationTests(unittest.TestCase):
                                            "heldout":{},"dose_validation":[]})
         protocol = {"title":"Synthetic test fixture, never findings", "order_seed":5, "common":{"task_count":3},
                     "stages":[{"id":"core","recipes":["opium"],"thinking_modes":[False],"seeds":[17],"config":{},"episodes":2}]}
+        protocol.update(protocol_overrides or {})
         entries=[]
         for index,episode in enumerate(expand(protocol)):
             cfg=episode["config"]
@@ -246,6 +248,49 @@ class PublicationTests(unittest.TestCase):
             self.assertIn("../output/runs/run-fixture/report.html",html)
             self.assertIn("not confidence intervals",html)
             self.assertTrue((output/"checksums.json").exists())
+
+    def test_second_study_uses_distinct_title_page_and_evidence_without_rewriting_initial(self):
+        with TemporaryDirectory() as name:
+            root=Path(name)
+            title='Opium Bench · Qwen3.8-27B replication'
+            data,output,receipt=self.fixture(root, protocol_overrides={
+                'title':title, 'episode_label':'27B replication',
+                'comparison':{'reference_study':'initial', 'changes':['checkpoint','quantization','runtime','calibration']}})
+            destination=root/'studies'/'qwen38-27b'
+            destination.parent.mkdir()
+            output.rename(destination)
+            original=root/'docs'/'results.html'
+            original.parent.mkdir()
+            original.write_bytes(b'Existing 4B findings remain unchanged')
+            protocol=root/'studies'/'initial'/'protocol.json'
+            protocol.parent.mkdir()
+            protocol.write_bytes(b'Existing frozen 4B protocol')
+            with patch('publish_lab_study.ROOT', root):
+                result=publish(receipt,data,destination,skip_figures=True)
+            page=root/'docs'/'results-qwen38-27b.html'
+            self.assertEqual(original.read_bytes(),b'Existing 4B findings remain unchanged')
+            self.assertEqual(protocol.read_bytes(),b'Existing frozen 4B protocol')
+            self.assertIn(title,page.read_text())
+            self.assertNotIn('initial findings',page.read_text())
+            self.assertIn('do not isolate model size',page.read_text())
+            self.assertEqual(result['comparison']['reference_study'],'initial')
+            self.assertIn('--output studies/qwen38-27b', (destination/'README.md').read_text())
+            self.assertIn('../studies/qwen38-27b/runs/run-fixture/report.html',page.read_text())
+
+    def test_custom_study_labels_leave_frozen_initial_46_episode_matrix_unchanged(self):
+        from run_lab_study import expand
+        protocol=json.loads((Path(__file__).resolve().parents[1]/'studies/initial/protocol.json').read_text())
+        before=expand(protocol)
+        changed=deepcopy(protocol)
+        changed.update(title='27B replication', episode_label='27B replication', model_id='Qwen/27B', model_revision='new')
+        after=expand(changed)
+        self.assertEqual(len(before),46)
+        self.assertTrue(all(row['config']['label'].startswith('Initial pilot / ') for row in before))
+        self.assertTrue(all(row['config']['label'].startswith('27B replication / ') for row in after))
+        for left,right in zip(before,after):
+            left['config'].pop('label')
+            right['config'].pop('label')
+            self.assertEqual(left,right)
 
     def test_complete_guard_requires_explicit_partial_override(self):
         with TemporaryDirectory() as name:

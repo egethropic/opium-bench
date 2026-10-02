@@ -58,9 +58,25 @@ def normalize_config(raw, default="opium"):
     return result
 
 
+def bundled_history():
+    """Discover published studies without following roots outside this checkout."""
+    root = ROOT.resolve()
+    paths = [root / "runs"]
+    studies = root / "studies"
+    if not studies.is_dir() or studies.resolve().parent != root:
+        return paths
+    for study in sorted(studies.iterdir()):
+        if not study.is_dir() or study.resolve().parent != studies.resolve():
+            continue
+        runs = study / "runs"
+        if runs.is_dir() and runs.resolve().parent == study.resolve():
+            paths.append(runs)
+    return paths
+
+
 class LabService:
     def __init__(self, data_dir, cache_dir, python=None, historical=None):
-        self.store = Store(data_dir, [ROOT / "runs", ROOT / "studies" / "initial" / "runs"] if historical is None else historical)
+        self.store = Store(data_dir, bundled_history() if historical is None else historical)
         self.cache_dir = str(Path(cache_dir).resolve())
         self.python = str(Path(python or sys.executable).absolute())
         self.csrf = secrets.token_urlsafe(32)

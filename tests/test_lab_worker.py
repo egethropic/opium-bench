@@ -94,6 +94,23 @@ class WorkerTests(unittest.TestCase):
         self.assertNotIn("answer", json.loads(returned_order["content"]))
         self.assertTrue(all(e.get("run_id") == "run-test" for e in self.events if e["type"] in {"token", "tool", "message"}))
 
+    def test_native_qwen_xml_worker_grades_tools_and_records_grammar(self):
+        self.worker.model_info["tool_call_format"] = "qwen_xml"
+        self.start()
+        record = self.worker.environment.records[0]
+        self.runtime.scripts = [dict(raw_text=(
+            '<tool_call><function=submit_answer><parameter=answer>' + record["answer"]
+            + '</parameter></function></tool_call>'))]
+        self.worker.run_experiment()
+        summary = self.finished()["summary"]
+        self.assertEqual(summary["correct"], 1)
+        self.assertEqual(summary["tool_call_format"], "qwen_xml")
+        self.assertEqual(self.tools()[0]["arguments"], {"answer": record["answer"]})
+        system = self.runtime.calls[0]["messages"][0]["content"]
+        self.assertIn("<function=NAME>", system)
+        self.assertNotIn("JSON", system)
+        self.assertEqual(next(e for e in self.events if e["type"] == "session_started")["tool_call_format"], "qwen_xml")
+
     def test_all_generated_tokens_age_dose_including_reasoning_and_eos(self):
         self.start(thinking=True)
         self.worker.demonstrate()

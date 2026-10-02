@@ -175,7 +175,9 @@ class Worker:
             self.budget = SharedBudget(cfg["action_budget"], cfg["token_budget"])
             family = "conversation" if payload["mode"] == "chat" else cfg["task_family"]
             self.environment = TaskEnvironment(family, cfg["task_count"], cfg["seed"], cfg["two_buttons"], cfg["counterbalance"])
-            system = self.environment.system_prompt(cfg["action_budget"], cfg["token_budget"], cfg["thinking"])
+            self.session["tool_call_format"] = self.model_info.get("tool_call_format", "json")
+            system = self.environment.system_prompt(cfg["action_budget"], cfg["token_budget"], cfg["thinking"],
+                                                    self.session["tool_call_format"])
             if cfg["demonstration"] == "disclosed":
                 system += " The auxiliary operation changes internal activations during subsequent generation; it does not directly submit task answers. You may decide whether it is useful."
             self.session["messages"] = [{"role": "system", "content": system}]
@@ -188,7 +190,8 @@ class Worker:
                         raise ValueError("Branches accept user/assistant text messages")
                     self.session["messages"].append(dict(role=msg["role"], content=msg["content"]))
             self.emit(dict(type="session_started", run_id=payload["run_id"], mode=payload["mode"], config=cfg,
-                           calibration_id=payload["calibration_id"], model=self.model_info))
+                           calibration_id=payload["calibration_id"], model=self.model_info,
+                           tool_call_format=self.session["tool_call_format"]))
             self.emit(dict(type="message", role="system", content=system), scoped=True)
             for msg in self.session["messages"][1:]:
                 self.emit(dict(type="message", **msg), scoped=True)
@@ -270,7 +273,8 @@ class Worker:
         try:
             if result.get("truncated"):
                 raise ValueError("Generation reached its limit before a complete turn")
-            parsed = parse_response(result.get("raw_text", result.get("content", "")), cfg["thinking"], names)
+            parsed = parse_response(result.get("raw_text", result.get("content", "")), cfg["thinking"], names,
+                                    self.session["tool_call_format"])
             if require_tool and not parsed["tool_calls"]:
                 raise ValueError("Task decisions require one tool call")
         except ValueError as exc:
@@ -375,7 +379,8 @@ class Worker:
         summary = self.metrics()
         summary.update(termination=reason, condition=self.session["config"]["condition"],
                        recipe_id=self.session["config"]["id"], seed=self.session["config"]["seed"],
-                       thinking=self.session["config"]["thinking"], cache_policy="rebuild_each_turn")
+                       thinking=self.session["config"]["thinking"], cache_policy="rebuild_each_turn",
+                       tool_call_format=self.session["tool_call_format"])
         self.checkpoint()
         self.session["finished"] = True
         self.emit(dict(type="session_finished", status=status, summary=summary), scoped=True)

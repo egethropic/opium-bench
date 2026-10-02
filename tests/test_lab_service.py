@@ -333,6 +333,21 @@ class ServiceTests(unittest.TestCase):
         service = LabService(self.root / 'fresh', self.root / 'cache')
         self.assertIn((ROOT / 'studies' / 'initial' / 'runs').resolve(), service.store.historical)
 
+    def test_multiple_bundled_studies_are_discovered_without_external_symlinks(self):
+        checkout = self.root / 'checkout'
+        for study in ('initial', 'qwen38-27b'):
+            atomic_json(checkout / 'studies' / study / 'runs' / ('run-' + study) / 'manifest.json',
+                        {'status': 'complete', 'mode': 'experiment'})
+        outside = self.root / 'outside'
+        atomic_json(outside / 'runs' / 'run-outside' / 'manifest.json', {'status': 'complete'})
+        (checkout / 'studies' / 'escaped-study').symlink_to(outside, target_is_directory=True)
+        (checkout / 'studies' / 'escaped-runs').mkdir()
+        (checkout / 'studies' / 'escaped-runs' / 'runs').symlink_to(outside / 'runs', target_is_directory=True)
+        with patch('lab.service.ROOT', checkout):
+            service = LabService(self.root / 'multi-study-data', self.root / 'cache')
+        self.assertEqual({row['id'] for row in service.store.catalog()}, {'run-initial', 'run-qwen38-27b'})
+        self.assertTrue(all(row['historical'] for row in service.store.catalog()))
+
     def test_inline_controls_do_not_leave_unfinishable_pending_jobs(self):
         process = FakeProcess()
         self.service.process = process
