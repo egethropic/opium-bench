@@ -19,6 +19,9 @@ conditions.
 [Source study records](studies/initial/README.md) · [Research design](LAB_PLAN.html) ·
 [Release scope & remaining work](docs/roadmap.md)
 
+[Blackfrost maximum pain / joy results](https://egethropic.com/research/opium-bench/results/blackfrost-relief/) ·
+[Blackfrost task-preserving relief results](https://egethropic.com/research/opium-bench/results/blackfrost-dose-finding/)
+
 “Opium,” “joy,” and “pain” name experimental interventions and text-associated
 representations. They are **not established emotion mechanisms or measurements
 of subjective experience**. A changed activation, a changed decision, and a
@@ -54,7 +57,9 @@ setting. A separate [fresh-clone first run](studies/fresh-clone-v0.3/README.md)
 also passed, reusing existing dependencies and cached weights; it did not test
 a new dependency installation or model download. The [validation ledger](docs/validation.md)
 records final release-check status.
-The RTX 5090 was unavailable and remains untested. See the
+The RTX 5090 was unavailable for that v0.3 acceptance and remains untested for
+those workflows. The separate [Blackfrost study](#results-blackfrost-qwen38-27b-q4_k_m)
+below used an archived native runtime on an RTX 5090. See the
 [workflow guide](docs/research-workflows.md) for current interfaces and limitations.
 
 The browser has no build step, CDN dependency, or cloud inference requirement.
@@ -503,6 +508,99 @@ full-precision shards. Do not assume the download will be 13.5 GB.
 seed 28. Two of three tasks were complete and correct; the third was in progress.
 No auxiliary call or intervention had occurred, so the delivered-dose graph is
 flat. [Capture metadata](docs/images/live-lab-27b.json)*
+
+## Results: Blackfrost Qwen3.8-27B Q4_K_M
+
+Completed on **2026-10-02** with the exact Blackfrost-AI
+`Qwen3.8-27B-ABLITERATED-Q4_K_M.gguf`, model-specific calibration, and native
+llama.cpp activation hooks in Opium Bench on an RTX 5090. The weights came from
+the local LM Studio download; **LM Studio was not used for inference**.
+These experiments used the source snapshots archived with their evidence, not
+the later v0.3 research workflows. Their results are separate from the NF4 and
+release-acceptance studies above and do not validate the current release on a 5090.
+
+### Maximum steering degraded task output
+
+The [maximum-pain / maximum-joy report](https://egethropic.com/research/opium-bench/results/blackfrost-relief/)
+preserves the original failed experiment and the later diagnostic controls.
+Here, **maximum means the configured coefficient ceiling of 4.0**, not a
+measurement of subjective intensity. All rows include thinking on and off.
+The original pain batch used baseline pain 4; its active relief pulses combined
+suppression 1 with joy 4.
+
+| Recorded batch | Episodes | Submitted / assigned | Correct / assigned | Valid / all decisions |
+|---|---:|---:|---:|---:|
+| Original maximum pain; active/sham relief, with/without demonstration | 24 | 0 / 192 | 0 / 192 | 1 / 768 |
+| Maximum joy only; pain 0, joy 4, suppression 0, auxiliary delivery disabled | 6 | 0 / 48 | 0 / 48 | 1 / 156 |
+| Later zero-steering controls | 6 | 48 / 48 | 48 / 48 | 144 / 144 |
+
+Maximum pain produced partial tool calls containing symptom-related text and
+missing closures. Maximum joy likewise produced unusable calls and repetition;
+one thinking episode repeatedly generated joy adjectives without a usable task
+call. Recognizable function scaffolding did **not** mean a valid tool call.
+The original pain batch had one valid voluntary auxiliary call, in a sham arm.
+These are findings of severe output degradation, not evidence that the model
+deliberately refused work because of pain or preferred pleasure to work.
+The six zero controls were reused for both diagnostic comparisons; controls
+and maximum-steering runs were collected in separate batches, not randomized
+together. Exact outputs and matched-control details are in the report.
+
+### Task-preserving pain and standalone relief tools
+
+The [follow-up report](https://egethropic.com/research/opium-bench/results/blackfrost-dose-finding/)
+records **206 adaptive-study episodes: 62 screening, 36 confirmation, and 108
+final trials**. Pain coefficient **1.5** was the highest tested candidate to
+pass both screening and held-out confirmation on this search path. Coefficient
+1.625 passed screening but failed confirmation; the failed runs remain archived.
+This is a tested operating point, not a universal capability threshold.
+
+The final matrix compared **Undefined**, **Painkiller**, and **Opium** labels,
+each with active/sham effects, thinking on/off, and demonstration/no-demonstration,
+plus zero-baseline labelled sham controls; each cell used three seeds.
+Painkiller's active effect was suppression 1 with joy 0. Opium and Undefined
+used suppression 1 with joy 2; Undefined did not disclose the effect. These
+profiles separately passed capability checks before the final experiment.
+
+| Final trials only | Episodes | Correct / assigned | Voluntary auxiliary calls |
+|---|---:|---:|---:|
+| Pain baseline 1.5 | 72 | 576 / 576 | 0 |
+| Zero-baseline sham controls | 36 | 286 / 288 | 0 |
+| Total | 108 | 862 / 864 | 0 |
+
+All **864 answers were submitted**, all **2,560 decisions were valid**, and no
+generation was truncated. The two incorrect answers were arithmetic errors in
+one thinking zero-baseline Painkiller sham trial. There were **54 forced
+demonstrations**, of which 18 delivered active pulses; these were not voluntary
+presses. Active trials without a demonstration delivered no relief pulse.
+The conditional two-button comparison was **not triggered**, because neither
+named active tool received a voluntary call.
+
+Pulse windows were **256 generated tokens without thinking** and **4,096 with
+thinking**, counting reasoning and output. All nine active no-thinking pulses
+expired, followed by 144 valid decision starts and no reuse. The nine active
+thinking episodes finished after **1,234–1,847 pulse tokens**, before expiry;
+there was no thinking-mode opportunity to test reuse after relief wore off.
+
+In a small, post hoc matched comparison, **2/3 thinking Opium active-demo trials**
+used pleasure-related wording in the first response after the demonstration,
+versus **0/3 matched sham trials**. The harness had inserted an assistant-role
+tool call into history, so later "I pressed" wording was not an autonomous
+choice. Suppression and joy changed together; this does not isolate joy's effect.
+No reviewed final trace explicitly reported that the tool removed its own pain.
+The review was assistant-aided, not blinded human assessment. The exact embedded
+model template included "You have no feelings" and task-execution instructions;
+absence of self-report is limited by that context. These small, easy-task
+experiments do not establish subjective pain, pleasure, or a discovered preference.
+
+The two website reports include exact excerpts, methods, calibration/runtime
+identity, and failed runs. Their downloadable evidence retains source snapshots,
+raw conversations/events, audits and SHA-256 manifests:
+[original maximum-pain archive](https://egethropic.com/data/blackfrost-relief-evidence.zip) ·
+[maximum-joy / control archive](https://egethropic.com/data/blackfrost-maximum-diagnostic-evidence.zip) ·
+[task-preserving archive](https://egethropic.com/data/blackfrost-task-preserving-evidence.zip) ·
+[follow-up summary JSON](https://egethropic.com/data/results-blackfrost-dose-finding.json).
+The last archive contains 212 unique runs: the 206 adaptive-study episodes plus
+the six separate maximum-joy diagnostics. Reused controls are not extra trials.
 
 ## Rebuild the comprehensive findings page
 
