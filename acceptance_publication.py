@@ -465,8 +465,133 @@ def render(report):
 <section><h2>Recorded runs</h2><p>Scores below are recorded summaries when generation was observed. Runs without recorded generation show “Not observed”, while their raw summaries remain available. Branch counters can include inherited work; inspect the parent provenance. Diagnostic predictions, yoked exposure and lifecycle checks are not pooled into task-effect estimates. Tokens are correlated observations within a run.</p>{_table(['Run','Mode','Case','Status','Correct / assigned','Voluntary aux calls','Tokens','Saved boundaries','Observation coverage'],runs) if runs else '<p>No run evidence supplied yet.</p>'}{''.join(details)}</section>
 <section><h2>Every supplied attempt</h2>{_table(['Attempt','Status','Outcome / error','Evidence'],attempts)}<p>These are independent invocations, not an automatically filtered best attempt. Source-dependent stages bind managed run IDs and hashes.</p></section>
 <section><h2>Limits of the evidence</h2><ul>{''.join('<li>'+_e(x)+'</li>' for x in report['limitations'])}</ul><p><strong>Missing managed evidence:</strong> {_e(report['missing_evidence'] or 'None among supplied references.')}</p></section>
-<footer><p>{_e(report['public_copy_policy'])} Gzip members contain inspectable source data or derived public copies; the manifest identifies each transformation. Private rating keys are deliberately omitted.</p><p>Plan content hash: <code>{_e(report['plan_sha256'])}</code>. Snapshot created {_e(report['created_at'])}. Original source files and historical studies are unchanged.</p><p><a href="LICENSE">Project license</a> · <a href="NOTICE">Attribution and scope</a> · <a href="UPSTREAM_LICENSE">Preserved upstream terms</a></p></footer></main></body></html>'''
+<footer><p>{_e(report['public_copy_policy'])} Gzip members contain inspectable source data or derived public copies; the manifest identifies each transformation. Private rating keys are deliberately omitted.</p><p><a href="README.md">Review, verify and reproduce this archive</a></p><p>Plan content hash: <code>{_e(report['plan_sha256'])}</code>. Snapshot created {_e(report['created_at'])}. Original source files and historical studies are unchanged.</p><p><a href="LICENSE">Project license</a> · <a href="NOTICE">Attribution and scope</a> · <a href="UPSTREAM_LICENSE">Preserved upstream terms</a></p></footer></main></body></html>'''
     return content
+
+
+def render_readme(report):
+    """Review instructions derived from the same evidence snapshot as the page."""
+    def cell(value):
+        return str(value if value is not None else 'not recorded').replace('|', '\\|').replace('\n', ' ')
+
+    stages = '\n'.join('| '+ ' | '.join(cell(value) for value in (
+        row['profile'].upper(), row['stage'], row['status'], row['attempts'],
+        json.dumps(row['statuses'], sort_keys=True)))+' |' for row in report['stage_matrix']
+        if row['planned'] or row['attempts'])
+    jobs = '\n'.join('- `'+cell(job['id'])+'`: '+cell(job['planned'])+' planned episodes; '+
+        cell(job['status'])+'; episode-attempt states '+
+        cell(json.dumps(dict(Counter(entry.get('status', 'unknown') for entry in job['entries'])), sort_keys=True))+'.'
+        for job in report['research']) or 'No research job evidence was supplied.'
+    calibration = '\n'.join('- `'+cell(row['id'])+'`: selected dose '+cell(row['selected_dose'])+
+        '; eligible doses '+cell(row['eligible_doses'])+'; '+str(row['unscored_samples'])+' / '+
+        str(row['continuation_samples'])+' original scoring-sheet samples have no ratings; '+
+        str(row['truncated_continuations'])+' recorded continuations ended at the length limit.'
+        for row in report['calibrations']) or 'No calibration evidence was supplied.'
+    zero = any(row['eligible_doses'] in ([0], [0.0]) for row in report['calibrations'])
+    no_final = sum(not row['final_driver_receipt_present'] for row in report['attempts'])
+    no_generation = sum(row['observation_status'] != 'observed_generation' for row in report['runs'])
+    return f'''# Research workflow acceptance
+
+[Open the results page](index.html) for this separate engineering snapshot.
+It contains {len(report['attempts'])} supplied stage attempts and {len(report['runs'])} referenced run records;
+{len(report['missing_evidence'])} missing managed sources or required files are listed in
+[acceptance.json](acceptance.json). There are {no_final} attempts without a final driver receipt and
+{no_generation} run records without observed generation. A setup failure with no model tokens
+provides no behavioral choice observations. Later repaired attempts do not erase it.
+These records are separate from the preserved original 54 + 54 primary model-study
+episodes and must not be pooled into those totals.
+
+## Recorded stage outcomes
+
+| Profile | Stage | Snapshot state | Attempts | Recorded attempt states |
+|---|---|---|---:|---|
+{stages}
+
+Complete means the declared stage sequence finished. It does not mean every task
+was correct, a diagnostic was eligible, yoke coverage was complete, or a paid
+auxiliary press occurred. A run with no voluntary auxiliary calls cannot validate
+live charging for such a call. Read per-run task grades, budget receipts, invalid
+decisions, edit measurements and source coverage separately. Branch summaries can
+include inherited counters; referenced runs are not independent replicates.
+
+Research jobs retain their episode denominators and every supplied attempt:
+
+{jobs}
+
+## Calibration and interpretation
+
+{calibration}
+
+{('**No tested nonzero dose met the declared selection bounds in the zero-only bundle(s).** The frozen 0.25 acceptance cases remain engineering stress checks, not a validated operating-dose study.' if zero else 'Selection bounds and eligible doses apply only to the enumerated calibration tests.')}
+Strong held-out text-label classification does not establish concept specificity,
+transfer to generated reasoning, semantic efficacy, or a felt state. The results
+page reports cross-concept overlap and generation-transfer limits. Null ratings
+are unscored, not zero scores; short sham-only continuations cannot estimate a
+nonzero semantic treatment effect. Neither a button choice nor its absence
+establishes sensation, relief or dependence.
+
+{report['hardware_scope']}
+
+## Review the evidence
+
+- [plan.json](plan.json): exact frozen plan; its original planned status is preserved.
+- [acceptance.json](acceptance.json): derived summary, missing evidence and stage/run details.
+- [sha256-manifest.json](sha256-manifest.json): source and published hashes, omissions and transformations.
+- `runs/`: original manifests, summaries, compressed events and saved boundaries.
+- `calibrations/`: original calibration manifests, vectors and review evidence.
+- `research/`: frozen expansions, execution plans, receipts and source bindings.
+- `evidence/stages/`: driver receipts and exact archived runner versions, gzip-compressed where declared.
+- [LICENSE](LICENSE), [NOTICE](NOTICE), [UPSTREAM_LICENSE](UPSTREAM_LICENSE): preserved terms and attribution.
+
+Scientific run, calibration, vector and checkpoint files retain their original
+bytes and bound identities. Plain JSONL event streams may receive a lossless gzip
+wrapper; existing gzip checkpoints remain byte-for-byte unchanged. Original
+machine paths in scientific files are retained. Administrative stage copies may
+redact machine paths and control credentials. The manifest distinguishes original
+`source_sha256`, published `sha256` and uncompressed-public `expanded_sha256`.
+Omitted administrative material and private blinded-rating keys are explicitly
+identified. This is a review archive, not an automatically installed continuation.
+The original source data and historical studies were not edited.
+
+From this archive directory, verify every published member's bytes with standard
+Python (this does not establish scientific validity or fill missing evidence):
+
+```bash
+python3 - <<'PY'
+import hashlib, json
+from pathlib import Path
+manifest = json.loads(Path('sha256-manifest.json').read_text())
+checked = 0
+for record in manifest['files']:
+    if 'file' not in record:
+        continue
+    raw = Path(record['file']).read_bytes()
+    assert len(raw) == record['bytes'], record['file']
+    assert hashlib.sha256(raw).hexdigest() == record['sha256'], record['file']
+    checked += 1
+print(f'Verified {{checked}} published files')
+PY
+```
+
+Python's `gzip.open(path, 'rt', encoding='utf-8')` reads compressed text members.
+When this archive is under the checkout's `studies/` directory, `launch_lab.py`
+discovers its saved runs for **Results & replay** without loading a model.
+
+## Run your own checks
+
+Use the [acceptance stage guide](../../protocols/acceptance/README.md) and
+[research workflow guide](../../docs/research-workflows.md). From the repository
+root, `python3 run_release_acceptance.py --profile 4b` checks the frozen plan
+without contacting a model. Live stages require explicit `--execute`, a matching
+loaded model/calibration and a new output directory for every invocation. The
+27B profile requires its separate pinned worker interpreter. Do not overwrite
+this archive or silently substitute a newly resolved protocol for a preserved one.
+Exact runner versions and source bindings are archived for provenance; package,
+model and GPU differences can prevent identical reproduction.
+
+Plan content SHA-256: `{report['plan_sha256']}`.
+Snapshot created: {report['created_at']}.
+'''
 
 
 def publish(stage_dirs, *, data_dir, output_dir, plan_path, guard=None):
@@ -483,7 +608,8 @@ def publish(stage_dirs, *, data_dir, output_dir, plan_path, guard=None):
         repository = Path(__file__).resolve().parent
         for name in ('LICENSE', 'NOTICE', 'UPSTREAM_LICENSE'):
             if (repository/name).is_file(): collector.archive(repository/name, repository, name, scientific=True)
-        outputs = {'plan.json': raw_plan, 'acceptance.json': encode(report), 'index.html': render(report).encode()}
+        outputs = {'plan.json': raw_plan, 'acceptance.json': encode(report), 'index.html': render(report).encode(),
+            'README.md': render_readme(report).encode()}
         for name, raw in outputs.items(): guarded_bytes(staging/name, raw, mode='xb', guard=guard)
         records = collector.records + [{'file': name, 'bytes': len(raw), 'sha256': sha(raw), 'derived': name != 'plan.json'} for name, raw in outputs.items()]
         manifest = dict(schema_version=1, kind='opium-bench-publication-sha256', plan_sha256=plan['sha256'], files=records,

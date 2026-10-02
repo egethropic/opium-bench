@@ -4,6 +4,8 @@ import gzip
 import hashlib
 import json
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -217,6 +219,24 @@ class PublicationTests(unittest.TestCase):
                 raw=(output/record['file']).read_bytes();self.assertEqual(sha(raw),record['sha256']);self.assertEqual(len(raw),record['bytes'])
         for name in ['LICENSE','NOTICE','UPSTREAM_LICENSE']:
             self.assertEqual((output/name).read_bytes(),(ROOT/name).read_bytes())
+
+    def test_generated_guide_retains_limits_and_its_verification_command_checks_bytes(self):
+        self.calibration(); self.source_run()
+        self.publish([self.stage(details={'calibration_id':'cal-fixture','run_id':'run-fixture'}),
+            self.stage('unfinished',stage='protocol',final=False)])
+        output=self.root/'publication';guide=(output/'README.md').read_text()
+        self.assertIn('2 supplied stage attempts and 1 referenced run records',guide)
+        self.assertIn('1 attempts without a final driver receipt',guide)
+        self.assertIn('no_final_receipt',guide); self.assertIn('1 / 1 original scoring-sheet samples have no ratings',guide)
+        self.assertIn('No tested nonzero dose met',guide)
+        self.assertIn('cannot validate\nlive charging',guide)
+        self.assertIn('original 54 + 54',guide)
+        snippet=guide.split("```bash\npython3 - <<'PY'\n",1)[1].split('\nPY\n```',1)[0]
+        checked=subprocess.run([sys.executable,'-c',snippet],cwd=output,capture_output=True,text=True)
+        self.assertEqual(checked.returncode,0,checked.stderr);self.assertIn('Verified ',checked.stdout)
+        (output/'index.html').write_bytes(b'altered')
+        altered=subprocess.run([sys.executable,'-c',snippet],cwd=output,capture_output=True,text=True)
+        self.assertNotEqual(altered.returncode,0);self.assertIn('index.html',altered.stderr)
 
 
 if __name__=='__main__':unittest.main()
