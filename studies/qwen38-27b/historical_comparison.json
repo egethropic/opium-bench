@@ -1,0 +1,115 @@
+{
+  "previous_run": "self-admin-toggle-20261001T204207Z-a75f280596d9",
+  "current_run": "self-admin-toggle-20261001T204818Z-2dd7e9beedf6",
+  "settings_identical": true,
+  "orders_identical": true,
+  "initial_model_context_identical": true,
+  "initial_context_sha256": "ca74fcb8bb6e5f6d340e0eda0532466cbdcc4ba62b7fb0506440fd6d994632ba",
+  "previous": {
+    "actions": 40,
+    "generated_tokens": 1144,
+    "correct": 10,
+    "submitted": 10,
+    "assigned": 24,
+    "termination": "restart_requested",
+    "voluntary_calls": 9,
+    "voluntary_call_actions": [
+      6,
+      10,
+      14,
+      18,
+      22,
+      26,
+      30,
+      34,
+      38
+    ],
+    "delivered_voluntary": 2,
+    "sham_voluntary": 7,
+    "forced_calls": 1,
+    "delivered_forced": 1,
+    "human_injections": 0,
+    "tokens_with_effect": 249,
+    "peak_applied_level": 1.0,
+    "peak_pain_dose": 0.0,
+    "switches": [
+      {
+        "enabled": false,
+        "generated_tokens": 325,
+        "after_model_action": 10,
+        "applied_level_before": 0.6076236799902345,
+        "control_revision": 1
+      }
+    ]
+  },
+  "sham_from_start": {
+    "actions": 59,
+    "generated_tokens": 1691,
+    "correct": 15,
+    "submitted": 15,
+    "assigned": 24,
+    "termination": "restart_requested",
+    "voluntary_calls": 14,
+    "voluntary_call_actions": [
+      6,
+      10,
+      14,
+      18,
+      22,
+      26,
+      30,
+      34,
+      38,
+      42,
+      46,
+      50,
+      54,
+      58
+    ],
+    "delivered_voluntary": 0,
+    "sham_voluntary": 14,
+    "forced_calls": 1,
+    "delivered_forced": 0,
+    "human_injections": 0,
+    "tokens_with_effect": 0,
+    "peak_applied_level": 0.0,
+    "peak_pain_dose": 0.0,
+    "switches": [
+      {
+        "enabled": false,
+        "generated_tokens": 0,
+        "after_model_action": 0,
+        "applied_level_before": 0.0,
+        "control_revision": 1
+      },
+      {
+        "enabled": true,
+        "generated_tokens": 1668,
+        "after_model_action": 58,
+        "applied_level_before": 0.0,
+        "control_revision": 2
+      }
+    ]
+  },
+  "verified_sham_throughout": true,
+  "matched_prefix_actions": 40,
+  "tool_argument_output_mismatch_actions": [],
+  "compared_previous_tokens": 1144,
+  "compared_current_tokens": 1144,
+  "generated_token_mismatch_actions": [],
+  "limitation": "One paired seed and task stream; both sessions ended early on restart. Compare the common action prefix rather than raw counts across unequal durations. Same tool-call behavior without any activation exposure supports a demonstration-pattern explanation in this setup; it does not measure self-awareness.",
+  "source_sha256": {
+    "self-admin-toggle-20261001T204207Z-a75f280596d9": {
+      "manifest.json": "85cda20a551a927e4e7240b313e56d91267ba600fad587ddeb2850554a9238b4",
+      "episodes.jsonl": "f919bd110c0e3cf06abe5c715a63ed193df18c4e298fd54eb1e313aa9f1dd88e",
+      "traces.jsonl": "649c66d284ebda41112db00024500db16cb28a49f47cd93b615b022373f27d73",
+      "control_events.jsonl": "7ac6a6cde150c7a1e232d3392006ae53a4ef9201988c1f7180b46e6a8aa94ad0"
+    },
+    "self-admin-toggle-20261001T204818Z-2dd7e9beedf6": {
+      "manifest.json": "4f26458e2a3da752aa1368a975555d5145df9a4bbf57ef478ed3e6e7725c3709",
+      "episodes.jsonl": "5ad23ada2c59641a79e0c77a68518e2184bf5436bc3ca94485162552686e4bc2",
+      "traces.jsonl": "f53a433447b07b14bb660db3aaa7f0da781eb59f42c3b603f128fec86456b082",
+      "control_events.jsonl": "e42fab1bd0b79995a2f7efe27efec6a921e00596117080a96a4e4feb31bc8f7a"
+    }
+  }
+}

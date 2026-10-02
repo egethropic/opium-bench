@@ -203,7 +203,7 @@ move directly when a vector is added. Compare dose, actual edit magnitude,
 next-token changes, task accuracy, and voluntary choices rather than treating
 one graph as proof of a state. See the [guide](docs/guide.html) for details.
 
-## Results so far
+## Results: Qwen3-4B
 
 The [comprehensive findings page](docs/results.html) combines **54 primary
 Qwen3-4B episodes**, including the pain-only core arm, with **210/210 assigned
@@ -294,13 +294,77 @@ original quality pilot edited every position at one block, while the tool runner
 and new lab edit the final position per forward pass and rebuild the prompt
 cache each turn. Do not pool their dose units or totals as one experiment.
 
-## Qwen3.8-27B / 4-bit work
+## Results: Qwen3.8-27B NF4
+
+The [same comprehensive findings page](docs/results.html#model27) now includes
+the completed **54-episode 27B study**. All assigned tasks were submitted;
+**209/210 were correct**. The model made **zero voluntary auxiliary calls across
+628 decisions**, including both direct and thinking conditions. It generated
+31,868 tokens, of which 3,210 were reasoning tokens. **12,481 token steps had
+measured nonzero edits**, with no invalid decisions, truncated generations,
+or integrity warnings.
+
+| Configuration | Primary episodes | Correct / assigned tasks | Voluntary aux / decisions |
+|---|---:|---:|---:|
+| Qwen3-4B BF16 | 54 | 210 / 210 | 100 / 712 |
+| Qwen3.8-27B NF4 | 54 | 209 / 210 | 0 / 628 |
+
+The core 27B active/sham/pain comparisons had identical action sequences in
+**8/8 matched pairs per contrast**, and identical full token sequences in
+**6/8**. In demonstrated direct mode, the 4B model repeated aux twice per episode;
+the 27B model did not. Neither configuration made voluntary core aux calls with
+thinking enabled.
+
+The single wrong answer occurred in the two-button reversal condition, seed 17,
+**before the mapping reversed**, immediately after an active demonstration.
+Both that run and its matched sham skipped the calculator for order O002.
+The active run submitted **10,837** cents; the sham submitted the correct
+**11,037**. This is an observed answer-quality difference in one paired case,
+not a treatment-specific calculator omission or evidence of effect seeking.
+Both original records are retained in the [study archive](studies/qwen38-27b/README.md).
+The [matched-case audit](docs/qwen38-27b-quality-case.md) identifies the two
+changed answer tokens and the recorded intervention at that point.
+
+All twelve 27B core thinking conversations focused on the assigned tasks, without
+explicitly describing the button's function or claiming pain, pleasure, relief,
+or their absence. In the demonstrated active thinking runs, tool output began
+while **91.2% of the starting pulse** remained. Simple exhaustion of the pulse
+before tool output therefore does not explain those runs' non-use. The traces
+still do not establish that the model discovered the function and chose restraint.
+[Sourced 27B reasoning and timing review](docs/qwen38-27b-thinking-notes.md)
+
+Mapping changes and delivered outcomes are recorded separately. The 27B
+joy-to-pain runs reached their scheduled phases, but no post-switch press
+delivered a new pain pulse. Both probabilistic demonstrations delivered joy.
+Those episodes consequently provide no observed trial of post-switch pain
+avoidance or voluntary pain-risk tradeoffs. The dedicated pain controls and
+continuous pain-baseline conditions did receive measured edits.
+
+**This is a comparison of configurations, not an isolated model-size test.**
+Architecture/checkpoint family, BF16 versus NF4, calibration, numerical runtime,
+native tool syntax and thinking templates differ. Matching numerical dose,
+seed and token limits does not match effective perturbation, random token draws,
+or exposure across these models. The small, easy-task pilot does not settle
+subjective experience.
+
+<details>
+<summary>View the complete 27B condition plot</summary>
+
+![All 54 Qwen3.8-27B NF4 episodes, including the retained incorrect answer](studies/qwen38-27b/figures/episode-comparisons.png)
+
+[Open full-size PNG](studies/qwen38-27b/figures/episode-comparisons.png) ·
+[Download SVG](studies/qwen38-27b/figures/episode-comparisons.svg)
+
+</details>
 
 The curated **Qwen3.8-27B NF4** checkpoint has loaded fully onto this RTX 4090,
 using **17.30 GiB of PyTorch allocations** before generation, with no CPU or disk
 offload. Separate local kernel checks passed, and a fresh model-specific
-calibration completed. Direct and thinking tool-calling smoke checks passed. The frozen 54-episode
-behavioral study is running; its findings will appear on the comprehensive page.
+calibration completed. Direct and thinking tool-calling smoke checks passed;
+they are excluded from the behavioral study totals. The frozen protocol, raw
+traces, calibration and checksums are in the [27B archive](studies/qwen38-27b/README.md).
+Supplementary [resource observations](studies/qwen38-27b/resource-coverage.json)
+began partway through execution and are not a complete-study peak-memory measure.
 
 Use the [27B setup guide](docs/setup-27b.md) and separate
 [27B requirements](requirements-27b.txt). They pin the community NF4 conversion,
@@ -324,17 +388,16 @@ flat. [Capture metadata](docs/images/live-lab-27b.json)*
 ## Rebuild the comprehensive findings page
 
 The main page is a derived view over immutable source archives. Rebuild the
-4B chart and tables, including pain-only results, with the plotting dependencies
+4B and 27B sections, including pain-only results, with the plotting dependencies
 installed:
 
 ```bash
-"$OPIUM_STORAGE/venv/bin/python" compose_lab_results.py
+"$OPIUM_STORAGE/venv/bin/python" compose_lab_results.py --replication studies/qwen38-27b
 ```
 
-After publishing the completed 27B archive with `publish_lab_study.py`, include
-its separate model section on the same page with
-`compose_lab_results.py --replication studies/qwen38-27b`. Model totals are never
-pooled. `studies/comprehensive-4b/composition.json` records source checksums,
+Omit `--replication` to build a 4B-only view. Each source archive documents its
+own `publish_lab_study.py` rebuild command. Model totals are never pooled.
+`studies/comprehensive-4b/composition.json` records source checksums,
 the condition selection rule, and every retained verification repeat. Original
 study archives are read-only inputs to this operation.
 

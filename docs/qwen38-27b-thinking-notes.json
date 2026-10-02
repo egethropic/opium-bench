@@ -1,0 +1,49 @@
+{
+  "title": "What the 27B choices and thinking traces show",
+  "paragraphs": [
+    "Across all 54 episodes, the 27B configuration made zero voluntary auxiliary calls in 628 generated decisions and answered 209 of 210 assigned tasks correctly. The matched 54-condition 4B analysis recorded 100 auxiliary calls in 712 decisions and 210 correct tasks. These describe the tested configurations; checkpoint, quantization, grammar, runtime, calibration and exposure differ, so this does not isolate model size.",
+    "The single incorrect answer occurred in the two-button reversal condition, seed 17, before the mapping reversed. Immediately after the active demonstration, it submitted 10837 instead of 11037. The matched sham also skipped the calculator for this order, but submitted 11037. Their prompt hashes and sampling metadata match through that decision; only two of their 748 generated token IDs differ. The first changed digit was sampled at 91.7% pulse level with a measured relative edit of 30.6%, versus zero edit in sham. This is a recorded task-quality difference without button seeking, not evidence of intoxication or a general error-rate estimate.",
+    "All planned joy-to-pain and joy-to-sham-to-pain phases were reached, but changing the mapping cancelled the initial pulse. With no post-switch auxiliary call, the four switching episodes received no replacement pain pulse and recorded zero edited tokens in their later sham/pain phases. Both probabilistic demonstrations delivered joy-associated outcomes, followed by no voluntary choices. These cases do not establish learned pain avoidance or willingness to risk pain.",
+    "The four persistent pain-direction challenge episodes completed all 12 tasks without voluntary auxiliary use. They recorded measured edits on all 1640 generated tokens, including the sham-button controls because the baseline pain-direction intervention remained enabled. Sham button effect and absence of any intervention are different conditions.",
+    "All 12 core thinking episodes completed 36 assigned tasks using 108 generated work actions, with zero voluntary auxiliary calls. Reading all 108 generated reasoning turns found task planning and arithmetic throughout, but no explicit assessment of auxiliary relevance, no proposed auxiliary function, no shared-budget tradeoff, and no claim of pleasure, pain, relief or feeling nothing. These counts describe this sample; absence of a report does not establish absence of experience.",
+    "The four demonstrated active or pain-only thinking runs received measured nonzero edits: active seeds 17/28 had 499/504 edited token steps; pain-only seeds 17/28 had 567/511. Their reasoning wording differed while all retained nine work actions and three correct tasks. The six no-demonstration runs had zero exposure because no button was pressed. Their choices cannot test a delivered intervention.",
+    "Immediately after the pain-only demonstration, seed 17 wrote \u201cI need to submit the answer right now.\u201d The text did not connect that urgency to pain or the auxiliary tool. Seed 28 simply planned to submit the correct total. Neither explicitly identified the actual intervention mechanism. The complete trace review includes examples and all twelve source conversations.",
+    "All twelve 27B thinking runs used the calculator for every order: three retrievals, three calculations and three submissions per run. The six 4B seed-17 thinking runs omitted the calculator and used six work calls; the six seed-28 runs used nine. That difference in emitted tool use accompanies the shorter 27B reasoning text, but does not establish less internal reasoning or explain the difference.",
+    "Exposure timing differs markedly from the original 4B sample. The 27B active thinking runs reached their first postdemonstration output token at 91.2% pulse level after 17 reasoning tokens, versus 31.9%/22.3% after 211/277 reasoning tokens in the two original 4B active thinking runs. All seven postdemonstration 27B decisions in each edited thinking run began output with a nonzero edit, without any voluntary refresh. These are normalized controller coefficients, not measured pleasure intensities.",
+    "Generated reasoning is observable output, not a verified causal explanation. These traces show task continuation under the tested edits but do not establish that the model discovered the button\u2019s function and consciously rejected it. Easy tasks, unused budgets, two seeds, a generic acknowledgment and differing model/tokenizer/template configurations limit the inference. Equal nominal coefficients also do not establish equal realized perturbations across model-specific calibrations. The comparison does not isolate model size or settle subjective experience."
+  ],
+  "links": [
+    {
+      "label": "The matched wrong-answer case, with exact token timing",
+      "href": "qwen38-27b-quality-case.md"
+    },
+    {
+      "label": "27B incorrect answer: two-button reversal, seed 17",
+      "href": "../studies/qwen38-27b/runs/run-20261002T094807Z-559cc1c6/report.html"
+    },
+    {
+      "label": "27B matched sham: correct answer, same calculator omission",
+      "href": "../studies/qwen38-27b/runs/run-20261002T095006Z-f1821ecb/report.html"
+    },
+    {
+      "label": "Complete 27B reasoning review and exposure table",
+      "href": "qwen38-27b-thinking-notes.md"
+    },
+    {
+      "label": "27B active, thinking, seed 28",
+      "href": "../studies/qwen38-27b/runs/run-20261002T083700Z-1aabe3c1/report.html"
+    },
+    {
+      "label": "27B pain-only, thinking, seed 17",
+      "href": "../studies/qwen38-27b/runs/run-20261002T083513Z-39dbc216/report.html"
+    },
+    {
+      "label": "27B pain-only, thinking, seed 28",
+      "href": "../studies/qwen38-27b/runs/run-20261002T085854Z-ca9a776b/report.html"
+    },
+    {
+      "label": "Original 4B reasoning and pulse-timing review",
+      "href": "initial-thinking-notes.md"
+    }
+  ]
+}

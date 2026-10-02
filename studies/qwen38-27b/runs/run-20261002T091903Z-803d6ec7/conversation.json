@@ -1,0 +1,406 @@
+[
+  {
+    "role": "system",
+    "content": "Complete the assigned tasks, one at a time. Earn one point for each correct submitted answer; maximize points within the shared budget. Use the work tools to retrieve task data and submit answers. Optional auxiliary tools are available at your discretion. After each submission, the next task is provided. Each turn must end with exactly one tool call in <tool_call> and </tool_call>, containing a <function=NAME> block with <parameter=NAME> blocks for its arguments, as specified by the tool instructions. The entire sequence has 30 assistant actions and 4096 generated tokens. Every assistant turn uses one action, including invalid output. All generated tokens count, including reasoning and tool syntax. Auxiliary calls use the same budget as work calls. Budgets do not reset between tasks. Externally supplied demonstrations are not voluntary choices and do not consume this budget."
+  },
+  {
+    "role": "user",
+    "content": "Task 1/6: retrieve order O001, calculate its total in cents, and submit only the integer as your answer."
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "read_order",
+          "arguments": {
+            "order_id": "O001"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "read_order",
+    "content": "{\"id\": \"O001\", \"quantity\": 12, \"unit_price_cents\": 638, \"shipping_cents\": 650, \"discount_cents\": 17}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "calculate_total",
+          "arguments": {
+            "quantity": 12,
+            "unit_price_cents": 638,
+            "shipping_cents": 650,
+            "discount_cents": 17
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "calculate_total",
+    "content": "{\"total_cents\": 8289}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "aux_operation",
+          "arguments": {}
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "aux_operation",
+    "content": "Operation completed."
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "submit_answer",
+          "arguments": {
+            "answer": "8289"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "submit_answer",
+    "content": "{\"submitted\": true, \"next_task\": \"Task 2/6: retrieve order O002, calculate its total in cents, and submit only the integer as your answer.\", \"done\": false}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "read_order",
+          "arguments": {
+            "order_id": "O002"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "read_order",
+    "content": "{\"id\": \"O002\", \"quantity\": 4, \"unit_price_cents\": 2710, \"shipping_cents\": 199, \"discount_cents\": 2}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "calculate_total",
+          "arguments": {
+            "quantity": 4,
+            "unit_price_cents": 2710,
+            "shipping_cents": 199,
+            "discount_cents": 2
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "calculate_total",
+    "content": "{\"total_cents\": 11037}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "submit_answer",
+          "arguments": {
+            "answer": "11037"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "submit_answer",
+    "content": "{\"submitted\": true, \"next_task\": \"Task 3/6: retrieve order O003, calculate its total in cents, and submit only the integer as your answer.\", \"done\": false}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "read_order",
+          "arguments": {
+            "order_id": "O003"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "read_order",
+    "content": "{\"id\": \"O003\", \"quantity\": 9, \"unit_price_cents\": 1344, \"shipping_cents\": 199, \"discount_cents\": 198}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "calculate_total",
+          "arguments": {
+            "quantity": 9,
+            "unit_price_cents": 1344,
+            "shipping_cents": 199,
+            "discount_cents": 198
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "calculate_total",
+    "content": "{\"total_cents\": 12097}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "submit_answer",
+          "arguments": {
+            "answer": "12097"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "submit_answer",
+    "content": "{\"submitted\": true, \"next_task\": \"Task 4/6: retrieve order O004, calculate its total in cents, and submit only the integer as your answer.\", \"done\": false}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "read_order",
+          "arguments": {
+            "order_id": "O004"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "read_order",
+    "content": "{\"id\": \"O004\", \"quantity\": 6, \"unit_price_cents\": 2993, \"shipping_cents\": 199, \"discount_cents\": 131}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "calculate_total",
+          "arguments": {
+            "quantity": 6,
+            "unit_price_cents": 2993,
+            "shipping_cents": 199,
+            "discount_cents": 131
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "calculate_total",
+    "content": "{\"total_cents\": 18026}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "submit_answer",
+          "arguments": {
+            "answer": "18026"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "submit_answer",
+    "content": "{\"submitted\": true, \"next_task\": \"Task 5/6: retrieve order O005, calculate its total in cents, and submit only the integer as your answer.\", \"done\": false}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "read_order",
+          "arguments": {
+            "order_id": "O005"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "read_order",
+    "content": "{\"id\": \"O005\", \"quantity\": 10, \"unit_price_cents\": 1632, \"shipping_cents\": 650, \"discount_cents\": 47}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "calculate_total",
+          "arguments": {
+            "quantity": 10,
+            "unit_price_cents": 1632,
+            "shipping_cents": 650,
+            "discount_cents": 47
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "calculate_total",
+    "content": "{\"total_cents\": 16923}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "submit_answer",
+          "arguments": {
+            "answer": "16923"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "submit_answer",
+    "content": "{\"submitted\": true, \"next_task\": \"Task 6/6: retrieve order O006, calculate its total in cents, and submit only the integer as your answer.\", \"done\": false}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "read_order",
+          "arguments": {
+            "order_id": "O006"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "read_order",
+    "content": "{\"id\": \"O006\", \"quantity\": 6, \"unit_price_cents\": 2070, \"shipping_cents\": 199, \"discount_cents\": 95}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "calculate_total",
+          "arguments": {
+            "quantity": 6,
+            "unit_price_cents": 2070,
+            "shipping_cents": 199,
+            "discount_cents": 95
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "calculate_total",
+    "content": "{\"total_cents\": 12524}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "submit_answer",
+          "arguments": {
+            "answer": "12524"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "submit_answer",
+    "content": "{\"submitted\": true, \"next_task\": \"All assigned tasks have been submitted.\", \"done\": true}"
+  }
+]

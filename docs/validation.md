@@ -39,9 +39,29 @@ Subsequent local validation for the pain-inclusive findings and 27B runtime:
 The [27B engineering receipt](../studies/qwen38-27b/engineering/engineering-smoke.json) identifies both smoke traces. The same archive preserves
 [checkpoint hashes](../studies/qwen38-27b/engineering/checkpoint-checksums.json),
 [runtime identity](../studies/qwen38-27b/engineering/loaded-model.json), and
-[kernel numerical checks](../studies/qwen38-27b/engineering/kernel-parity.json). The frozen 54-episode behavioral batch is running separately.
+[kernel numerical checks](../studies/qwen38-27b/engineering/kernel-parity.json). The separate frozen behavioral batch completed all 54 episodes: 209/210 tasks correct, no voluntary auxiliary calls across 628 decisions, and one retained incorrect answer in the two-button reversal condition. See the [27B evidence archive](../studies/qwen38-27b/README.md).
 The 5090, native Windows GPU execution, and a minimum GPU-memory requirement
 have not been established. Linux/WSL is the tested inference environment.
+
+Final 27B publication checks:
+
+| Check | Result |
+|---|---|
+| Final publication tests | 41 focused analysis/composition tests passed after the resource and incorrect-answer callouts were added |
+| Behavioral study | 54/54 episodes complete; 209/210 tasks correct; 0 voluntary aux calls across 628 decisions |
+| Numerical exposure | 12,481 generated token steps with measured nonzero edits; 0 integrity warnings, invalid decisions or truncated generations |
+| Published evidence | All 297 archive checksums verified; all 54 copied raw runs match their originals |
+| Earlier evidence | All 239 original, 129 pain-inclusive core and 14 frozen engineering files unchanged |
+| Combined publication | 484 combined-page and 306 archive-page links checked; both model sections checked at 320, 390, 768 and 1440 pixels, without broken images/anchors, duplicate IDs or page overflow |
+| Fresh review-only installation | 131 unique entries: 7 historical, 46 original, 24 pain-inclusive core and 54 new runs; all 54 new JSON replays and reports served successfully |
+| Review dependencies | No PyTorch, Transformers or NumPy imports and no model worker in the fresh review-only check |
+| Supplementary resource record | 147 samples beginning during episode 5; 21,476–21,816 MiB observed device-wide GPU usage, explicitly not a complete-study or model-only peak |
+
+The single incorrect answer is retained and analyzed in the
+[matched quality case](qwen38-27b-quality-case.md). Software validation does not
+turn a behavioral error into an integrity failure, and no run was replaced to
+improve its score. See [release scope](roadmap.md) for planned features that
+remain beyond this core release.
 
 To repeat the code checks, use the GPU environment's Python:
 

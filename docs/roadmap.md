@@ -21,10 +21,11 @@ the current 27B study does not complete every item in that plan.
   reports, JSON exports, and published [4B findings](results.html).
 
 The Qwen3.8-27B NF4 runtime has loaded fully on the RTX 4090, with separate
-calibration and kernel/tool-calling checks. **Its 54-episode behavioral study is
-still running at this review date.** Completion, evidence checks, analysis, and
-publication on the combined findings page remain pending. Engineering checks
-are not substitutes for completed behavioral results.
+calibration and kernel/tool-calling checks. Its **54-episode behavioral study is
+complete: 209/210 tasks correct and zero voluntary auxiliary calls**. The
+[combined findings](results.html) preserve the comparison with 4B and the raw
+[27B evidence](../studies/qwen38-27b/README.md). This completes that study;
+the planned features below remain separate implementation work.
 
 ## Remaining items explicitly described in the plan
 

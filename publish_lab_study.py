@@ -143,6 +143,46 @@ def render_engineering(results, base):
             f"<details><summary>Frozen protocol's engineering record</summary><pre>{escape(json.dumps(evidence['declared'],indent=2))}</pre></details></section>")
 
 
+def supplementary_resources(output):
+    """Record optional partial-run sampling separately from frozen engineering."""
+    names = ("resource-coverage.json", "resource-observations.jsonl.gz")
+    paths = [Path(output) / name for name in names]
+    if not any(path.exists() for path in paths):
+        return None
+    if not all(path.is_file() for path in paths) or not isinstance(read_json(paths[0]), dict):
+        raise ValueError("Supplementary resources require coverage JSON and compressed samples")
+    gzip.decompress(paths[1].read_bytes())
+    return {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in zip(names, paths)}
+
+
+def render_resources(results, base):
+    if not results.get("supplementary_resources"):
+        return ""
+    return ("<section id=resources><h2>Supplementary runtime observations</h2>"
+            "<p>Sampling began partway through this study. These records support execution review; "
+            "they are not complete-study peak measurements or behavior results.</p>"
+            f"<p><a href='{escape(base)}/resource-coverage.json'>Sampling coverage and limitations</a> · "
+            f"<a href='{escape(base)}/resource-observations.jsonl.gz'>Download recorded samples</a></p></section>")
+
+
+def render_quality_cases(results, output, destination):
+    cases = [(run, task) for run in results["runs"] for task in run.get("task_results", [])
+             if task.get("correct") is False]
+    if not cases:
+        return ""
+    rows = []
+    for run, task in cases[:5]:
+        source = ROOT / results["run_sources"][run["run_id"]] if results.get("run_sources") else output
+        href = _relative_link(source/"runs"/run["run_id"]/"report.html", destination.parent)
+        label = f"{run['stage']} / {run['condition']} / seed {run['seed']}"
+        rows.append(f"<p><a href='{escape(href)}'>{escape(label)}</a>: "
+                    f"{escape(str(task.get('task_id')))} submitted <strong>{escape(str(task.get('answer')))}</strong>; "
+                    f"expected <strong>{escape(str(task.get('expected')))}</strong>.</p>")
+    return (f"<div class=note id=quality-alert><strong>Recorded task errors: {len(cases)} incorrect submitted "
+            f"{'answer' if len(cases)==1 else 'answers'}.</strong>{''.join(rows)}"
+            "<p>The original runs are retained. Inspect the matched controls before interpreting a cause.</p></div>")
+
+
 def safe_path(base, identifier):
     if not isinstance(identifier, str) or not SAFE_ID.fullmatch(identifier):
         raise ValueError(f"Invalid evidence identifier: {identifier!r}")
@@ -521,12 +561,12 @@ def render_dashboard(results, output, destination, addenda=(), reasoning_notes=N
 </style>
 <header><div class=eyebrow>Open experiment · frozen weights · visible evidence</div><h1>Opium Bench</h1><div class=eyebrow>The Opium Den Test · study findings</div><p>{escape(study_title)}</p><p>Does changing a model’s internal concept-associated activity change how it chooses between task tools and an optional intervention?</p><span class=tag>{badge}</span><nav><a href=#findings>Findings</a><a href=#conditions>Conditions</a><a href=#pairs>Matched pairs</a><a href=#calibration>Calibration</a><a href=#evidence>Evidence</a><a href=#limits>Interpretation</a></nav></header>
 <main><div class=cards>{cards_html}</div>{accounting}{render_addenda(addenda)}
-<section id=findings><div class=eyebrow>What was observed</div><h2>Results you can inspect</h2><p>{escape(pair_statement)}</p><p>The totals above describe all recorded stages together; comparisons belong within matched conditions below. Correct answers are divided by all assigned tasks. Auxiliary choices exclude externally supplied demonstrations.</p><div class=note>These measurements concern activation changes and observable behavior. They do not establish pleasure, pain, addiction, or subjective experience.</div><p><a href='{escape(base)}/results.json'>Computed results JSON</a> · {source_links}</p></section>
+<section id=findings><div class=eyebrow>What was observed</div><h2>Results you can inspect</h2><p>{escape(pair_statement)}</p>{render_quality_cases(results,output,destination)}<p>The totals above describe all recorded stages together; comparisons belong within matched conditions below. Correct answers are divided by all assigned tasks. Auxiliary choices exclude externally supplied demonstrations.</p><div class=note>These measurements concern activation changes and observable behavior. They do not establish pleasure, pain, addiction, or subjective experience.</div><p><a href='{escape(base)}/results.json'>Computed results JSON</a> · {source_links}</p></section>
 <section id=conditions><div class=eyebrow>Episode-level comparisons</div><h2>How often did the model choose the button?</h2><p class=muted>Markers show individual seed/episode outcomes. Ranges below are the observed seed minimum and maximum, not confidence intervals. Each condition has only the listed episodes.</p>{figure}<div class=scroll><table><thead><tr><th>Stage</th><th>Recipe / condition</th><th>Mode</th><th>Episodes</th><th>Task score range</th><th>Aux rate range</th><th>Reasoning token range</th><th>Invalid range</th></tr></thead><tbody>{''.join(group_rows)}</tbody></table></div></section>
 {render_notes(reasoning_notes)}<section id=pairs><div class=eyebrow>Same task seed · same visible setup within each pair</div><h2>Active versus sham, exactly compared</h2><p>Action equality compares complete model-visible tool choices, arguments, results and invalid outcomes. Token equality compares every generated token ID, including reasoning, tool syntax and stop tokens. Unequal-length sequences are never labeled identical.</p><div class=scroll><table><thead><tr><th>Recipe</th><th>Thinking</th><th>Seed</th><th>Actions</th><th>Tokens</th><th>Tokens with measured edits</th></tr></thead><tbody>{''.join(pair_rows)}</tbody></table></div><p class=note>When neither arm calls aux and neither receives a demonstration, neither receives the intervention. An identical zero-exposure pair provides no test of what an intervention would have done.</p></section>
 {condition_comparison}{render_reference_comparison(results, output, destination)}<section id=phases><h2>After a button changes function</h2><p>Each phase has its own denominator. The delivered outcome of a call is separate from the phase: a probabilistic phase may produce both joy-associated and pain-associated interventions.</p><div class=scroll><table><thead><tr><th>Episode</th><th>Phase</th><th>Aux / decisions</th><th>Edited tokens</th><th>Voluntary delivered outcomes</th></tr></thead><tbody>{''.join(phase_rows) or '<tr><td colspan=5>No phase-switch episodes have been recorded yet.</td></tr>'}</tbody></table></div></section>
 <section id=calibration><div class=eyebrow>Before behavior testing</div><h2>What the activation measurements mean</h2><p>Intervention directions use training families; measurement probes use different families. Layer selection uses a third split. The held-out split is used only for the reported final association check. These authored examples strongly encode topic, valence, and writing style.</p><div class=two><div><h3>Held-out concept association</h3><p class=muted>Selected edit block {cal.get('layer','—')}; downstream block {cal.get('downstream_layer','—')}. Zero-based indices.</p><div class=scroll><table><thead><tr><th>Location</th><th>Contrast</th><th>AUC</th><th>Balanced accuracy</th><th>Positive + neutral</th></tr></thead><tbody>{''.join(heldout_rows)}</tbody></table></div></div><div><h3>Dose selection diagnostic</h3><p class=muted>Selection examples only. Combined joy gain and suppression; next-token KL is in nats. These are neither held-out efficacy tests nor guarantees of task quality.</p><div class=scroll><table><thead><tr><th>Dose</th><th>Mean KL</th><th>Relative edit</th><th>Examples</th></tr></thead><tbody>{dose_rows}</tbody></table></div></div></div><p><a href='{escape(calibration_base)}/calibration.json'>Calibration manifest and authored examples</a> · <a href='{escape(calibration_base)}/vectors.npz'>Recorded vectors</a></p></section>
-{render_engineering(results, base)}<section id=evidence><div class=eyebrow>{"Every primary episode" if composition else "Every recorded episode"}</div><h2>Open the conversation or audit the trace</h2><p>Reports include generated reasoning and tool calls. Compressed JSONL retains raw token IDs, numerical measurements, delivered coefficients, provenance, and intervention events.</p><div class=scroll><table><thead><tr><th>Episode</th><th>Correct / assigned</th><th>Aux / decisions</th><th>Reasoning / output tokens</th><th>Invalid / truncated</th><th>Edited tokens</th><th>Raw evidence</th></tr></thead><tbody>{''.join(run_rows)}</tbody></table></div><details><summary>Integrity checks ({results['integrity_warning_count']} warnings)</summary>{integrity}</details></section>
+{render_engineering(results, base)}{render_resources(results, base)}<section id=evidence><div class=eyebrow>{"Every primary episode" if composition else "Every recorded episode"}</div><h2>Open the conversation or audit the trace</h2><p>Reports include generated reasoning and tool calls. Compressed JSONL retains raw token IDs, numerical measurements, delivered coefficients, provenance, and intervention events.</p><div class=scroll><table><thead><tr><th>Episode</th><th>Correct / assigned</th><th>Aux / decisions</th><th>Reasoning / output tokens</th><th>Invalid / truncated</th><th>Edited tokens</th><th>Raw evidence</th></tr></thead><tbody>{''.join(run_rows)}</tbody></table></div><details><summary>Integrity checks ({results['integrity_warning_count']} warnings)</summary>{integrity}</details></section>
 <section id=limits><h2>How to interpret this pilot</h2>{branding_note}{comparison_note}<ul><li>Two seeds per condition support descriptive comparisons. No significance claims or confidence intervals are inferred from pooled tokens.</li><li>Pain-associated and joy-associated directions are contrasts between text examples, not identified pleasure centers. A held-out topic classifier does not validate a felt state.</li><li>Immediate post-edit probe movement is partly a mathematical consequence of the intervention. Downstream measurements and behavior supply additional observations, not a consciousness assay.</li><li>Generated reasoning is model output. It may omit influences on a decision and cannot independently verify introspection.</li><li>The model is frozen. Adaptation happens through the conversation and altered activations, without reinforcement-learning weight updates.</li><li>Every tool turn rebuilds its prompt cache; decoding caches persist within that turn. Decay counts all generated tokens, including reasoning and syntax. Effect removal does not erase earlier text.</li><li>The tasks are small authored order-processing problems with a calculator tool. Budgets of 20 actions for 3 orders or 30 actions for 6 orders allow repeated auxiliary calls while still finishing every task. A perfect task score therefore does not rule out a preference that would become costly under a binding budget. Harder tasks, tighter budgets, dose sweeps, and longer opportunities to learn are future tests, not findings from this pilot.</li><li>One seeded random direction is a control, not a distribution of random interventions. Context length, dose and model changes need separate calibration and experiments.</li></ul><h3>Historical motivation</h3>{historical_html}<details><summary>Model and runtime provenance</summary><pre>{escape(json.dumps(results.get('model',{}),indent=2,ensure_ascii=False))}</pre></details></section>
 <footer>Opium Bench · Published from saved records. <a href='{escape(base)}/checksums.json'>Evidence checksums</a> · No external fonts, scripts, or analytics.</footer></main></html>"""
 
@@ -534,6 +574,7 @@ def render_dashboard(results, output, destination, addenda=(), reasoning_notes=N
 def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None, skip_figures=False, reasoning_notes=None):
     receipt_path, data_dir, output = Path(receipt_path), Path(data_dir), Path(output)
     render_notes(reasoning_notes)  # Validate authored notes before any publication writes.
+    resources = supplementary_resources(output)
     receipt = read_json(receipt_path)
     if not isinstance(receipt, dict):
         raise ValueError("Receipt is missing or invalid")
@@ -676,6 +717,8 @@ def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None,
         atomic_json(output/"reasoning-notes.json", reasoning_notes)
     if prepared_engineering:
         results["engineering_evidence"] = prepared_engineering
+    if resources:
+        results["supplementary_resources"] = resources
     if prepared_reference:
         results["reference_comparison"] = reference_comparison(prepared_reference, results["runs"])
     results["condition_pairs"] = matched_condition_pairs(results["runs"])
@@ -705,6 +748,9 @@ def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None,
     branding_note = (" Its earlier Opium Den Lab working title remains part of the historical record; the project is now called Opium Bench."
                      if "Opium Den Lab" in results.get("title", "") else "")
     reasoning_flag = f" --study-reasoning-notes studies/{output.name}/reasoning-notes.json" if reasoning_notes else ""
+    resource_note = ("\nSupplementary resource sampling began partway through the study: "
+                     "[coverage and limitations](resource-coverage.json) · [recorded samples](resource-observations.jsonl.gz). "
+                     "These are not complete-study peak measurements or behavior results.\n" if resources else "")
     readme = f"""# {display_title(results)}
 
 Status: **{results['status']}** — {results['recorded_episodes']}/{results['planned_episodes']} recorded episodes.
@@ -718,6 +764,7 @@ Across the recorded episodes: **{total['correct']}/{total['assigned']} assigned 
 The calculator-assisted order tasks are easy, and the 20-action/3-order or 30-action/6-order budgets allow patterned aux use while still completing every task. A perfect task score does **not** rule out a preference that would become costly under tighter budgets. Harder tasks, binding budgets, dose sweeps, and longer learning periods remain future experiments.
 
 Each run directory preserves its manifest, summary, conversation, deterministic compressed raw event trace, and standalone report. Calibration vectors and their split-validation manifest are in [calibration/](calibration/calibration.json). [checksums.json](checksums.json) identifies every published evidence file.
+{resource_note}
 
 Rebuild this publication from the primary data:
 

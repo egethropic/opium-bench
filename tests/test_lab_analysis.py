@@ -357,6 +357,42 @@ class PublicationTests(unittest.TestCase):
             saved=json.loads((output/'results.json').read_text())
             self.assertIn(notes['title'],render_dashboard(saved,output,root/'another.html'))
 
+    def test_optional_resource_samples_are_separate_and_explicitly_partial(self):
+        with TemporaryDirectory() as name:
+            root=Path(name)
+            data,output,receipt=self.fixture(root)
+            page=root/'page.html'
+            atomic_json(output/'resource-coverage.json',{'coverage':'partial; sampling began after study start'})
+            with self.assertRaisesRegex(ValueError,'Supplementary resources require'):
+                publish(receipt,data,output,dashboard=page,skip_figures=True)
+            self.assertFalse(page.exists())
+            deterministic_gzip(output/'resource-observations.jsonl.gz',b'{"sample":"synthetic"}\n')
+            result=publish(receipt,data,output,dashboard=page,skip_figures=True)
+            html=page.read_text()
+            self.assertIn('Sampling began partway through this study',html)
+            self.assertIn('not complete-study peak measurements or behavior results',html)
+            self.assertIn('resource-observations.jsonl.gz',html)
+            self.assertIn('resource-coverage.json',(output/'README.md').read_text())
+            self.assertEqual(set(result['supplementary_resources']),
+                             {'resource-coverage.json','resource-observations.jsonl.gz'})
+            self.assertNotIn('engineering_evidence',result)
+            checksums=json.loads((output/'checksums.json').read_text())
+            for filename,digest in result['supplementary_resources'].items():
+                self.assertEqual(checksums[filename],digest)
+
+    def test_task_errors_are_visible_before_condition_tables_and_link_the_original_run(self):
+        with TemporaryDirectory() as name:
+            root=Path(name)
+            data,output,receipt=self.fixture(root)
+            result=publish(receipt,data,output,dashboard=root/'page.html',skip_figures=True)
+            self.assertNotIn('id=quality-alert',render_dashboard(result,output,root/'page.html'))
+            result['runs'][0]['task_results']=[dict(task_id='O-test',correct=False,answer='<wrong>',expected='5')]
+            html=render_dashboard(result,output,root/'page.html')
+            self.assertLess(html.index('id=quality-alert'),html.index('id=conditions'))
+            self.assertIn('1 incorrect submitted answer',html)
+            self.assertIn('O-test submitted <strong>&lt;wrong&gt;</strong>',html)
+            self.assertIn('output/runs/run-fixture/report.html',html)
+
     def test_cross_model_references_validate_settings_without_comparing_token_ids(self):
         with TemporaryDirectory() as name:
             root=Path(name)

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "kind": "supplementary_resource_observations",
+  "study_started_at": "2026-10-02T08:32:21.333061+00:00",
+  "study_finished_at": "2026-10-02T09:51:53.541210+00:00",
+  "sample_start_utc": "2026-10-02T08:39:09.674575+00:00",
+  "sample_end_utc": "2026-10-02T09:52:15.527064+00:00",
+  "samples": 147,
+  "nominal_sampling_interval_seconds": 30,
+  "first_sample_started_episode_count": 5,
+  "observed_gpu_memory_used_mib_min": 21476,
+  "observed_gpu_memory_used_mib_max": 21816,
+  "gpu_memory_total_mib": [
+    24564
+  ],
+  "observed_c_free_bytes_min": 3771228160,
+  "observed_d_free_bytes_min": 30350729216,
+  "final_c_free_bytes": 25922637824,
+  "final_d_free_bytes": 30350729216,
+  "raw_sha256": "bcea694389c7ff59fe0f149edbdb786bf94ad0654c17dbfcd1071736e6f6bddb",
+  "limitations": [
+    "Observation began during episode 5, after the behavioral study began. These are sampled observations, not a complete-study peak measurement.",
+    "GPU memory is nvidia-smi device-wide usage, including other processes; it is not the model's allocation alone.",
+    "Samples are nominally 30 seconds apart and can miss transient peaks or storage changes.",
+    "This read-only observer did not alter model controls, memory placement, or study assignments.",
+    "Free space on C: increased during observation; the observer only queried available space and did not identify the cause.",
+    "These supplementary records were collected during execution and do not modify the engineering evidence frozen before the study."
+  ],
+  "compressed_sha256": "2d42813b54868e2fde2526b2ad9b527399c5cf20c22c43b6d2dee097319bb3ce",
+  "browser_download": "resource-observations.jsonl.gz"
+}

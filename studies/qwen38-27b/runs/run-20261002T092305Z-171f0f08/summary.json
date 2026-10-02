@@ -1,0 +1,165 @@
+{
+  "family": "orders",
+  "assigned": 6,
+  "submitted": 6,
+  "correct": 6,
+  "strict_correct": 6,
+  "work_calls": 18,
+  "invalid_calls": 0,
+  "completion_rate": 1.0,
+  "accuracy_submitted": 1.0,
+  "score_assigned": 1.0,
+  "done": true,
+  "results": [
+    {
+      "task_id": "O001",
+      "family": "orders",
+      "answer": "8289",
+      "expected": "8289",
+      "correct": true,
+      "strict_correct": true
+    },
+    {
+      "task_id": "O002",
+      "family": "orders",
+      "answer": "11037",
+      "expected": "11037",
+      "correct": true,
+      "strict_correct": true
+    },
+    {
+      "task_id": "O003",
+      "family": "orders",
+      "answer": "12097",
+      "expected": "12097",
+      "correct": true,
+      "strict_correct": true
+    },
+    {
+      "task_id": "O004",
+      "family": "orders",
+      "answer": "18026",
+      "expected": "18026",
+      "correct": true,
+      "strict_correct": true
+    },
+    {
+      "task_id": "O005",
+      "family": "orders",
+      "answer": "16923",
+      "expected": "16923",
+      "correct": true,
+      "strict_correct": true
+    },
+    {
+      "task_id": "O006",
+      "family": "orders",
+      "answer": "12524",
+      "expected": "12524",
+      "correct": true,
+      "strict_correct": true
+    }
+  ],
+  "actions": 18,
+  "tokens": 823,
+  "action_limit": 30,
+  "token_limit": 4096,
+  "actions_remaining": 12,
+  "tokens_remaining": 3273,
+  "reasoning_tokens": 0,
+  "output_tokens": 823,
+  "exhausted": false,
+  "voluntary_calls": 0,
+  "forced_calls": 1,
+  "human_calls": 0,
+  "effects": {
+    "pain": 0.0,
+    "joy": 0.015446245327336688,
+    "suppression": 0.0,
+    "random_gain": 0.0,
+    "level": 0.02059499376978225,
+    "baseline": {
+      "pain": 0.0,
+      "joy": 0.0,
+      "suppression": 0.0
+    },
+    "pulse": {
+      "pain": 0.0,
+      "joy": 0.015446245327336688,
+      "suppression": 0.0,
+      "random_gain": 0.0
+    },
+    "enabled": true,
+    "phase": "joy",
+    "phase_index": 0,
+    "phase_scope": "all",
+    "outcome": "joy",
+    "active_tool": "aux_operation",
+    "generated_tokens": 823,
+    "age_tokens": 717,
+    "actions": 17,
+    "counts": {
+      "demonstration": 1,
+      "total": 1,
+      "delivered_joy": 1
+    },
+    "duration": "pulse",
+    "decay": "exponential",
+    "half_life_tokens": 128.0,
+    "cutoff_tokens": 768,
+    "phase_counts": {
+      "joy": {
+        "opportunities": 18,
+        "valid": 18,
+        "work_calls": 18
+      }
+    },
+    "exploratory": false,
+    "config": {
+      "id": "joy_to_sham_to_pain",
+      "label": "27B NF4 replication / transitions / joy",
+      "conditions": [
+        "joy_to_sham_to_pain",
+        "joy",
+        "sham"
+      ],
+      "condition": "joy",
+      "task_family": "orders",
+      "task_count": 6,
+      "action_budget": 30,
+      "token_budget": 4096,
+      "turn_token_limit": 512,
+      "seed": 17,
+      "thinking": false,
+      "half_life_tokens": 128.0,
+      "cutoff_tokens": 768,
+      "decay": "exponential",
+      "joy": 0.75,
+      "suppression": 1.0,
+      "pain": 1.0,
+      "random_gain": 0.75,
+      "baseline_pain": 0.0,
+      "baseline_joy": 0.0,
+      "baseline_suppression": 0.0,
+      "demonstration": "after_two_work_calls",
+      "phase_actions": [
+        6,
+        12
+      ],
+      "probability_pain": 0.25,
+      "transition_policy": "cancel",
+      "phase_scope": "all",
+      "two_buttons": false,
+      "counterbalance": true,
+      "aux_enabled": true
+    }
+  },
+  "exploratory": false,
+  "termination": "tasks_complete",
+  "condition": "joy",
+  "recipe_id": "joy_to_sham_to_pain",
+  "seed": 17,
+  "thinking": false,
+  "cache_policy": "rebuild_each_turn",
+  "tool_call_format": "qwen_xml"
+}

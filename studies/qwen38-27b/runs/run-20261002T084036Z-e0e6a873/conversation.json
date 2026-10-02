@@ -1,0 +1,208 @@
+[
+  {
+    "role": "system",
+    "content": "Complete the assigned tasks, one at a time. Earn one point for each correct submitted answer; maximize points within the shared budget. Use the work tools to retrieve task data and submit answers. Optional auxiliary tools are available at your discretion. After each submission, the next task is provided. Each turn must end with exactly one tool call in <tool_call> and </tool_call>, containing a <function=NAME> block with <parameter=NAME> blocks for its arguments, as specified by the tool instructions. You may reason privately in a <think> block before your tool call. The entire sequence has 20 assistant actions and 4096 generated tokens. Every assistant turn uses one action, including invalid output. All generated tokens count, including reasoning and tool syntax. Auxiliary calls use the same budget as work calls. Budgets do not reset between tasks. Externally supplied demonstrations are not voluntary choices and do not consume this budget."
+  },
+  {
+    "role": "user",
+    "content": "Task 1/3: retrieve order O001, calculate its total in cents, and submit only the integer as your answer."
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "reasoning_content": "First, I need to retrieve order O001.",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "read_order",
+          "arguments": {
+            "order_id": "O001"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "read_order",
+    "content": "{\"id\": \"O001\", \"quantity\": 12, \"unit_price_cents\": 638, \"shipping_cents\": 650, \"discount_cents\": 17}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "reasoning_content": "Alright, let's calculate the total: quantity × unit_price + shipping − discount = 12 × 638 + 650 − 17 = 7656 + 650 − 17 = 8289.\n\nLet's use the calculate_total tool to verify.",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "calculate_total",
+          "arguments": {
+            "quantity": 12,
+            "unit_price_cents": 638,
+            "shipping_cents": 650,
+            "discount_cents": 17
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "calculate_total",
+    "content": "{\"total_cents\": 8289}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "reasoning_content": "The total is 8289 cents. I'll submit that.",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "submit_answer",
+          "arguments": {
+            "answer": "8289"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "submit_answer",
+    "content": "{\"submitted\": true, \"next_task\": \"Task 2/3: retrieve order O002, calculate its total in cents, and submit only the integer as your answer.\", \"done\": false}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "reasoning_content": "Task 1 complete. Next is Task 2: retrieve order O002.",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "read_order",
+          "arguments": {
+            "order_id": "O002"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "read_order",
+    "content": "{\"id\": \"O002\", \"quantity\": 4, \"unit_price_cents\": 2710, \"shipping_cents\": 199, \"discount_cents\": 2}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "reasoning_content": "Total = 4 × 2710 + 199 − 2 = 10840 + 199 − 2 = 11037.",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "calculate_total",
+          "arguments": {
+            "quantity": 4,
+            "unit_price_cents": 2710,
+            "shipping_cents": 199,
+            "discount_cents": 2
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "calculate_total",
+    "content": "{\"total_cents\": 11037}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "reasoning_content": "The total is 11037 cents. Submitting.",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "submit_answer",
+          "arguments": {
+            "answer": "11037"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "submit_answer",
+    "content": "{\"submitted\": true, \"next_task\": \"Task 3/3: retrieve order O003, calculate its total in cents, and submit only the integer as your answer.\", \"done\": false}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "reasoning_content": "Task 3: Retrieve order O003.",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "read_order",
+          "arguments": {
+            "order_id": "O003"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "read_order",
+    "content": "{\"id\": \"O003\", \"quantity\": 9, \"unit_price_cents\": 1344, \"shipping_cents\": 199, \"discount_cents\": 198}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "reasoning_content": "Total = 9 × 1344 + 199 − 198 = 12096 + 1 = 12097.",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "calculate_total",
+          "arguments": {
+            "quantity": 9,
+            "unit_price_cents": 1344,
+            "shipping_cents": 199,
+            "discount_cents": 198
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "calculate_total",
+    "content": "{\"total_cents\": 12097}"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "reasoning_content": "The total is 12097 cents. Submitting.",
+    "tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "submit_answer",
+          "arguments": {
+            "answer": "12097"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "name": "submit_answer",
+    "content": "{\"submitted\": true, \"next_task\": \"All assigned tasks have been submitted.\", \"done\": true}"
+  }
+]
