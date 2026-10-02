@@ -1,0 +1,24 @@
+{
+  "title": "What the thinking traces show",
+  "paragraphs": [
+    "All 12 thinking episodes in the primary core set completed their 36 assigned tasks without a voluntary auxiliary call. This includes active, sham and pain-only conditions with and without a demonstration. The six episodes without a demonstration never received an auxiliary intervention; their choices do not test a delivered effect.",
+    "The two demonstrated active runs and two demonstrated pain-only runs each had 768 sampled-token steps with measured nonzero edits. Reasoning text changed between conditions, while tool choices stayed identical. In the pain-only runs, seed 17 guessed that the operation was a placeholder; seed 28 guessed it might be for optional steps and continued with the answer. None of the four pain-condition thinking runs reported pain, pleasure or relief, or identified the actual intervention mechanism.",
+    "In the active/sham thinking traces, the model sometimes called the auxiliary tool unnecessary or interpreted its acknowledgment as a calculation confirmation. The acknowledgment did not actually check calculations. These explanations support task prioritization or a guessed procedural role under these settings, rather than established discovery of the button’s function.",
+    "Pulse timing limits comparisons between thinking and direct generation. With a 128-token half-life, the first output after the demonstrated active pulse began at 31.9% of initial pulse level for seed 17 and 22.3% for seed 28; direct generation began at 100%. Reasoning consumed much of the pulse before the tool decision was emitted. This is a timing confound, not evidence that it caused the choice.",
+    "The 16 original active/sham core controls reproduced the selected controls’ full action and token sequences exactly. They remain verification records, not additional primary samples. Generated reasoning is observable model output, not a verified causal account or a sensation measurement. Two seeds, easy tasks, short pulses and unused budgets leave multiple explanations open."
+  ],
+  "links": [
+    {
+      "label": "Pain-only, thinking, seed 17: placeholder guess",
+      "href": "../studies/core-pain-4b/runs/run-20261002T075258Z-237792da/report.html"
+    },
+    {
+      "label": "Pain-only, thinking, seed 28: optional-step guess",
+      "href": "../studies/core-pain-4b/runs/run-20261002T080934Z-5fc19d18/report.html"
+    },
+    {
+      "label": "Original active/sham reasoning close reading and pulse timing",
+      "href": "initial-thinking-notes.md"
+    }
+  ]
+}

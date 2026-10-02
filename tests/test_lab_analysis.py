@@ -12,7 +12,8 @@ from lab.analysis import analyze_run, aggregate_groups, paired_core, study_resul
 from lab.protocol import TaskEnvironment, validate_recipe
 from lab.storage import atomic_json
 from publish_lab_study import (deterministic_gzip, publish, read_events, render_dashboard,
-                               matched_condition_pairs, refresh_reference_dashboard, render_notes)
+                               matched_condition_pairs, refresh_reference_dashboard, render_notes,
+                               prepare_reference_comparison, reference_comparison)
 
 
 class Trace:
@@ -319,11 +320,16 @@ class PublicationTests(unittest.TestCase):
             before={path.relative_to(output):path.read_bytes() for path in output.rglob('*') if path.is_file()}
             followup=deepcopy(result)
             followup['publication_title']='Pain-only follow-up'
+            replication=deepcopy(result)
+            replication['publication_title']='27B replication'
             notes={'title':'Thinking <notes>', 'paragraphs':['Output is not <introspection>.'],
                    'links':[{'label':'Read traces','href':'initial-thinking-notes.md'}]}
-            refresh_reference_dashboard(output,page,[(followup,'results-core-pain-4b.html')],notes)
+            refresh_reference_dashboard(output,page,[(followup,'results-core-pain-4b.html'),
+                                                     (replication,'results-27b.html')],notes)
             self.assertIn('Pain-only follow-up',page.read_text())
             self.assertIn('results-core-pain-4b.html',page.read_text())
+            self.assertIn('27B replication',page.read_text())
+            self.assertIn('results-27b.html',page.read_text())
             self.assertIn('Thinking &lt;notes&gt;',page.read_text())
             self.assertIn('totals do not include this follow-up',page.read_text())
             self.assertEqual(before,{path.relative_to(output):path.read_bytes() for path in output.rglob('*') if path.is_file()})
@@ -336,6 +342,45 @@ class PublicationTests(unittest.TestCase):
     def test_reasoning_notes_reject_script_links(self):
         with self.assertRaisesRegex(ValueError,'relative or HTTP'):
             render_notes({'links':[{'href':'javascript:alert(1)'}]})
+
+    def test_cross_model_references_validate_settings_without_comparing_token_ids(self):
+        with TemporaryDirectory() as name:
+            root=Path(name)
+            data,output,receipt=self.fixture(root)
+            study=root/'studies'/'reference'
+            study.parent.mkdir()
+            output.rename(study)
+            prior=publish(receipt,data,study,dashboard=root/'prior.html',skip_figures=True)
+            current_receipt=json.loads(receipt.read_text())
+            current_receipt['protocol']['comparison']={'reference_sources':{'core':'studies/reference'}}
+            current=deepcopy(prior['runs'])
+            for entry,row in zip(current_receipt['episodes'],current):
+                entry['run_id']='new-'+entry['run_id']
+                entry['config']['label']='New model metadata'
+                row['run_id']=entry['run_id']
+                row['token_sequence_sha256']='different-vocabulary'
+            with patch('publish_lab_study.ROOT',root):
+                prepared=prepare_reference_comparison(current_receipt)
+                comparison=reference_comparison(prepared,current)
+            self.assertEqual(len(comparison['rows']),2)
+            self.assertTrue(all(row['tool_action_sequences_identical'] for row in comparison['rows']))
+            self.assertNotIn('tokens_identical',json.dumps(comparison))
+            self.assertIn('not compared across vocabularies',comparison['interpretation'])
+            self.assertIn('results_sha256',comparison['sources']['studies/reference'])
+            current_receipt['episodes'][0]['config']['token_budget']+=1
+            with patch('publish_lab_study.ROOT',root), self.assertRaisesRegex(ValueError,'settings differ'):
+                prepare_reference_comparison(current_receipt)
+
+    def test_reference_comparison_rejects_missing_stages_and_external_roots(self):
+        with TemporaryDirectory() as name:
+            root=Path(name)
+            _,_,receipt=self.fixture(root)
+            current=json.loads(receipt.read_text())
+            for sources,pattern in (({'wrong':'studies/initial'},'No reference study'),
+                                    ({'core':'../outside'},'inside this checkout')):
+                current['protocol']['comparison']={'reference_sources':sources}
+                with patch('publish_lab_study.ROOT',root), self.assertRaisesRegex(ValueError,pattern):
+                    prepare_reference_comparison(current)
 
     def test_complete_guard_requires_explicit_partial_override(self):
         with TemporaryDirectory() as name:

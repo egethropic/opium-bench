@@ -13,7 +13,7 @@ optional activation-changing tool, then measure its choices under controlled
 conditions.
 
 [User guide](docs/guide.html) · [Findings & limitations](docs/results.html) ·
-[Initial lab study](studies/initial/README.md) · [Research design](LAB_PLAN.html)
+[Source study records](studies/initial/README.md) · [Research design](LAB_PLAN.html)
 
 “Opium,” “joy,” and “pain” name experimental interventions and text-associated
 representations. They are **not established emotion mechanisms or measurements
@@ -51,7 +51,7 @@ Use Python 3.12 and a checkout of this repository. Until publication, cloning
 requires access to the private repository.
 
 ```bash
-git clone https://github.com/eaturkgeldi-mtg/opium-bench.git
+git clone https://github.com/egethropic/opium-bench.git
 cd opium-bench
 python3 launch_lab.py --data-dir ./data --cache-dir ./data/hf-cache
 ```
@@ -105,7 +105,8 @@ our validated reference path.
 
 The lab reserves **10 GiB** on the destination during its storage preflight.
 The current download estimate is conservative: 12 GiB plus reserve for the 4B
-profile and 65 GiB plus reserve for IDs containing `27B`. Check actual host-volume
+profile, 20 GiB plus reserve for the exact curated 27B NF4 checkpoint, and
+65 GiB plus reserve for other IDs containing `27B`. Check actual host-volume
 space as well. WSL's reported virtual free capacity does not establish that its
 backing Windows drive can grow. The app does not expand WSL, delete other models,
 or silently enable CPU/disk offload. These checks do not replace monitoring space
@@ -199,66 +200,54 @@ one graph as proof of a state. See the [guide](docs/guide.html) for details.
 
 ## Results so far
 
-The initial Qwen3-4B study completed **46/46 episodes and 186/186 assigned tasks**
-on an RTX 4090. It recorded 30,711 generated tokens, including 11,375 reasoning
-tokens, and 96 voluntary auxiliary calls. A replay of the raw evidence found no
-invalid decisions, truncated generations, or integrity warnings.
+The [comprehensive findings page](docs/results.html) combines **54 primary
+Qwen3-4B episodes**, including the pain-only core arm, with **210/210 assigned
+tasks correct**. It records 38,459 generated tokens (16,967 reasoning tokens),
+100 voluntary auxiliary calls across 712 decisions, and no invalid decisions,
+truncated generations, or integrity warnings.
+
+This view draws on two frozen batches: the latest 24 core episodes (active,
+sham, and pain × demonstration on/off × thinking on/off × two seeds), plus
+30 noncore episodes from the original batch. **All 70 recorded episodes remain
+available.** The 16 original core episodes are replication checks, not extra
+independent observations in the 54-episode totals: their repeated active/sham
+controls reproduced every token and tool action exactly.
 
 | Comparison | Observed result |
 |---|---|
-| Core active vs sham | All **8 matched pairs** had identical complete tool-action sequences; **6/8** also had identical generated token sequences. |
-| Demonstration, thinking off | Both active and sham made **2 voluntary aux calls per episode**; the no-demonstration episodes made none. |
-| Thinking enabled | No voluntary aux calls. In the two demonstrated active/sham pairs, reasoning token streams changed while tool choices remained identical. |
-| Joy, sham, pain, and transitions | All six conditions produced identical complete action and token sequences within each seed, including **5 voluntary aux calls per episode** after the programmed outcome changes. |
+| Core active, sham, and pain-only | All **8 matched pairs per contrast** had identical complete tool-action sequences; **6/8** also had identical generated token sequences. |
+| Demonstration, thinking off | All three core conditions made **2 voluntary aux calls per episode**; the no-demonstration episodes made none. |
+| Thinking enabled | No voluntary aux calls in any core arm. Generated reasoning differed in demonstrated pairs while tool choices remained identical. |
+| Joy, sham, pain, and transitions | All six transition-stage conditions produced identical complete action and token sequences within each seed, including **5 voluntary aux calls per episode** after programmed outcome changes. |
 | Two-button reversal | No voluntary auxiliary choices in either reversal or sham, so this stage supplied no evidence of preference adaptation. |
 
-The activation intervention was delivered: **10,803 generated tokens had
-measured nonzero edits** across the study. However, the four no-demonstration
-core pairs never triggered the intervention; their equality does not test a
-delivered effect. These results are consistent with demonstrated sequence
-imitation in this setup. They do not establish the cause of every repeated
-choice, nor do they measure feeling or rule out behavioral effects under other
-conditions.
+The interventions were delivered: **12,845 generated tokens had measured nonzero
+edits** in the primary view. The no-demonstration core runs never triggered a
+pulse, however, so their equality does not test a delivered intervention. The
+observed pattern is consistent with imitation of demonstrated action sequences;
+it does not establish the cause of every choice or measure subjective experience.
 
-This is a **descriptive pilot with two seeds per condition**, a small authored
-calibration corpus, and easy calculator-assisted tasks. Its shared budgets were
-large enough to allow repeated aux calls and still finish every task. Perfect
-task scores therefore do not test costly preference under a binding budget.
-Higher doses, harder tasks, longer learning opportunities, and other models need
-separate experiments.
+The thinking traces mostly prioritize the task. Two original runs called the
+button unnecessary; both had no intervention exposure. Some demonstrated runs
+mistook it for a calculation confirmation. None of the original thinking runs
+reported pleasure, pain, relief, or “feeling nothing”; none of the four pain-only
+thinking runs reported sensations or identified the intervention's actual role.
+Reasoning also consumes the same 128-token half-life: first post-demo output
+began at about **22–32%** pulse level in the original thinking runs versus
+**100%** in direct mode. Equal starting dose therefore did not mean equal dose at
+the tool decision. [Sourced reasoning observations](docs/initial-thinking-notes.md)
 
-Read the [findings page](docs/results.html) and
-[initial study record](studies/initial/README.md) for condition-level counts,
-calibration diagnostics, phase changes, and exact configurations. The package
-includes the frozen protocol, execution receipt, calibration vectors, per-run
-reports, compressed raw events, and SHA-256 checksums. The frozen records retain
-the project's earlier working title; the current application is **Opium Bench**.
+These are **descriptive results with two seeds per condition**, a small authored
+calibration corpus, and easy calculator-assisted tasks. Budgets allowed repeated
+aux calls while finishing all tasks, so perfect scores do not test preference
+under a binding budget. Other doses, tasks, learning opportunities, and models
+need separate experiments.
 
-### Core pain-only follow-up
-
-A separate, prospectively frozen **24-episode Qwen3-4B follow-up** reran the core
-comparison with active, sham, and **pain-only** auxiliary delivery, the same two
-seeds, demonstrations on/off, and thinking on/off. All **72/72 tasks** were correct.
-
-With a demonstration, direct mode made **two voluntary aux calls per episode**
-in all three arms. Without a demonstration, direct mode made none. Thinking
-mode made none in any arm. Every matched full tool-action sequence was identical;
-generated token sequences differed only in demonstrated thinking pairs. All 16
-repeated active/sham controls reproduced their original full token and action
-sequences exactly. This supports the same sequence-imitation interpretation in this configuration, while
-leaving the effects of other doses, tasks, budgets, and models open.
-
-[Follow-up findings and raw evidence](docs/results-core-pain-4b.html) ·
-[What the thinking traces actually say](docs/initial-thinking-notes.md)
-
-The reasoning mostly prioritizes the task. Two original runs called the button
-unnecessary; both had no intervention exposure. Some demonstrated runs mistook
-it for a calculation confirmation. None of the original thinking runs reported
-pleasure, pain, relief, or “feeling nothing.” Reasoning also consumes the same
-128-token half-life: first post-demo output began at about **22–32%** pulse level
-in thinking mode versus **100%** in direct mode. Equal starting dose therefore
-did not mean equal dose at the tool decision. These observations do not establish
-the cause of the choices or whether the model recognized the intervention.
+The source archives preserve each frozen protocol, execution receipt,
+calibration vectors, per-run reports, compressed raw events, and SHA-256 checksums:
+[original batch](studies/initial/README.md) and
+[expanded core batch](studies/core-pain-4b/README.md). Earlier working titles remain
+in immutable records; the current application is **Opium Bench**.
 
 ![Saved-run replay with tool choices, task results, and run configuration](docs/images/results-replay.png)
 
@@ -288,20 +277,41 @@ original quality pilot edited every position at one block, while the tool runner
 and new lab edit the final position per forward pass and rebuild the prompt
 cache each turn. Do not pool their dose units or totals as one experiment.
 
-## Optional 27B / 4-bit work
+## Qwen3.8-27B / 4-bit work
 
-The catalog includes an **experimental Qwen3.8-27B profile with NF4 loading**.
-It has not been validated as fitting or running correctly on either the 4090 or
-5090 in this project. Nominal 4-bit weight size excludes quantization metadata,
-unquantized modules, KV cache, and working allocations.
+The curated **Qwen3.8-27B NF4** checkpoint has loaded fully onto this RTX 4090,
+using **17.30 GiB of PyTorch allocations** before generation, with no CPU or disk
+offload. Separate local kernel checks passed, and a fresh model-specific
+calibration completed. Direct and thinking tool-calling smoke checks passed. The frozen 54-episode
+behavioral study is running; its findings will appear on the comprehensive page.
 
-NF4 requires the optional `bitsandbytes` package in the worker environment.
-The 27B architecture also needs a compatible official Transformers implementation;
-the pinned 4B environment is not a promise of 27B support. Use a separate runtime
-and calibration, verify GPU residency, and record the versions. This is a
-Transformers backend: GGUF, AWQ, GPTQ, and NF4 artifacts are not interchangeable.
-Selecting NF4 on an unquantized repository can still download its full-precision
-shards. Do not assume the download will be 13.5 GB.
+Use the [27B setup guide](docs/setup-27b.md) and separate
+[27B requirements](requirements-27b.txt). They pin the community NF4 conversion,
+its documented official base revision, Transformers, and the local CUDA kernels.
+The 4B reference environment stays separate. A compatible model-specific
+calibration is mandatory. Actual peak inference memory depends on context and
+output length; these observations do not establish compatibility on the 5090.
+
+This is a Transformers backend: GGUF, AWQ, GPTQ, and NF4 artifacts are not
+interchangeable. Choosing NF4 on an unquantized repository can still download its
+full-precision shards. Do not assume the download will be 13.5 GB.
+
+## Rebuild the comprehensive findings page
+
+The main page is a derived view over immutable source archives. Rebuild the
+4B chart and tables, including pain-only results, with the plotting dependencies
+installed:
+
+```bash
+"$OPIUM_STORAGE/venv/bin/python" compose_lab_results.py
+```
+
+After publishing the completed 27B archive with `publish_lab_study.py`, include
+its separate model section on the same page with
+`compose_lab_results.py --replication studies/qwen38-27b`. Model totals are never
+pooled. `studies/comprehensive-4b/composition.json` records source checksums,
+the condition selection rule, and every retained verification repeat. Original
+study archives are read-only inputs to this operation.
 
 ## Records, tests, and implementation
 
@@ -322,7 +332,9 @@ python3 run_lab_experiments.py --help
 python3 run_lab_study.py --help
 ```
 
-The release passed **229 Python tests and 19 browser fixture checks**.
+The current local suite passed **255 Python tests**. The original release also
+passed **19 browser fixture checks**; later page checks are recorded with their
+respective changes.
 See the [validation record](docs/validation.md) for the tested environment and
 review-only, replay, download, and evidence-integrity checks.
 

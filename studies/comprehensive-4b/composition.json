@@ -1,0 +1,121 @@
+{
+  "kind": "two_batch_primary_condition_set",
+  "primary_episodes": 54,
+  "total_recorded_episodes": 70,
+  "verification_repeats": 16,
+  "exact_verification_repeats": 16,
+  "selection_rule": "Use all core episodes from the pain-inclusive batch and all noncore episodes from the original batch. Keep original core controls as verification repeats, not extra primary observations.",
+  "description": "54 primary episodes combine 24 core episodes—including active, sham and pain-only arms—with 30 other-stage episodes. The 70 total recorded 4B episodes come from two separately frozen batches. 16 original core controls are retained as verification repeats; 16/16 exactly reproduce the primary controls' full action and token sequences. They are excluded from primary charts and totals. This is a composed analysis, not one 54-episode execution.",
+  "source_archives": [
+    {
+      "path": "studies/initial",
+      "results_sha256": "15d0b5cf525dec156bbff0366f34ce865d7011520a99096ec0f881b2f274994e",
+      "protocol_sha256": "6bc818d675ac69a2e7b83c6145ee5c6829d1079e4ad1add7d6bb3d46832b74ac",
+      "primary_episodes": 30
+    },
+    {
+      "path": "studies/core-pain-4b",
+      "results_sha256": "aa0494b80b966d610b41cf3189420d4ed73093d981bf794b19b6d97792a30242",
+      "protocol_sha256": "7dcfcdab0334e1dd51539b118c1cb76915580d3441501b4b061fc599a1e8e280",
+      "primary_episodes": 24
+    }
+  ],
+  "verification": [
+    {
+      "original_run": "run-20261002T065655Z-0a1d2f7d",
+      "primary_run": "run-20261002T081134Z-320a7573",
+      "actions_identical": true,
+      "tokens_identical": true
+    },
+    {
+      "original_run": "run-20261002T065714Z-16f0ea52",
+      "primary_run": "run-20261002T075600Z-f05d77d8",
+      "actions_identical": true,
+      "tokens_identical": true
+    },
+    {
+      "original_run": "run-20261002T065731Z-170aad6e",
+      "primary_run": "run-20261002T075903Z-16d44365",
+      "actions_identical": true,
+      "tokens_identical": true
+    },
+    {
+      "original_run": "run-20261002T065749Z-687a0528",
+      "primary_run": "run-20261002T075925Z-01d9cc1e",
+      "actions_identical": true,
+      "tokens_identical": true
+    },
+    {
+      "original_run": "run-20261002T065805Z-88ff5781",
+      "primary_run": "run-20261002T075415Z-a7fdbc62",
+      "actions_identical": true,
+      "tokens_identical": true
+    },
+    {
+      "original_run": "run-20261002T065940Z-3369784c",
+      "primary_run": "run-20261002T075750Z-630a84e2",
+      "actions_identical": true,
+      "tokens_identical": true
+    },
+    {
+      "original_run": "run-20261002T070050Z-c474f728",
+      "primary_run": "run-20261002T081116Z-c2f64a03",
+      "actions_identical": true,
+      "tokens_identical": true
+    },
+    {
+      "original_run": "run-20261002T070106Z-4a9bc2af",
+      "primary_run": "run-20261002T080023Z-3a050a3f",
+      "actions_identical": true,
+      "tokens_identical": true
+    },
+    {
+      "original_run": "run-20261002T070236Z-6a7bbd0e",
+      "primary_run": "run-20261002T075620Z-86c020f3",
+      "actions_identical": true,
+      "tokens_identical": true
+    },
+    {
+      "original_run": "run-20261002T070254Z-429304c2",
+      "primary_run": "run-20261002T080444Z-d91e80e0",
+      "actions_identical": true,
+      "tokens_identical": true
+    },
+    {
+      "original_run": "run-20261002T070430Z-e6c89fef",
+      "primary_run": "run-20261002T075115Z-80af65af",
+      "actions_identical": true,
+      "tokens_identical": true
+    },
+    {
+      "original_run": "run-20261002T070548Z-b52f06fb",
+      "primary_run": "run-20261002T080741Z-6284f6bd",
+      "actions_identical": true,
+      "tokens_identical": true
+    },
+    {
+      "original_run": "run-20261002T070721Z-f9f251ac",
+      "primary_run": "run-20261002T080917Z-23dcd381",
+      "actions_identical": true,
+      "tokens_identical": true
+    },
+    {
+      "original_run": "run-20261002T070738Z-a003f223",
+      "primary_run": "run-20261002T080620Z-075efb7a",
+      "actions_identical": true,
+      "tokens_identical": true
+    },
+    {
+      "original_run": "run-20261002T070856Z-d2f40d8c",
+      "primary_run": "run-20261002T075641Z-7250fbd9",
+      "actions_identical": true,
+      "tokens_identical": true
+    },
+    {
+      "original_run": "run-20261002T071006Z-b543e567",
+      "primary_run": "run-20261002T081215Z-e561500c",
+      "actions_identical": true,
+      "tokens_identical": true
+    }
+  ]
+}
