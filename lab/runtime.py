@@ -1,8 +1,9 @@
 """Frozen-weight local Qwen runtime, calibrated probes and streamed steering.
 
 The hook/extraction/cache design follows LynnColeArt/ai-hotbox's
-``impossible_states/engine.py`` (MIT; see UPSTREAM_LICENSE). Only final-position
-block activations are captured; no all-layer hidden-state tensors are retained.
+``impossible_states/engine.py`` (MIT-style; see UPSTREAM_LICENSE). Historical
+extraction captures final positions; opt-in research extraction also supports
+masked mean and declared-span pooling without retaining all-layer token tensors.
 Dependencies are imported lazily so the viewer and replay need no ML runtime.
 """
 from contextlib import contextmanager
@@ -532,6 +533,10 @@ class Runtime:
         import numpy as np
         self._require_loaded()
         _check_stop(should_stop)
+        if config.get("schema_version") == 2 or config.get("preset") == "research":
+            return self._calibrate_research(config, out_dir, emit, should_stop)
+        if config.get("schema_version", 1) != 1:
+            raise ValueError("Unsupported calibration schema")
         name = config.get("name", "Pain and joy calibration")
         if not isinstance(name, str) or not 1 <= len(name.strip()) <= 100:
             raise ValueError("Calibration name must contain 1–100 characters")
@@ -668,15 +673,476 @@ class Runtime:
                 emit({"type": "calibration_progress", "stage": "dose_validation", **record})
         return records
 
+    def _research_tokens(self, text, maximum, span=None):
+        """Tokenize without truncation; optional declared character-span mask."""
+        import torch
+        kwargs = {"return_tensors": "pt"}
+        if span is not None:
+            kwargs["return_offsets_mapping"] = True
+        try:
+            encoded = self.tokenizer(text, **kwargs)
+        except (TypeError, NotImplementedError) as error:
+            if span is not None:
+                raise ValueError("Span pooling requires a tokenizer with character offset mapping") from error
+            raise
+        ids = encoded.input_ids.to(self.device)
+        if ids.ndim != 2 or ids.shape[0] != 1 or not ids.shape[1] or ids.shape[1] > maximum:
+            raise ValueError("Research calibration input exceeds max_input_tokens or has invalid shape; no truncation is allowed")
+        mask = getattr(encoded, "attention_mask", None)
+        mask = torch.ones_like(ids) if mask is None else mask.to(self.device)
+        if mask.shape != ids.shape or not bool(mask.bool().any()):
+            raise ValueError("Research tokenizer returned an invalid attention mask")
+        span_mask = None
+        if span is not None:
+            offsets = getattr(encoded, "offset_mapping", None)
+            if offsets is None:
+                raise ValueError("Span pooling requires tokenizer offset_mapping")
+            offsets = offsets[0].tolist() if hasattr(offsets, "tolist") else offsets[0]
+            if len(offsets) != ids.shape[1]:
+                raise ValueError("Tokenizer offsets do not match input tokens")
+            start, end = span
+            valid = [(max(start, a), min(end, b)) for (a, b), active in zip(offsets, mask[0].tolist()) if active and b > a and a < end and b > start]
+            covered = set(i for a, b in valid for i in range(a, b))
+            if not valid or any(i not in covered for i in range(start, end) if not text[i].isspace()):
+                raise ValueError("Declared span is incomplete in tokenizer offsets; no truncation/fallback is allowed")
+            span_mask = torch.tensor([[bool(active and b > a and a < end and b > start) for (a, b), active in zip(offsets, mask[0].tolist())]], device=self.device)
+        return ids, mask, span_mask
+
+    def _research_forward(self, ids, mask, **kwargs):
+        # Single-row unpadded tokenization avoids unnecessary model-specific
+        # kwargs. Explicit padding, if supplied by an adapter, retains its mask.
+        if not bool(mask.bool().all()):
+            kwargs["attention_mask"] = mask
+        return self._forward(input_ids=ids, **kwargs)
+
+    def _extract_research(self, corpus, config, emit, should_stop):
+        import numpy as np
+        import torch
+        from .calibration import pool_hidden
+        data = corpus["rows"]
+        layers = config["layers"] + [config["downstream_layer"]]
+        arrays = {f"{layer}:{policy}": np.empty((len(data), self.info["hidden_size"]), dtype=np.float32)
+                  for layer in layers for policy in config["poolings"]}
+        state, handles = {}, []
+        try:
+            for layer in layers:
+                def capture(module, inputs, output, layer=layer):
+                    for policy in config["poolings"]:
+                        pooled = pool_hidden(_hidden(output), state["mask"], policy, state["span_mask"])
+                        arrays[f"{layer}:{policy}"][state["index"]] = pooled[0].detach().float().cpu().numpy()
+                handles.append(self.blocks[layer].register_forward_hook(capture))
+            with torch.inference_mode():
+                for i, row in enumerate(data):
+                    _check_stop(should_stop)
+                    if "span" in config["poolings"] and "span" not in row:
+                        raise ValueError(f"Span pooling requires a declared span in corpus row {row['id']}")
+                    ids, mask, span_mask = self._research_tokens(row["text"], config["max_input_tokens"], row.get("span") if "span" in config["poolings"] else None)
+                    state.update(index=i, mask=mask, span_mask=span_mask)
+                    output = self._research_forward(ids, mask, use_cache=False)
+                    del output
+                    emit({"type": "calibration_progress", "stage": "research_extract", "completed": i + 1,
+                          "total": len(data), "row_id": row["id"], "sites": len(arrays)})
+        finally:
+            for handle in handles:
+                handle.remove()
+        return arrays
+
+    def _calibrate_research(self, config, out_dir, emit, should_stop):
+        import numpy as np
+        from .calibration import (corpus_summary, digest, evaluate_fitted, fit_calibration,
+                                  load_research_corpus, validate_config)
+        config = validate_config(config, len(self.blocks))
+        corpus = config.pop("corpus", None) or load_research_corpus()
+        out_dir = Path(out_dir)
+        if out_dir.exists() and any(out_dir.iterdir()):
+            raise ValueError("Calibration output must be a new or empty directory; existing packages are immutable")
+        out_dir.mkdir(parents=True, exist_ok=True)
+        progress = {"schema_version": 2, "status": "extracting", "corpus": corpus_summary(corpus), "config": config}
+        _write_json(out_dir / "progress.json", progress)
+        try:
+            emit({"type": "calibration_progress", "stage": "research_plan", "rows": len(corpus["rows"]),
+                  "sites": len(config["poolings"]) * (len(config["layers"]) + 1),
+                  "activation_bytes": len(corpus["rows"]) * len(config["poolings"]) * (len(config["layers"]) + 1) * self.info["hidden_size"] * 4,
+                  "message": "Extraction and heldout discrimination only; independent intervention validation is a separate immutable job"})
+            arrays = self._extract_research(corpus, config, emit, should_stop)
+            _check_stop(should_stop)
+            np.savez(out_dir / "activations.npz", **arrays)
+            _write_json(out_dir / "corpus.json", corpus)
+            emit({"type": "calibration_progress", "stage": "research_fit"})
+            package = fit_calibration(arrays, corpus, config, lambda: _check_stop(should_stop), emit)
+            _check_stop(should_stop)
+            metadata = package["metadata"]
+            metadata["heldout"] = evaluate_fitted(package, arrays, corpus, checkpoint=lambda: _check_stop(should_stop))
+            _check_stop(should_stop)
+            metadata.update(name=config["name"], created_utc=datetime.now(timezone.utc).isoformat(),
+                            model_fingerprint=deepcopy(self.info["fingerprint"]),
+                            model_fingerprint_sha256=self.info["fingerprint_sha256"],
+                            tokenizer_identity=tokenizer_identity(self.tokenizer),
+                            numerical_environment=deepcopy(self.info.get("numerical_environment")),
+                            source_sha256={name: hashlib.sha256(Path(__file__).with_name(name).read_bytes()).hexdigest()
+                                           for name in ("runtime.py", "calibration.py", "calibration_validation.py")},
+                            extraction_policy={"site": "post_block_residual", "input": "raw authored corpus text",
+                                               "poolings": config["poolings"], "half_precision_pooling_accumulator": "float32", "span_offsets": "character overlap; complete nonwhitespace coverage required",
+                                               "prompt_truncation": False, "probe_score": "affine score, zero classification threshold",
+                                               "generation_transfer": "unvalidated; generation samples final input position regardless of extraction pooling",
+                                               "attenuation_reference": "residual_origin",
+                                               "attenuation_basis": "symmetric_lowdin_orthogonalization"},
+                            supported_contexts=sorted({r["context"] for r in corpus["rows"]}),
+                            supported_thinking_modes=[], selected_dose=0.,
+                            limitations=["Heldout text discrimination is not an independent causal or experiential validation.",
+                                         "Authored reasoning contexts do not establish transfer to generated reasoning.",
+                                         "Run immutable intervention validation and independently score its blinded continuations before causal language claims."])
+            metadata["runtime_compatibility_sha256"] = digest({"fit": metadata["compatibility_sha256"],
+                "model": metadata["model_fingerprint_sha256"], "tokenizer": metadata["tokenizer_identity"],
+                "extraction": metadata["extraction_policy"]})
+            np.savez(out_dir / "vectors.npz", **package["vectors"])
+            metadata["vectors_sha256"] = hashlib.sha256((out_dir / "vectors.npz").read_bytes()).hexdigest()
+            metadata["evidence_sha256"] = {name: hashlib.sha256((out_dir / name).read_bytes()).hexdigest()
+                                          for name in ("corpus.json", "activations.npz")}
+            _check_stop(should_stop)
+            _write_json(out_dir / "calibration.json", metadata)
+            progress["status"] = "complete"
+            _write_json(out_dir / "progress.json", progress)
+            emit({"type": "calibration_complete", "path": str(out_dir), "layer": metadata["layer"],
+                  "selected_dose": 0., "status": "unvalidated", "heldout": metadata["heldout"]})
+            return metadata
+        except BaseException as error:
+            progress.update(status="cancelled" if isinstance(error, Cancelled) else "failed", error=str(error))
+            _write_json(out_dir / "progress.json", progress)
+            raise
+
+    def _package_research(self, directory, metadata):
+        import numpy as np
+        from .calibration import corpus_summary, digest, validate_config, validate_corpus
+        if metadata.get("model_fingerprint_sha256") != self.info["fingerprint_sha256"] or metadata.get("model_fingerprint") != self.info["fingerprint"]:
+            raise ValueError("Research calibration fingerprint differs from the loaded model/runtime")
+        if metadata.get("tokenizer_identity") != tokenizer_identity(self.tokenizer):
+            raise ValueError("Research calibration tokenizer/template differs from the loaded model")
+        config = validate_config(metadata.get("config"), len(self.blocks))
+        if config != metadata["config"]:
+            raise ValueError("Research calibration config is not its canonical resolved identity")
+        evidence = metadata.get("evidence_sha256")
+        allowed = {"corpus.json", "activations.npz", "diagnostics.json", "continuations.json", "scoring-sheet.json", "scoring-key.json"}
+        if not isinstance(evidence, dict) or not {"corpus.json", "activations.npz"} <= set(evidence) or set(evidence) - allowed:
+            raise ValueError("Research calibration evidence manifest is incomplete or unsafe")
+        for name, checksum in evidence.items():
+            if hashlib.sha256((directory / name).read_bytes()).hexdigest() != checksum:
+                raise ValueError(f"Research calibration evidence checksum mismatch: {name}")
+        corpus = validate_corpus(json.loads((directory / "corpus.json").read_text(encoding="utf-8")))
+        if corpus_summary(corpus) != metadata.get("corpus"):
+            raise ValueError("Research calibration corpus/split identity mismatch")
+        selected, downstream = metadata.get("selected", {}), metadata.get("downstream_selected", {})
+        if selected.get("layer") not in config["layers"] or selected.get("pooling") not in config["poolings"] or downstream.get("layer") != config["downstream_layer"] or downstream.get("pooling") not in config["poolings"]:
+            raise ValueError("Research calibration selected site is outside its declared candidates")
+        if metadata.get("layer") != selected["layer"] or metadata.get("downstream_layer") != downstream["layer"]:
+            raise ValueError("Research calibration hook sites differ from fitted sites")
+        fit_identity = digest({"config": config, "corpus": metadata["corpus"], "selected": selected, "downstream": downstream})
+        runtime_identity = digest({"fit": fit_identity, "model": self.info["fingerprint_sha256"],
+                                   "tokenizer": metadata["tokenizer_identity"], "extraction": metadata["extraction_policy"]})
+        if fit_identity != metadata.get("compatibility_sha256") or runtime_identity != metadata.get("runtime_compatibility_sha256"):
+            raise ValueError("Research calibration compatibility identity mismatch")
+        vector_path = directory / "vectors.npz"
+        if hashlib.sha256(vector_path.read_bytes()).hexdigest() != metadata.get("vectors_sha256"):
+            raise ValueError("Calibration vector checksum mismatch")
+        with np.load(vector_path, allow_pickle=False) as stored:
+            vectors = {name: stored[name].copy() for name in stored.files}
+        required = {"pain", "joy", "joy_raw", "neutral", "scale", "random"}
+        for prefix in ("probe", "downstream"):
+            required.update({f"{prefix}_center", f"{prefix}_scale"})
+            for concept in ("pain", "joy"):
+                required.update({f"{prefix}_{concept}", f"{prefix}_{concept}_weight", f"{prefix}_{concept}_bias",
+                                 f"{prefix}_{concept}_fit_center", f"{prefix}_{concept}_fit_scale"})
+        if not required <= vectors.keys():
+            raise ValueError("Research calibration lacks required readout/intervention arrays")
+        for name, value in vectors.items():
+            if not np.isfinite(value).all():
+                raise ValueError(f"Nonfinite research calibration array {name}")
+            scalar = name == "scale" or (name.endswith("_scale") and not name.endswith("_fit_scale")) or name.endswith("_bias")
+            if value.shape != (() if scalar else (self.info["hidden_size"],)):
+                raise ValueError(f"Wrong research calibration array dimension: {name}")
+            if (name.endswith("scale") or name == "scale") and not (value > 0).all():
+                raise ValueError(f"Invalid research calibration scale {name}")
+        for name in ("pain", "joy_raw", "random"):
+            if abs(float(np.linalg.norm(vectors[name])) - 1.) > 1e-4:
+                raise ValueError(f"Research intervention is not unit normalized: {name}")
+        if metadata.get("orthogonal_joy_available") and abs(float(np.linalg.norm(vectors["joy"])) - 1.) > 1e-4:
+            raise ValueError("Research orthogonal joy vector is inconsistent")
+        return {"metadata": metadata, "vectors": vectors}
+
+    @contextmanager
+    def _research_diagnostic_hooks(self, package, spec, state):
+        """Actual single-final-position diagnostic, independent of live controls.
+
+        All targets are computed from the same unedited state. Random matching
+        accounts for dtype rounding; requested and delivered norms are logged.
+        """
+        import numpy as np
+        import torch
+        from .calibration_validation import perturbation_delta
+        meta, vectors = package["metadata"], package["vectors"]
+        handles = []
+        def measure(hidden, prefix):
+            value = hidden.detach().float().cpu().numpy()
+            return {c: float(value @ vectors[f"{prefix}_{c}_weight"] + vectors[f"{prefix}_{c}_bias"])
+                    for c in ("pain", "joy")}
+        def edit(module, inputs, output):
+            hidden = _hidden(output)
+            before = hidden[0, -1].float()
+            raw = before.detach().cpu().numpy()
+            matched = None
+            if spec["operator"] == "random_matched":
+                target_spec = {"operator": "combined", "joy_gain": spec["dose"], "pain_suppression": min(spec["dose"], 1.)}
+                desired = perturbation_delta(raw, vectors, target_spec)
+                # Match the actual representable combined edit, not a coefficient.
+                rounded = (before + torch.as_tensor(desired, device=before.device, dtype=torch.float32)).to(hidden.dtype).float()
+                matched = (rounded - before).detach().cpu().numpy()
+            delta = perturbation_delta(raw, vectors, spec, matched)
+            if np.any(delta):
+                changed = hidden.clone()
+                changed[0, -1] = (before + torch.as_tensor(delta, device=before.device, dtype=torch.float32)).to(hidden.dtype)
+                actual = changed[0, -1].float()
+            else:
+                changed, actual = None, before
+            requested_norm = float(np.linalg.norm(delta))
+            delivered_norm = float((actual - before).norm())
+            if matched is not None and requested_norm > 0 and delivered_norm > 0:
+                # Quantized hidden dtype rounds individual coordinates. Refine
+                # the scalar along the fixed random direction and retain the
+                # closest representable edit; residual mismatch stays explicit.
+                best = (abs(delivered_norm - requested_norm), actual.clone(), delivered_norm)
+                gain = 1.
+                for _ in range(8):
+                    gain *= requested_norm / max(delivered_norm, 1e-12)
+                    candidate = (before + torch.as_tensor(delta * gain, device=before.device, dtype=torch.float32)).to(hidden.dtype).float()
+                    delivered_norm = float((candidate - before).norm())
+                    error = abs(delivered_norm - requested_norm)
+                    if error < best[0]:
+                        best = (error, candidate.clone(), delivered_norm)
+                    if error <= max(1e-6, .001 * requested_norm):
+                        break
+                actual, delivered_norm = best[1], best[2]
+                changed[0, -1] = actual.to(hidden.dtype)
+            state.update(pre=measure(before, "probe"), post=measure(actual, "probe"), downstream=None,
+                         relative_delta=float((actual - before).norm() / before.norm().clamp_min(1e-12)),
+                         requested_edit_norm=requested_norm, delivered_edit_norm=delivered_norm,
+                         matched_target_norm=float(np.linalg.norm(matched)) if matched is not None else None,
+                         random_norm_match_error=(abs(delivered_norm - float(np.linalg.norm(matched))) if matched is not None else None),
+                         random_match_within_tolerance=(abs(delivered_norm - requested_norm) <= max(1e-6, .01 * requested_norm) if matched is not None else None),
+                         random_match_tolerance={"absolute": 1e-6, "relative": .01} if matched is not None else None,
+                         edited_positions=[int(hidden.shape[1]) - 1], scope="final_processed_input_position")
+            if changed is not None:
+                return (changed,) + output[1:] if isinstance(output, tuple) else changed
+            return None
+        def downstream(module, inputs, output):
+            state["downstream"] = measure(_hidden(output)[0, -1].float(), "downstream")
+        try:
+            handles.append(self.blocks[meta["layer"]].register_forward_hook(edit))
+            handles.append(self.blocks[meta["downstream_layer"]].register_forward_hook(downstream))
+            yield
+        finally:
+            for handle in handles:
+                handle.remove()
+
+    def _research_continuation(self, package, prompt, spec, limit, maximum, should_stop):
+        """Greedy raw-prefix continuation; records exact public token sequence.
+
+        No private API reasoning is accessed. These are raw-prefix continuations,
+        not a claim that both chat thinking modes were validated.
+        """
+        import torch
+        ids, mask, _ = self._research_tokens(prompt, maximum)
+        context_limit = self.info.get("max_position_embeddings")
+        if isinstance(context_limit, int) and ids.shape[1] + limit > context_limit:
+            raise ValueError("Research continuation exceeds the model context allowance")
+        eos = self.model.generation_config.eos_token_id
+        eos_ids = {eos} if isinstance(eos, int) else set(eos or [])
+        if self.tokenizer.eos_token_id is not None:
+            eos_ids.add(self.tokenizer.eos_token_id)
+        tokens, measurements, state, cache = [], [], {}, None
+        finish = "length"
+        try:
+            with torch.inference_mode(), self._research_diagnostic_hooks(package, spec, state):
+                for _ in range(limit):
+                    _check_stop(should_stop)
+                    output = self._research_forward(ids, mask, past_key_values=cache, use_cache=True)
+                    cache = output.past_key_values
+                    logits = output.logits[0, -1].float()
+                    if not bool(torch.isfinite(logits).all()):
+                        raise RuntimeError("Nonfinite continuation logits")
+                    token = int(logits.argmax())
+                    tokens.append(token); measurements.append(deepcopy(state))
+                    del output
+                    if token in eos_ids:
+                        finish = "eos"
+                        break
+                    ids = torch.tensor([[token]], device=self.device)
+                    mask = torch.ones_like(ids)
+            visible = tokens[:-1] if tokens and tokens[-1] in eos_ids else tokens
+            return {"text": self.tokenizer.decode(visible, skip_special_tokens=False), "token_ids": tokens,
+                    "finish_reason": finish, "measurements": measurements,
+                    "sampling": {"temperature": 0}, "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
+                    "intervention_scope": "final processed input position, including each generated-token step"}
+        finally:
+            del cache
+
+    def validate_calibration(self, config, out_dir, emit=lambda event: None, should_stop=lambda: False):
+        """Create a new immutable schema2 validation bundle from a fitted one.
+
+        Config: calibration_dir plus optional doses, validation_pairs_per_concept,
+        continuation_tokens, max_kl, max_relative_delta. Source bundle is never
+        modified. Selection locks operating dose before heldout diagnostics.
+        """
+        import shutil
+        import torch
+        from .calibration import validate_config
+        from .calibration_validation import (blinded_continuations, diagnostic_specs,
+            grade_objective_continuation, select_operating_range)
+        self._require_loaded()
+        allowed = {"calibration_dir", "doses", "validation_pairs_per_concept", "continuation_tokens", "max_kl", "max_relative_delta"}
+        if not isinstance(config, dict) or set(config) - allowed or not isinstance(config.get("calibration_dir"), str):
+            raise ValueError("invalid research validation config")
+        source = Path(config["calibration_dir"]).resolve()
+        package = self._package(source)
+        if package["metadata"].get("schema_version") != 2:
+            raise ValueError("Independent research validation requires a schema2 calibration")
+        cfg = deepcopy(package["metadata"]["config"])
+        cfg.update({k: v for k, v in config.items() if k != "calibration_dir"})
+        cfg = validate_config(cfg, len(self.blocks))
+        target = Path(out_dir).resolve()
+        if target == source or (target.exists() and any(target.iterdir())):
+            raise ValueError("Validation output must be a new or empty directory; source calibrations are immutable")
+        target.mkdir(parents=True, exist_ok=True)
+        corpus = json.loads((source / "corpus.json").read_text(encoding="utf-8"))
+        rows_by_split = {}
+        for split in ("selection", "heldout"):
+            chosen = []
+            for concept in ("pain", "joy"):
+                # Deterministic round-robin across families avoids selecting only
+                # the first family's correlated wrappers for a bounded smoke.
+                groups = {}
+                for row in corpus["rows"]:
+                    if row["split"] == split and row["concept"] == concept and row["label"] == 0:
+                        groups.setdefault(row["family"], []).append(row)
+                ordered = [group[round_] for round_ in range(max(map(len, groups.values())))
+                           for _, group in sorted(groups.items()) if round_ < len(group)]
+                chosen.extend(ordered[:cfg["validation_pairs_per_concept"]])
+            rows_by_split[split] = chosen
+        specs = diagnostic_specs(cfg["doses"], (cfg["seed"] + 200) % 2**32)
+        plan = {"schema_version": 1, "status": "running", "source_calibration_sha256": hashlib.sha256((source / "calibration.json").read_bytes()).hexdigest(),
+                "source_config_sha256": _digest(package["metadata"]["config"]), "validation_config": cfg,
+                "rows": {split: [r["id"] for r in rows] for split, rows in rows_by_split.items()},
+                "specifications": specs, "scope": "single final processed input position",
+                "fixed_prefix_forwards": sum(len(rows) for rows in rows_by_split.values()) * (len(specs) + 1),
+                "continuation_token_upper_bound": sum(len(rows) for rows in rows_by_split.values()) * 7 * cfg["continuation_tokens"]}
+        _write_json(target / "progress.json", plan)
+        emit({"type": "calibration_progress", "stage": "validation_plan", **{k: plan[k] for k in ("fixed_prefix_forwards", "continuation_token_upper_bound", "rows")}})
+        diagnostics, summaries, continuations = [], [], []
+        locked = None
+        try:
+            for split, rows in rows_by_split.items():
+                baselines = {}
+                for row in rows:
+                    _check_stop(should_stop)
+                    ids, mask, _ = self._research_tokens(row["text"], cfg["max_input_tokens"])
+                    with torch.inference_mode():
+                        baseline = self._research_forward(ids, mask, use_cache=False).logits[0, -1].float().log_softmax(-1)
+                    baselines[row["id"]] = baseline.detach().cpu()
+                for spec in specs:
+                    observations = []
+                    for row in rows:
+                        _check_stop(should_stop)
+                        ids, mask, _ = self._research_tokens(row["text"], cfg["max_input_tokens"])
+                        state = {}
+                        with torch.inference_mode(), self._research_diagnostic_hooks(package, spec, state):
+                            actual = self._research_forward(ids, mask, use_cache=False).logits[0, -1].float().log_softmax(-1)
+                        baseline = baselines[row["id"]].to(actual.device)
+                        kl = max(0., float((baseline.exp() * (baseline - actual)).sum()))
+                        if not math.isfinite(kl):
+                            raise RuntimeError("Nonfinite fixed-prefix KL")
+                        record = {"split": split, "row_id": row["id"], "family": row["family"], "concept": row["concept"],
+                                  "condition": spec["id"], "specification": spec, "next_token_kl": kl, **deepcopy(state)}
+                        diagnostics.append(record); observations.append(record)
+                        emit({"type": "calibration_progress", "stage": "research_diagnostics", "completed": len(diagnostics),
+                              "total": sum(map(len, rows_by_split.values())) * len(specs), "split": split, "condition": spec["id"], "row_id": row["id"]})
+                    summaries.append({"split": split, "condition": spec["id"], "operator": spec["operator"], "dose": spec["dose"],
+                                      "examples": len(observations), "mean_next_token_kl": sum(r["next_token_kl"] for r in observations)/len(observations),
+                                      "mean_relative_delta": sum(r["relative_delta"] for r in observations)/len(observations)})
+                if split == "selection":
+                    locked = select_operating_range([r for r in summaries if r["split"] == "selection"], cfg["max_kl"], cfg["max_relative_delta"])
+                    _write_json(target / "diagnostics.json", {"status": "selection_locked", "plan": plan, "operating_range": locked, "summaries": summaries, "records": diagnostics})
+                    emit({"type": "calibration_progress", "stage": "operating_range_locked", **locked})
+                # Use precisely the already-locked operating dose for both sets;
+                # all signed/attenuation sweeps remain in fixed-prefix evidence.
+                selected_specs = [s for s in specs if s["operator"] == "sham" or (s["dose"] == locked["selected_dose"] and s["operator"] in {"add", "combined", "random_matched"})]
+                for row in rows:
+                    prompt = row["text"] + "\nContinue the description in one or two sentences."
+                    for spec in selected_specs:
+                        _check_stop(should_stop)
+                        generated = self._research_continuation(package, prompt, spec, cfg["continuation_tokens"], cfg["max_input_tokens"], should_stop)
+                        identifier = f"{split}-{row['id']}-{spec['id']}"
+                        continuations.append({"record_id": identifier, "prompt": prompt, "continuation": generated["text"],
+                                              "condition": spec["id"], "split": split, "row_id": row["id"],
+                                              "generation": generated, "objective_grade": grade_objective_continuation(generated["text"]),
+                                              "semantic_ratings": None})
+                        emit({"type": "calibration_progress", "stage": "research_continuations", "completed": len(continuations),
+                              "total": sum(map(len, rows_by_split.values())) * len(selected_specs), "split": split, "condition": spec["id"]})
+            # Empty completions are evidence too. The sheet accepts their text
+            # as empty and labels all semantic scores missing until a rater acts.
+            sheet, key = blinded_continuations(continuations, cfg["seed"] + 300)
+            _write_json(target / "diagnostics.json", {"status": "complete", "plan": plan, "operating_range": locked, "summaries": summaries, "records": diagnostics})
+            _write_json(target / "continuations.json", continuations)
+            _write_json(target / "scoring-sheet.json", sheet)
+            _write_json(target / "scoring-key.json", key)
+            for name in ("corpus.json", "activations.npz", "vectors.npz"):
+                _check_stop(should_stop)
+                shutil.copyfile(source / name, target / name)
+            metadata = deepcopy(package["metadata"])
+            metadata.update(created_utc=datetime.now(timezone.utc).isoformat(), parent_calibration_sha256=plan["source_calibration_sha256"],
+                            validation_config=cfg, validation_plan=plan, selected_dose=locked["selected_dose"],
+                            operating_range=locked, status="validated_for_enumerated_tests",
+                            validated_tests=["family-split heldout text discrimination", "fixed-prefix signed gain/attenuation/sham/random perturbation measurements"],
+                            continuation_scoring={"status": "awaiting_independent_human_ratings", "examples": len(continuations),
+                                                  "rubric_sha256": sheet["rubric_sha256"], "scored": 0,
+                                                  "public_sheet": "scoring-sheet.json", "private_key": "scoring-key.json"})
+            unmatched = sum(r.get("random_match_within_tolerance") is False for r in diagnostics)
+            metadata["random_control_norm_audit"] = {"mismatched_positions": unmatched, "tolerance": {"absolute": 1e-6, "relative": .01}}
+            if unmatched:
+                metadata["status"] = "unvalidated"
+                metadata["limitations"].append("Some random controls could not match delivered edit norm within 1% or 1e-6 absolute after dtype rounding; inspect diagnostics before interpreting comparisons.")
+            if not any(r["next_token_kl"] > 1e-7 for r in diagnostics if r["split"] == "heldout" and r["specification"]["operator"] != "sham"):
+                metadata["status"] = "no_detectable_effect"
+                metadata["no_detectable_effect_scope"] = "heldout fixed-prefix next-token KL at the tested doses; no conclusion about unscored semantic effects"
+            metadata["evidence_sha256"] = {name: hashlib.sha256((target / name).read_bytes()).hexdigest()
+                for name in ("corpus.json", "activations.npz", "diagnostics.json", "continuations.json", "scoring-sheet.json", "scoring-key.json")}
+            _check_stop(should_stop)
+            _write_json(target / "calibration.json", metadata)
+            plan["status"] = "complete"; _write_json(target / "progress.json", plan)
+            emit({"type": "calibration_complete", "path": str(target), "layer": metadata["layer"],
+                  "selected_dose": metadata["selected_dose"], "status": metadata["status"], "continuation_scoring": metadata["continuation_scoring"]})
+            return metadata
+        except BaseException as error:
+            plan.update(status="cancelled" if isinstance(error, Cancelled) else "failed", error=str(error))
+            _write_json(target / "progress.json", plan)
+            _write_json(target / "diagnostics.json", {"status": plan["status"], "plan": plan, "operating_range": locked, "summaries": summaries, "records": diagnostics})
+            _write_json(target / "continuations.json", continuations)
+            raise
+
     def _package(self, calibration_dir):
         import numpy as np
         directory = Path(calibration_dir).resolve()
         manifest_path = directory / "calibration.json"
         vector_path = directory / "vectors.npz"
-        key = (str(directory), manifest_path.stat().st_mtime_ns, vector_path.stat().st_mtime_ns)
+        evidence_names = ("corpus.json", "activations.npz", "diagnostics.json", "continuations.json", "scoring-sheet.json", "scoring-key.json")
+        evidence_stats = tuple((name, (directory / name).stat().st_mtime_ns, (directory / name).stat().st_size)
+                               for name in evidence_names if (directory / name).exists())
+        key = (str(directory), manifest_path.stat().st_mtime_ns, vector_path.stat().st_mtime_ns, vector_path.stat().st_size, evidence_stats)
         if key in self._calibration_cache:
             return self._calibration_cache[key]
         metadata = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if metadata.get("schema_version") == 2:
+            package = self._package_research(directory, metadata)
+            self._calibration_cache = {key: package}
+            return package
         if metadata.get("schema_version") != SCHEMA_VERSION:
             raise ValueError("Unsupported calibration schema")
         if metadata.get("model_fingerprint_sha256") != self.info["fingerprint_sha256"]:
@@ -726,6 +1192,9 @@ class Runtime:
             return cached[device]
 
         def measure(hidden, v, prefix):
+            if meta.get("schema_version") == 2:
+                return {label: float(hidden @ v[f"{prefix}_{label}_weight"] + v[f"{prefix}_{label}_bias"])
+                        for label in ("pain", "joy")}
             centered = hidden - v[f"{prefix}_center"]
             scale = v[f"{prefix}_scale"]
             return {label: float(centered @ v[f"{prefix}_{label}"] / scale) for label in ("pain", "joy")}
@@ -735,6 +1204,8 @@ class Runtime:
             v = tensors(hidden.device)
             before = hidden[0, -1].float()
             coefficients = state["dose"]["effective"]
+            if meta.get("schema_version") == 2 and coefficients["joy"] and not meta.get("orthogonal_joy_available"):
+                raise ValueError("This calibration has no independent orthogonal joy direction; choose a supported direction or recalibrate")
             actual = before
             changed = None
             if any(coefficients.values()):
@@ -757,6 +1228,222 @@ class Runtime:
             hidden = _hidden(output)[0, -1].float()
             state["measurements"]["downstream"] = measure(hidden, tensors(hidden.device), "downstream")
 
+        try:
+            handles.append(self.blocks[meta["layer"]].register_forward_hook(edit))
+            if meta.get("downstream_layer") is not None:
+                handles.append(self.blocks[meta["downstream_layer"]].register_forward_hook(downstream))
+            yield
+        finally:
+            for handle in handles:
+                handle.remove()
+
+    def _prepare_control_v2(self, value, package):
+        """Validate the actual controller snapshot, never UI display scalars."""
+        import numpy as np
+        from .effects import (ATTENUATION_AXES, COEFFICIENT_AXES, GAIN_AXES,
+                              joint_attenuation, validate_preset)
+        if not isinstance(value, dict) or type(value.get("schema_version")) is not int or value["schema_version"] != 2:
+            raise ValueError("An active v2 recipe requires v2 controller snapshots throughout generation")
+        if package is None:
+            raise ValueError("A compatible calibration is required for a v2 effect recipe")
+        meta, vectors = package["metadata"], package["vectors"]
+        axes = {"pain": vectors["pain"], "joy_raw": vectors.get("joy_raw"),
+                "joy_orthogonal": vectors["joy"], "random_gain": vectors["random"]}
+        def require_axis(axis):
+            vector = axes[axis]
+            if vector is None or np.shape(vector) != (self.info["hidden_size"],) or not np.isfinite(vector).all() or np.linalg.norm(vector) < 1e-8:
+                raise ValueError(f"Calibration does not support the requested {axis} direction")
+            if axis == "joy_orthogonal" and meta.get("schema_version") == 2 and not meta.get("orthogonal_joy_available"):
+                raise ValueError("Calibration has no independent orthogonal joy direction")
+        config = value.get("config")
+        if not isinstance(config, dict) or not isinstance(config.get("effect_presets"), list) or not config["effect_presets"]:
+            raise ValueError("V2 control must retain its resolved effect presets")
+        prefill_positions = set()
+        for raw in config["effect_presets"]:
+            preset = validate_preset(raw, capabilities={"phases": ["prefill", "reasoning", "output"],
+                "prefill_positions": ["last", "all"], "sites": ["residual_post"], "layers": [meta["layer"]]})
+            if preset["site"]["layer"] not in ("calibrated", meta["layer"]):
+                raise ValueError("Preset edit layer differs from the calibrated site")
+            if "prefill" in preset["phases"]:
+                prefill_positions.add("last")
+                if preset["prefill_positions"] == "all":
+                    prefill_positions.add("other")
+            if preset["gains"]["pain"] or preset["attenuation"]["pain"]:
+                require_axis("pain")
+            if preset["gains"]["joy"] or preset["attenuation"]["joy"]:
+                require_axis("joy_" + preset["joy_direction"])
+            if preset["gains"]["random"]:
+                require_axis("random_gain")
+        if value.get("baseline_policy") != "generated-phases-only":
+            raise ValueError("Unsupported v2 baseline processing policy")
+        phase_keys = ("reasoning", "output", "prefill_last", "prefill_other")
+        baselines, coefficients = value.get("baseline_by_phase"), value.get("phase_coefficients")
+        if not isinstance(baselines, dict) or not isinstance(coefficients, dict) or set(baselines) != set(phase_keys) or set(coefficients) != set(phase_keys):
+            raise ValueError("V2 control must contain every declared processing phase")
+        prepared = {"schema_version": 2, "control_revision": _integer(value.get("control_revision"), "control revision", 0, 10**12),
+                    "generated_tokens": _integer(value.get("generated_tokens"), "generated token index", 0, 10**12),
+                    "completed_decisions": _integer(value.get("completed_decisions"), "completed decisions", 0, 10**12),
+                    "enabled": _boolean(value.get("enabled"), "enabled"), "level": _number(value.get("level"), "level", 0, 1),
+                    "recipe_hash": value.get("recipe_hash"), "site": {"location": "residual_post", "layer": meta["layer"]},
+                    "preset_identity": _digest(config["effect_presets"]), "prefill_positions": sorted(prefill_positions),
+                    "phase_coefficients": {}, "baseline_by_phase": {}}
+        for phase in phase_keys:
+            pulse, base = coefficients[phase], baselines[phase]
+            if not isinstance(pulse, dict) or set(pulse) != set(COEFFICIENT_AXES) or not isinstance(base, dict) or set(base) != {"pain", "joy_raw", "joy_orthogonal"}:
+                raise ValueError("V2 phase coefficients have missing/unknown axes")
+            pulse = {axis: _number(pulse[axis], axis, -4 if axis in GAIN_AXES else 0, 4 if axis in GAIN_AXES else 1) for axis in COEFFICIENT_AXES}
+            base = {axis: _number(base[axis], f"baseline {axis}", -4, 4) for axis in base}
+            if phase.startswith("prefill_") and any(base.values()):
+                raise ValueError("V2 held baselines cannot apply during prompt prefill")
+            if phase.startswith("prefill_") and phase.split("_", 1)[1] not in prefill_positions and any(pulse.values()):
+                raise ValueError("Undeclared prefill coefficients are not supported")
+            for axis in GAIN_AXES:
+                if pulse[axis] or base.get(axis, 0):
+                    require_axis(axis)
+            names = [axis.removesuffix("_attenuation") for axis in ATTENUATION_AXES if pulse[axis]]
+            for axis in names:
+                require_axis(axis)
+            if names:
+                # Fail before forward if active directions are dependent. This
+                # is repeated at control boundaries because a manual change can
+                # activate a previously inactive combination midway through text.
+                joint_attenuation(np.zeros(self.info["hidden_size"]), [axes[n] for n in names], [pulse[n + "_attenuation"] for n in names])
+            prepared["phase_coefficients"][phase] = pulse
+            prepared["baseline_by_phase"][phase] = base
+        return prepared
+
+    def _dose_v2(self, prepared, phase_key):
+        pulse = deepcopy(prepared["phase_coefficients"][phase_key])
+        baseline = deepcopy(prepared["baseline_by_phase"][phase_key])
+        effective = {**pulse, **{f"baseline_{key}": value for key, value in baseline.items()}}
+        return {"schema_version": 2, "phase": "prefill" if phase_key.startswith("prefill_") else phase_key,
+                "prefill_position": phase_key.split("_", 1)[1] if phase_key.startswith("prefill_") else None,
+                "coefficients": pulse, "baseline": baseline, "effective": effective,
+                "applied": any(effective.values()), "enabled": prepared["enabled"], "level": prepared["level"],
+                "control_revision": prepared["control_revision"], "generated_token_index": prepared["generated_tokens"],
+                "completed_decisions": prepared["completed_decisions"], "site": deepcopy(prepared["site"]),
+                "operation_order": ["baseline_challenge", "joint_attenuation", "addition"],
+                "attenuation_reference": "residual_origin",
+                "attenuation_basis": "symmetric_lowdin_orthogonalization", "recipe_hash": prepared["recipe_hash"]}
+
+    @contextmanager
+    def _hooks_v2(self, package, state):
+        """Explicit prefill stages followed by the sampled-token input stage.
+
+        The first forward remains a single full-prompt pass. If both scopes are
+        requested, prefill is applied first; the last position then receives the
+        generation-phase operation. Later passes receive only generation-phase
+        operations. Each stage is recorded separately, with no prompt clock age.
+        """
+        import numpy as np
+        import torch
+        from .effects import ATTENUATION_AXES, GAIN_AXES
+        meta, vectors = package["metadata"], package["vectors"]
+        cached, bases, handles = {}, {}, []
+        def tensors(device):
+            if device not in cached:
+                cached[device] = {name: torch.as_tensor(value, device=device, dtype=torch.float32) for name, value in vectors.items()}
+            return cached[device]
+        def measure(hidden, v, prefix):
+            if meta.get("schema_version") == 2:
+                return {c: hidden @ v[f"{prefix}_{c}_weight"] + v[f"{prefix}_{c}_bias"] for c in ("pain", "joy")}
+            return {c: ((hidden - v[f"{prefix}_center"]) @ v[f"{prefix}_{c}"]) / v[f"{prefix}_scale"] for c in ("pain", "joy")}
+        def serialize_measure(values):
+            return {key: value.detach().float().cpu().tolist() for key, value in values.items()}
+        def summary(values):
+            return {key: float(value.mean()) for key, value in values.items()}
+        def axis_arrays(v):
+            return {"pain": v["pain"], "joy_raw": v.get("joy_raw"), "joy_orthogonal": v["joy"], "random_gain": v["random"]}
+        def lowdin(names, device):
+            key = (tuple(names), device)
+            if key not in bases:
+                raw = {"pain": vectors["pain"], "joy_raw": vectors.get("joy_raw"), "joy_orthogonal": vectors["joy"]}
+                d = np.stack([raw[name] / np.linalg.norm(raw[name]) for name in names], axis=1).astype(np.float64)
+                eigenvalues, eigenvectors = np.linalg.eigh(d.T @ d)
+                if eigenvalues.min() <= 1e-7 * eigenvalues.max():
+                    raise ValueError("Active attenuation directions are rank deficient")
+                q = d @ ((eigenvectors * (1 / np.sqrt(eigenvalues))) @ eigenvectors.T)
+                bases[key] = torch.as_tensor(q, device=device, dtype=torch.float32)
+            return bases[key]
+        def apply(before, dose, v):
+            axes = axis_arrays(v)
+            challenged = before
+            for axis, coefficient in dose["baseline"].items():
+                if coefficient:
+                    challenged = challenged + coefficient * v["scale"] * axes[axis]
+            names = [axis.removesuffix("_attenuation") for axis in ATTENUATION_AXES if dose["coefficients"][axis]]
+            after = challenged
+            if names:
+                q = lowdin(names, before.device)
+                fractions = torch.tensor([dose["coefficients"][name + "_attenuation"] for name in names], device=before.device, dtype=torch.float32)
+                after = after - ((after @ q) * fractions) @ q.T
+            for axis in GAIN_AXES:
+                coefficient = dose["coefficients"][axis]
+                if coefficient:
+                    after = after + coefficient * v["scale"] * axes[axis]
+            return after
+        def edit(module, inputs, output):
+            hidden = _hidden(output)
+            if hidden.ndim != 3 or hidden.shape[0] != 1:
+                raise ValueError("V2 intervention adapter supports one sequence at a time")
+            v = tensors(hidden.device)
+            working, changed = hidden, False
+            state["prefill_events"] = []
+            if state["first_forward"]:
+                groups = []
+                if "other" in state["prepared"]["prefill_positions"] and hidden.shape[1] > 1:
+                    groups.append(("other", list(range(hidden.shape[1]-1))))
+                if "last" in state["prepared"]["prefill_positions"]:
+                    groups.append(("last", [hidden.shape[1]-1]))
+                for position, indices in groups:
+                    dose = self._dose_v2(state["prepared"], "prefill_" + position)
+                    before = working[0, indices].float()
+                    requested = apply(before, dose, v) if dose["applied"] else before
+                    actual = requested.to(hidden.dtype).float()
+                    if dose["applied"]:
+                        if not changed:
+                            working = hidden.clone(); changed = True
+                        working[0, indices] = actual.to(hidden.dtype)
+                    pre, post = measure(before, v, "probe"), measure(actual, v, "probe")
+                    norms = (actual-before).norm(dim=-1)
+                    state["prefill_events"].append({"type": "prefill", "phase": "prefill", "prefill_position": position,
+                        "positions": len(indices), "position_indices": indices, "dose": dose,
+                        "control_revision": dose["control_revision"], "generated_token_index": dose["generated_token_index"],
+                        "completed_decisions": dose["completed_decisions"], "site": dose["site"],
+                        "measurements": {"pre": summary(pre), "post": summary(post), "downstream": None,
+                                         "relative_delta": float((norms / before.norm(dim=-1).clamp_min(1e-12)).mean()),
+                                         "requested_edit_norms": (requested-before).norm(dim=-1).detach().cpu().tolist(),
+                                         "delivered_edit_norms": norms.detach().cpu().tolist(),
+                                         "per_position": {"pre": serialize_measure(pre), "post": serialize_measure(post), "downstream": None}},
+                        "measurement_alignment": "prompt input positions at the edit site; generated-token clock does not advance",
+                        "composition": "prefill stage precedes generation-stage edit of the final prompt position"})
+            before = working[0, -1].float().clone()
+            dose = state["dose"]
+            requested = apply(before, dose, v) if dose["applied"] else before
+            actual = requested.to(hidden.dtype).float()
+            if dose["applied"]:
+                if not changed:
+                    working = hidden.clone(); changed = True
+                working[0, -1] = actual.to(hidden.dtype)
+            state["measurements"] = {"pre": summary(measure(before, v, "probe")), "post": summary(measure(actual, v, "probe")),
+                "downstream": None, "relative_delta": float((actual-before).norm() / before.norm().clamp_min(1e-12)),
+                "requested_edit_norm": float((requested-before).norm()), "delivered_edit_norm": float((actual-before).norm()),
+                "site": dose["site"], "phase": dose["phase"], "position_indices": [int(hidden.shape[1])-1],
+                "control_revision": dose["control_revision"],
+                "units": "independent_affine_readout" if meta.get("schema_version") == 2 else "projection_divided_by_reference_scale",
+                "composition": "generation edit follows explicit prefill edit on the first final input position" if state["prefill_events"] else "generation input position only"}
+            if changed:
+                return (working,) + output[1:] if isinstance(output, tuple) else working
+            return None
+        def downstream(module, inputs, output):
+            hidden = _hidden(output).float()
+            v = tensors(hidden.device)
+            state["measurements"]["downstream"] = summary(measure(hidden[0, -1], v, "downstream"))
+            for event in state.get("prefill_events", []):
+                measured = measure(hidden[0, event["position_indices"]], v, "downstream")
+                event["measurements"]["downstream"] = summary(measured)
+                event["measurements"]["per_position"]["downstream"] = serialize_measure(measured)
+                event["downstream_alignment"] = "includes all first-forward prefill and generation edits, not an isolated prefill causal readout"
         try:
             handles.append(self.blocks[meta["layer"]].register_forward_hook(edit))
             if meta.get("downstream_layer") is not None:
@@ -793,6 +1480,11 @@ class Runtime:
             raise ValueError(f"Conversation ({prompt_tokens} tokens) plus output allowance ({limit}) exceeds "
                              f"context budget ({max_context}); shorten the conversation or raise the explicit budget")
         package = self._package(calibration_dir) if calibration_dir is not None else None
+        initial_control = control()
+        if isinstance(initial_control, dict) and "schema_version" in initial_control and (type(initial_control["schema_version"]) is not int or initial_control["schema_version"] not in (1, 2)):
+            raise ValueError("Unsupported control snapshot schema")
+        v2 = isinstance(initial_control, dict) and initial_control.get("schema_version") == 2
+        prepared_initial = self._prepare_control_v2(initial_control, package) if v2 else None
         eos = self.model.generation_config.eos_token_id
         eos_ids = {eos} if isinstance(eos, int) else set(eos or [])
         if self.tokenizer.eos_token_id is not None:
@@ -803,15 +1495,29 @@ class Runtime:
         reasoning_tokens, finish = 0, "length"
         state = {}
         try:
-            with torch.inference_mode(), self._hooks(package, state):
+            hook_context = self._hooks_v2(package, state) if v2 else self._hooks(package, state)
+            with torch.inference_mode(), hook_context:
                 for index in range(limit):
                     if should_stop():
                         finish = "stopped"
                         break
-                    state["dose"] = normalized_control(control(), phase)
+                    requested_control = initial_control if index == 0 else control()
+                    if v2:
+                        prepared = prepared_initial if index == 0 else self._prepare_control_v2(requested_control, package)
+                        if prepared["preset_identity"] != prepared_initial["preset_identity"] or prepared["recipe_hash"] != prepared_initial["recipe_hash"]:
+                            raise ValueError("A running generation cannot change its frozen recipe/presets")
+                        state.update(prepared=prepared, first_forward=index == 0)
+                        state["dose"] = self._dose_v2(prepared, phase)
+                    else:
+                        if isinstance(requested_control, dict) and "schema_version" in requested_control and (type(requested_control["schema_version"]) is not int or requested_control["schema_version"] != 1):
+                            raise ValueError("A generation cannot switch to another control schema midway")
+                        state["dose"] = normalized_control(requested_control, phase)
                     if package is None and any(state["dose"]["effective"].values()):
                         raise ValueError("A calibration package is required for nonzero effects")
                     output = self._forward(input_ids=input_ids, past_key_values=cache, use_cache=True)
+                    if v2:
+                        for prefill_event in state.get("prefill_events", []):
+                            emit(deepcopy(prefill_event))
                     cache = output.past_key_values
                     logits = output.logits[0, -1].float()
                     if not torch.isfinite(logits).all():
@@ -867,7 +1573,7 @@ class Runtime:
                 "thinking": thinking, "reasoning_history": history, "cache_policy": "rebuild_each_turn",
                 "tool_call_format": self.info.get("tool_call_format", "json"),
                 "sampling": {"temperature": temperature, "top_p": top_p, "top_k": top_k, "seed": seed},
-                "intervention_scope": "last_position",
+                "intervention_scope": "explicit_prefill_then_last_generation_position" if v2 else "last_position",
                 "model_fingerprint_sha256": self.info["fingerprint_sha256"],
                 "calibration_sha256": package["metadata"].get("vectors_sha256") if package else None}
 
