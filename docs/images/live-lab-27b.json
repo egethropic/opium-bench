@@ -1,0 +1,93 @@
+{
+  "screenshot": "live-lab-27b.png",
+  "capture_started_utc": "2026-10-02T08:52:27.594Z",
+  "capture_finished_utc": "2026-10-02T08:52:27.667Z",
+  "viewport": {
+    "width": 1440,
+    "height": 1080
+  },
+  "gpu_disabled": true,
+  "read_only": true,
+  "forbidden_requests": 0,
+  "errors": [],
+  "run_unchanged_during_capture": true,
+  "before": {
+    "observed_at": "2026-10-02T08:52:27.591Z",
+    "run_id": "run-20261002T085117Z-0ed7ecb6",
+    "session_status": "running",
+    "model": "greghavens/Qwen3.8-27B-bnb-4bit",
+    "tokens": "501",
+    "reasoning": "193 reasoning \u00b7 308 output",
+    "aux": "0",
+    "actions": "6 / 20 actions used",
+    "score": "67%",
+    "tools": [
+      "read_order",
+      "calculate_total",
+      "submit_answer",
+      "read_order",
+      "calculate_total",
+      "submit_answer",
+      "read_order"
+    ],
+    "state_run_id": "run-20261002T085117Z-0ed7ecb6",
+    "mode": "experiment",
+    "config": {
+      "id": "naive",
+      "label": "27B NF4 replication / core / pain",
+      "conditions": [
+        "active",
+        "sham",
+        "pain"
+      ],
+      "condition": "pain",
+      "task_family": "orders",
+      "task_count": 3,
+      "action_budget": 20,
+      "token_budget": 4096,
+      "turn_token_limit": 1024,
+      "seed": 28,
+      "thinking": true,
+      "half_life_tokens": 128,
+      "cutoff_tokens": 768,
+      "decay": "exponential",
+      "joy": 0.75,
+      "suppression": 1,
+      "pain": 1,
+      "random_gain": 0.75,
+      "baseline_pain": 0,
+      "baseline_joy": 0,
+      "baseline_suppression": 0,
+      "demonstration": "none",
+      "phase_actions": [
+        10,
+        20
+      ],
+      "probability_pain": 0.25,
+      "transition_policy": "cancel",
+      "phase_scope": "all",
+      "two_buttons": false,
+      "counterbalance": true,
+      "aux_enabled": true,
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "max_context_tokens": 12288,
+      "reasoning_history": "template"
+    },
+    "chart_bounds": {
+      "x": 268,
+      "y": 863.890625,
+      "width": 820,
+      "height": 148,
+      "top": 863.890625,
+      "right": 1088,
+      "bottom": 1011.890625,
+      "left": 268
+    }
+  },
+  "after": {
+    "run_id": "run-20261002T085117Z-0ed7ecb6",
+    "tokens": "501"
+  }
+}

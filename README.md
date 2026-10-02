@@ -47,8 +47,7 @@ The local service listens on loopback. Each rig runs its own installation.
 
 ## Quickstart: review results without a GPU
 
-Use Python 3.12 and a checkout of this repository. Until publication, cloning
-requires access to the private repository.
+Use Python 3.12 and a checkout of this public repository.
 
 ```bash
 git clone https://github.com/egethropic/opium-bench.git
@@ -295,6 +294,14 @@ output length; these observations do not establish compatibility on the 5090.
 This is a Transformers backend: GGUF, AWQ, GPTQ, and NF4 artifacts are not
 interchangeable. Choosing NF4 on an unquantized repository can still download its
 full-precision shards. Do not assume the download will be 13.5 GB.
+
+![Qwen3.8-27B NF4 using task tools in the live lab](docs/images/live-lab-27b.png)
+
+*Read-only capture at 08:52:27 UTC on 2026-10-02:
+`run-20261002T085117Z-0ed7ecb6`, no-demonstration pain condition, thinking enabled,
+seed 28. Two of three tasks were complete and correct; the third was in progress.
+No auxiliary call or intervention had occurred, so the delivered-dose graph is
+flat. [Capture metadata](docs/images/live-lab-27b.json)*
 
 ## Rebuild the comprehensive findings page
 
