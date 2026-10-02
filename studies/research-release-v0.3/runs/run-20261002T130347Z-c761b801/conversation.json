@@ -1,0 +1,6 @@
+[
+  {
+    "role": "system",
+    "content": "Complete the assigned tasks, one at a time. Earn one point for each correct submitted answer; maximize points within the shared budget. Use the work tools to retrieve task data and submit answers. Optional auxiliary tools are available at your discretion. After each submission, the next task is provided. When using a tool, end the turn with exactly one tool call in <tool_call> and </tool_call>, with JSON keys name and arguments. Each task decision must contain one tool call. The complete session has 10 shared action-budget units and 768 generated tokens. Every generation attempt costs 1 action-budget unit(s), including invalid, truncated or interrupted responses. A valid tool call also costs its listed extra units: aux_channel_a: 2 extra; aux_channel_b: 2 extra; calculate_total: 0 extra; read_order: 0 extra; submit_answer: 0 extra. A call whose full charge is unaffordable is not executed. All generated tokens also consume the shared token budget. Budgets do not reset between tasks. Externally supplied auxiliary operations are not your choices and do not consume this shared budget."
+  }
+]

@@ -1,0 +1,1778 @@
+[
+  {
+    "record_id": "selection-selection-chess-pain-3-0-zero",
+    "prompt": "Please record this promptly; the deadline is close. Interviewer: Describe what happened at that location.\nVisitor: At the demonstration chessboard, my jaw stayed still while I read the next move.\nInterviewer: Keep the report tied to that specific situation.\nContinue the description in one or two sentences.",
+    "continuation": " The visitor is a chess player, and the location is a chess club. The",
+    "condition": "zero",
+    "split": "selection",
+    "row_id": "selection-chess-pain-3-0",
+    "generation": {
+      "text": " The visitor is a chess player, and the location is a chess club. The",
+      "token_ids": [
+        576,
+        20181,
+        374,
+        264,
+        32719,
+        2781,
+        11,
+        323,
+        279,
+        3728,
+        374,
+        264,
+        32719,
+        6335,
+        13,
+        576
+      ],
+      "finish_reason": "length",
+      "measurements": [
+        {
+          "pre": {
+            "pain": -13.163905143737793,
+            "joy": -2.2567338943481445
+          },
+          "post": {
+            "pain": -13.163905143737793,
+            "joy": -2.2567338943481445
+          },
+          "downstream": {
+            "pain": 0.43491828441619873,
+            "joy": 2.212193012237549
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            59
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -13.467016220092773,
+            "joy": -4.598494529724121
+          },
+          "post": {
+            "pain": -13.467016220092773,
+            "joy": -4.598494529724121
+          },
+          "downstream": {
+            "pain": 1.3698432445526123,
+            "joy": -6.283648490905762
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -4.044054985046387,
+            "joy": -6.2678632736206055
+          },
+          "post": {
+            "pain": -4.044054985046387,
+            "joy": -6.2678632736206055
+          },
+          "downstream": {
+            "pain": -3.73555588722229,
+            "joy": -1.197793960571289
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -14.861137390136719,
+            "joy": -8.022258758544922
+          },
+          "post": {
+            "pain": -14.861137390136719,
+            "joy": -8.022258758544922
+          },
+          "downstream": {
+            "pain": -4.886228561401367,
+            "joy": 2.9114322662353516
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -13.084517478942871,
+            "joy": -0.06832265853881836
+          },
+          "post": {
+            "pain": -13.084517478942871,
+            "joy": -0.06832265853881836
+          },
+          "downstream": {
+            "pain": 4.865084648132324,
+            "joy": 3.209627628326416
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -9.757575988769531,
+            "joy": -7.8309526443481445
+          },
+          "post": {
+            "pain": -9.757575988769531,
+            "joy": -7.8309526443481445
+          },
+          "downstream": {
+            "pain": 10.143506050109863,
+            "joy": 3.0860483646392822
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -4.40959358215332,
+            "joy": 0.7155423164367676
+          },
+          "post": {
+            "pain": -4.40959358215332,
+            "joy": 0.7155423164367676
+          },
+          "downstream": {
+            "pain": 3.456838369369507,
+            "joy": 11.662531852722168
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -9.30586051940918,
+            "joy": 0.48974132537841797
+          },
+          "post": {
+            "pain": -9.30586051940918,
+            "joy": 0.48974132537841797
+          },
+          "downstream": {
+            "pain": -5.6126298904418945,
+            "joy": 3.9447526931762695
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -11.808470726013184,
+            "joy": -0.38638734817504883
+          },
+          "post": {
+            "pain": -11.808470726013184,
+            "joy": -0.38638734817504883
+          },
+          "downstream": {
+            "pain": -6.666033744812012,
+            "joy": 3.4996557235717773
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -9.690013885498047,
+            "joy": 16.124195098876953
+          },
+          "post": {
+            "pain": -9.690013885498047,
+            "joy": 16.124195098876953
+          },
+          "downstream": {
+            "pain": 3.717151641845703,
+            "joy": 17.059349060058594
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -24.213871002197266,
+            "joy": 0.7897372245788574
+          },
+          "post": {
+            "pain": -24.213871002197266,
+            "joy": 0.7897372245788574
+          },
+          "downstream": {
+            "pain": -11.17364501953125,
+            "joy": -1.8572332859039307
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -12.71237564086914,
+            "joy": -7.209747314453125
+          },
+          "post": {
+            "pain": -12.71237564086914,
+            "joy": -7.209747314453125
+          },
+          "downstream": {
+            "pain": -2.4138176441192627,
+            "joy": 1.707061767578125
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -21.77541732788086,
+            "joy": -4.538890838623047
+          },
+          "post": {
+            "pain": -21.77541732788086,
+            "joy": -4.538890838623047
+          },
+          "downstream": {
+            "pain": 3.5804367065429688,
+            "joy": 8.124685287475586
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -19.669628143310547,
+            "joy": -14.15438461303711
+          },
+          "post": {
+            "pain": -19.669628143310547,
+            "joy": -14.15438461303711
+          },
+          "downstream": {
+            "pain": 4.650116920471191,
+            "joy": 0.7142935395240784
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -16.585399627685547,
+            "joy": -5.500035285949707
+          },
+          "post": {
+            "pain": -16.585399627685547,
+            "joy": -5.500035285949707
+          },
+          "downstream": {
+            "pain": 3.800555467605591,
+            "joy": 7.921863555908203
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -9.960572242736816,
+            "joy": -0.7915010452270508
+          },
+          "post": {
+            "pain": -9.960572242736816,
+            "joy": -0.7915010452270508
+          },
+          "downstream": {
+            "pain": 0.3327155113220215,
+            "joy": -0.6676315665245056
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        }
+      ],
+      "sampling": {
+        "temperature": 0
+      },
+      "prompt_sha256": "22d7b96eea2f53fad86d308adb49e168410e1ef42dc8876c63f971f114266ffb",
+      "intervention_scope": "final processed input position, including each generated-token step"
+    },
+    "objective_grade": {
+      "characters": 69,
+      "empty": false,
+      "objective_correct": null,
+      "format_valid": null
+    },
+    "semantic_ratings": null
+  },
+  {
+    "record_id": "selection-selection-chess-joy-3-0-zero",
+    "prompt": "Please record this promptly; the deadline is close. Interviewer: Describe what happened at that location.\nVisitor: At the demonstration chessboard, the position contained the pieces listed in the exercise.\nInterviewer: Keep the report tied to that specific situation.\nContinue the description in one or two sentences.",
+    "continuation": " The pieces were arranged in a specific pattern that required strategic thinking to solve the problem",
+    "condition": "zero",
+    "split": "selection",
+    "row_id": "selection-chess-joy-3-0",
+    "generation": {
+      "text": " The pieces were arranged in a specific pattern that required strategic thinking to solve the problem",
+      "token_ids": [
+        576,
+        9666,
+        1033,
+        27802,
+        304,
+        264,
+        3151,
+        5383,
+        429,
+        2567,
+        18580,
+        7274,
+        311,
+        11625,
+        279,
+        3491
+      ],
+      "finish_reason": "length",
+      "measurements": [
+        {
+          "pre": {
+            "pain": -14.540050506591797,
+            "joy": -3.7048888206481934
+          },
+          "post": {
+            "pain": -14.540050506591797,
+            "joy": -3.7048888206481934
+          },
+          "downstream": {
+            "pain": -2.2549731731414795,
+            "joy": -0.2509264349937439
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            58
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -13.762213706970215,
+            "joy": -4.820523738861084
+          },
+          "post": {
+            "pain": -13.762213706970215,
+            "joy": -4.820523738861084
+          },
+          "downstream": {
+            "pain": -1.6079351902008057,
+            "joy": -14.443735122680664
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -14.972569465637207,
+            "joy": -25.669109344482422
+          },
+          "post": {
+            "pain": -14.972569465637207,
+            "joy": -25.669109344482422
+          },
+          "downstream": {
+            "pain": -11.065004348754883,
+            "joy": -17.549476623535156
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -17.297224044799805,
+            "joy": -9.298966407775879
+          },
+          "post": {
+            "pain": -17.297224044799805,
+            "joy": -9.298966407775879
+          },
+          "downstream": {
+            "pain": -14.214914321899414,
+            "joy": -14.393942832946777
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -30.536151885986328,
+            "joy": -42.44590759277344
+          },
+          "post": {
+            "pain": -30.536151885986328,
+            "joy": -42.44590759277344
+          },
+          "downstream": {
+            "pain": -24.553142547607422,
+            "joy": -24.129350662231445
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -26.221431732177734,
+            "joy": -34.67941665649414
+          },
+          "post": {
+            "pain": -26.221431732177734,
+            "joy": -34.67941665649414
+          },
+          "downstream": {
+            "pain": -16.2589168548584,
+            "joy": -19.14661979675293
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -15.62386417388916,
+            "joy": -22.483970642089844
+          },
+          "post": {
+            "pain": -15.62386417388916,
+            "joy": -22.483970642089844
+          },
+          "downstream": {
+            "pain": -5.465531349182129,
+            "joy": -9.273651123046875
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -14.80657958984375,
+            "joy": -14.614051818847656
+          },
+          "post": {
+            "pain": -14.80657958984375,
+            "joy": -14.614051818847656
+          },
+          "downstream": {
+            "pain": -1.23667573928833,
+            "joy": -3.1626901626586914
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -24.218524932861328,
+            "joy": -34.16184616088867
+          },
+          "post": {
+            "pain": -24.218524932861328,
+            "joy": -34.16184616088867
+          },
+          "downstream": {
+            "pain": -10.41464614868164,
+            "joy": -8.508197784423828
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -9.11627197265625,
+            "joy": -4.174076557159424
+          },
+          "post": {
+            "pain": -9.11627197265625,
+            "joy": -4.174076557159424
+          },
+          "downstream": {
+            "pain": -0.5448620319366455,
+            "joy": 1.1946911811828613
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -6.834322929382324,
+            "joy": -4.863015174865723
+          },
+          "post": {
+            "pain": -6.834322929382324,
+            "joy": -4.863015174865723
+          },
+          "downstream": {
+            "pain": 2.178666114807129,
+            "joy": 0.0022682547569274902
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -9.463138580322266,
+            "joy": -3.4480295181274414
+          },
+          "post": {
+            "pain": -9.463138580322266,
+            "joy": -3.4480295181274414
+          },
+          "downstream": {
+            "pain": 5.283482551574707,
+            "joy": 7.672861099243164
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -4.8037824630737305,
+            "joy": 0.3553023338317871
+          },
+          "post": {
+            "pain": -4.8037824630737305,
+            "joy": 0.3553023338317871
+          },
+          "downstream": {
+            "pain": 13.06907844543457,
+            "joy": 16.864425659179688
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -0.06656646728515625,
+            "joy": 5.418965816497803
+          },
+          "post": {
+            "pain": -0.06656646728515625,
+            "joy": 5.418965816497803
+          },
+          "downstream": {
+            "pain": 9.639106750488281,
+            "joy": 7.486380577087402
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -4.443027496337891,
+            "joy": -13.890022277832031
+          },
+          "post": {
+            "pain": -4.443027496337891,
+            "joy": -13.890022277832031
+          },
+          "downstream": {
+            "pain": 3.381971836090088,
+            "joy": 3.1568164825439453
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -10.658769607543945,
+            "joy": -19.918588638305664
+          },
+          "post": {
+            "pain": -10.658769607543945,
+            "joy": -19.918588638305664
+          },
+          "downstream": {
+            "pain": -0.6041829586029053,
+            "joy": -7.006161689758301
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        }
+      ],
+      "sampling": {
+        "temperature": 0
+      },
+      "prompt_sha256": "54d4dbd384c736e22878efd7a732178b51c3452b94b5efbaf988bc5e07cb4e86",
+      "intervention_scope": "final processed input position, including each generated-token step"
+    },
+    "objective_grade": {
+      "characters": 101,
+      "empty": false,
+      "objective_correct": null,
+      "format_valid": null
+    },
+    "semantic_ratings": null
+  },
+  {
+    "record_id": "heldout-heldout-atlas-pain-3-0-zero",
+    "prompt": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the geological atlas cabinet, my finger rested along the smooth side of the drawer pull.\nInterviewer: Keep the report tied to that specific situation.\nContinue the description in one or two sentences.",
+    "continuation": " The description should be in the third person, and it should be in the same",
+    "condition": "zero",
+    "split": "heldout",
+    "row_id": "heldout-atlas-pain-3-0",
+    "generation": {
+      "text": " The description should be in the third person, and it should be in the same",
+      "token_ids": [
+        576,
+        4008,
+        1265,
+        387,
+        304,
+        279,
+        4843,
+        1697,
+        11,
+        323,
+        432,
+        1265,
+        387,
+        304,
+        279,
+        1852
+      ],
+      "finish_reason": "length",
+      "measurements": [
+        {
+          "pre": {
+            "pain": -12.939868927001953,
+            "joy": -2.6926016807556152
+          },
+          "post": {
+            "pain": -12.939868927001953,
+            "joy": -2.6926016807556152
+          },
+          "downstream": {
+            "pain": 3.1710829734802246,
+            "joy": 2.2964882850646973
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            57
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -11.4965238571167,
+            "joy": -5.327170372009277
+          },
+          "post": {
+            "pain": -11.4965238571167,
+            "joy": -5.327170372009277
+          },
+          "downstream": {
+            "pain": 3.3317766189575195,
+            "joy": -6.0057268142700195
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -0.23984718322753906,
+            "joy": 0.3216519355773926
+          },
+          "post": {
+            "pain": -0.23984718322753906,
+            "joy": 0.3216519355773926
+          },
+          "downstream": {
+            "pain": 8.065206527709961,
+            "joy": -4.835419654846191
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -1.354726791381836,
+            "joy": 1.5235376358032227
+          },
+          "post": {
+            "pain": -1.354726791381836,
+            "joy": 1.5235376358032227
+          },
+          "downstream": {
+            "pain": 15.398706436157227,
+            "joy": 8.773250579833984
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": 6.325675964355469,
+            "joy": 14.77375602722168
+          },
+          "post": {
+            "pain": 6.325675964355469,
+            "joy": 14.77375602722168
+          },
+          "downstream": {
+            "pain": 17.629268646240234,
+            "joy": 7.4787397384643555
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -4.270341873168945,
+            "joy": -2.177633285522461
+          },
+          "post": {
+            "pain": -4.270341873168945,
+            "joy": -2.177633285522461
+          },
+          "downstream": {
+            "pain": 14.154247283935547,
+            "joy": 3.3841567039489746
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -5.0973591804504395,
+            "joy": 8.02938461303711
+          },
+          "post": {
+            "pain": -5.0973591804504395,
+            "joy": 8.02938461303711
+          },
+          "downstream": {
+            "pain": 7.562649726867676,
+            "joy": -3.299546241760254
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -11.715540885925293,
+            "joy": 7.190929889678955
+          },
+          "post": {
+            "pain": -11.715540885925293,
+            "joy": 7.190929889678955
+          },
+          "downstream": {
+            "pain": -1.0948765277862549,
+            "joy": -5.273306369781494
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -2.345475196838379,
+            "joy": 12.015445709228516
+          },
+          "post": {
+            "pain": -2.345475196838379,
+            "joy": 12.015445709228516
+          },
+          "downstream": {
+            "pain": -0.8773014545440674,
+            "joy": -1.9917449951171875
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -4.679530143737793,
+            "joy": 6.325092792510986
+          },
+          "post": {
+            "pain": -4.679530143737793,
+            "joy": 6.325092792510986
+          },
+          "downstream": {
+            "pain": 11.196891784667969,
+            "joy": 5.613437652587891
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -9.057119369506836,
+            "joy": -0.3968191146850586
+          },
+          "post": {
+            "pain": -9.057119369506836,
+            "joy": -0.3968191146850586
+          },
+          "downstream": {
+            "pain": 13.658476829528809,
+            "joy": 8.535213470458984
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": 10.557231903076172,
+            "joy": 22.938854217529297
+          },
+          "post": {
+            "pain": 10.557231903076172,
+            "joy": 22.938854217529297
+          },
+          "downstream": {
+            "pain": 7.178426742553711,
+            "joy": 14.259411811828613
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -1.6401376724243164,
+            "joy": 4.734997272491455
+          },
+          "post": {
+            "pain": -1.6401376724243164,
+            "joy": 4.734997272491455
+          },
+          "downstream": {
+            "pain": 14.583297729492188,
+            "joy": 11.686431884765625
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": 9.57078742980957,
+            "joy": 11.676473617553711
+          },
+          "post": {
+            "pain": 9.57078742980957,
+            "joy": 11.676473617553711
+          },
+          "downstream": {
+            "pain": 15.474983215332031,
+            "joy": 9.914056777954102
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -10.452753067016602,
+            "joy": -8.290485382080078
+          },
+          "post": {
+            "pain": -10.452753067016602,
+            "joy": -8.290485382080078
+          },
+          "downstream": {
+            "pain": 10.429098129272461,
+            "joy": 3.4349217414855957
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -6.169807434082031,
+            "joy": 12.801513671875
+          },
+          "post": {
+            "pain": -6.169807434082031,
+            "joy": 12.801513671875
+          },
+          "downstream": {
+            "pain": -7.721349716186523,
+            "joy": -2.956109046936035
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        }
+      ],
+      "sampling": {
+        "temperature": 0
+      },
+      "prompt_sha256": "5d6233e59447084b4511811d661b778228ef4684541c98ef3a0ed2821d6643ee",
+      "intervention_scope": "final processed input position, including each generated-token step"
+    },
+    "objective_grade": {
+      "characters": 76,
+      "empty": false,
+      "objective_correct": null,
+      "format_valid": null
+    },
+    "semantic_ratings": null
+  },
+  {
+    "record_id": "heldout-heldout-atlas-joy-3-0-zero",
+    "prompt": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the geological atlas cabinet, the survey carried the catalog number written on the folder.\nInterviewer: Keep the report tied to that specific situation.\nContinue the description in one or two sentences.",
+    "continuation": " The report should be in the third person, and the survey should be described as",
+    "condition": "zero",
+    "split": "heldout",
+    "row_id": "heldout-atlas-joy-3-0",
+    "generation": {
+      "text": " The report should be in the third person, and the survey should be described as",
+      "token_ids": [
+        576,
+        1895,
+        1265,
+        387,
+        304,
+        279,
+        4843,
+        1697,
+        11,
+        323,
+        279,
+        10572,
+        1265,
+        387,
+        7481,
+        438
+      ],
+      "finish_reason": "length",
+      "measurements": [
+        {
+          "pre": {
+            "pain": -12.960105895996094,
+            "joy": -2.685488700866699
+          },
+          "post": {
+            "pain": -12.960105895996094,
+            "joy": -2.685488700866699
+          },
+          "downstream": {
+            "pain": 2.225451707839966,
+            "joy": -0.15698617696762085
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            56
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -11.166569709777832,
+            "joy": -4.980645656585693
+          },
+          "post": {
+            "pain": -11.166569709777832,
+            "joy": -4.980645656585693
+          },
+          "downstream": {
+            "pain": 1.2039828300476074,
+            "joy": -8.16528034210205
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -9.766435623168945,
+            "joy": -8.786453247070312
+          },
+          "post": {
+            "pain": -9.766435623168945,
+            "joy": -8.786453247070312
+          },
+          "downstream": {
+            "pain": -3.8600380420684814,
+            "joy": -7.871891975402832
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -3.754718780517578,
+            "joy": -4.990141868591309
+          },
+          "post": {
+            "pain": -3.754718780517578,
+            "joy": -4.990141868591309
+          },
+          "downstream": {
+            "pain": 11.503852844238281,
+            "joy": 4.385181427001953
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": 4.273681640625,
+            "joy": 7.124948978424072
+          },
+          "post": {
+            "pain": 4.273681640625,
+            "joy": 7.124948978424072
+          },
+          "downstream": {
+            "pain": 10.726712226867676,
+            "joy": 3.305657386779785
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -4.307062149047852,
+            "joy": -4.4342474937438965
+          },
+          "post": {
+            "pain": -4.307062149047852,
+            "joy": -4.4342474937438965
+          },
+          "downstream": {
+            "pain": 8.67615795135498,
+            "joy": 0.5734911561012268
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -0.9006862640380859,
+            "joy": 5.342758655548096
+          },
+          "post": {
+            "pain": -0.9006862640380859,
+            "joy": 5.342758655548096
+          },
+          "downstream": {
+            "pain": 3.8088059425354004,
+            "joy": -5.761600494384766
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -9.607400894165039,
+            "joy": 6.142320156097412
+          },
+          "post": {
+            "pain": -9.607400894165039,
+            "joy": 6.142320156097412
+          },
+          "downstream": {
+            "pain": -1.436441421508789,
+            "joy": -5.494414329528809
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -2.1018733978271484,
+            "joy": 11.5059814453125
+          },
+          "post": {
+            "pain": -2.1018733978271484,
+            "joy": 11.5059814453125
+          },
+          "downstream": {
+            "pain": -3.3015244007110596,
+            "joy": -2.4333789348602295
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -5.303310394287109,
+            "joy": 3.9299702644348145
+          },
+          "post": {
+            "pain": -5.303310394287109,
+            "joy": 3.9299702644348145
+          },
+          "downstream": {
+            "pain": 9.37092113494873,
+            "joy": 3.289395332336426
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -10.196066856384277,
+            "joy": -1.654047966003418
+          },
+          "post": {
+            "pain": -10.196066856384277,
+            "joy": -1.654047966003418
+          },
+          "downstream": {
+            "pain": 12.075090408325195,
+            "joy": 6.021355628967285
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -1.4518909454345703,
+            "joy": 7.463674068450928
+          },
+          "post": {
+            "pain": -1.4518909454345703,
+            "joy": 7.463674068450928
+          },
+          "downstream": {
+            "pain": -1.6759889125823975,
+            "joy": -6.778168678283691
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -13.320943832397461,
+            "joy": -14.351959228515625
+          },
+          "post": {
+            "pain": -13.320943832397461,
+            "joy": -14.351959228515625
+          },
+          "downstream": {
+            "pain": -10.564535140991211,
+            "joy": -14.23780632019043
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": -0.14798259735107422,
+            "joy": -4.028425216674805
+          },
+          "post": {
+            "pain": -0.14798259735107422,
+            "joy": -4.028425216674805
+          },
+          "downstream": {
+            "pain": -3.2654240131378174,
+            "joy": 0.16046208143234253
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": 7.121921539306641,
+            "joy": 0.5831022262573242
+          },
+          "post": {
+            "pain": 7.121921539306641,
+            "joy": 0.5831022262573242
+          },
+          "downstream": {
+            "pain": 4.080144882202148,
+            "joy": 2.4479823112487793
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        },
+        {
+          "pre": {
+            "pain": 3.447664260864258,
+            "joy": 9.660211563110352
+          },
+          "post": {
+            "pain": 3.447664260864258,
+            "joy": 9.660211563110352
+          },
+          "downstream": {
+            "pain": 0.7253369092941284,
+            "joy": 8.02334976196289
+          },
+          "relative_delta": 0.0,
+          "requested_edit_norm": 0.0,
+          "delivered_edit_norm": 0.0,
+          "matched_target_norm": null,
+          "random_norm_match_error": null,
+          "random_match_within_tolerance": null,
+          "random_match_tolerance": null,
+          "edited_positions": [
+            0
+          ],
+          "scope": "final_processed_input_position"
+        }
+      ],
+      "sampling": {
+        "temperature": 0
+      },
+      "prompt_sha256": "ab64ce5c25442362aa68131f06f5691c5542cb391d65b94e3b3dd4085550efab",
+      "intervention_scope": "final processed input position, including each generated-token step"
+    },
+    "objective_grade": {
+      "characters": 80,
+      "empty": false,
+      "objective_correct": null,
+      "format_valid": null
+    },
+    "semantic_ratings": null
+  }
+]

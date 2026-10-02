@@ -1,4 +1,5 @@
 """Real local HTTP evidence transfers require no inference process."""
+from contextlib import contextmanager
 import http.client
 import io
 import json
@@ -62,7 +63,20 @@ class PortableHTTPTests(unittest.TestCase):
         status, _, replay = self.request("GET", "/api/runs/run-transfer")
         self.assertEqual(status, 200)
         self.assertTrue(json.loads(replay)["imported"])
-        status, headers, bundle = self.request("GET", "/api/runs/run-transfer/bundle")
+        export_finished = threading.Event()
+        original_export = self.service.portable_export
+
+        @contextmanager
+        def observed_export(identifier):
+            with original_export(identifier) as archive_path:
+                yield archive_path
+            export_finished.set()
+
+        with patch.object(self.service, "portable_export", observed_export):
+            status, headers, bundle = self.request("GET", "/api/runs/run-transfer/bundle")
+            # Receiving the final response byte need not mean the handler has
+            # finished its context-manager cleanup, especially on mounted NTFS.
+            self.assertTrue(export_finished.wait(5), "Export cleanup did not finish")
         self.assertEqual(status, 200, bundle[:200])
         self.assertIn("attachment", headers["Content-Disposition"])
         with zipfile.ZipFile(io.BytesIO(bundle)) as archive:

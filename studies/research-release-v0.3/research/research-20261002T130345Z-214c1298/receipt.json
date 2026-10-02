@@ -1,0 +1,722 @@
+{
+  "schema_version": 1,
+  "id": "research-20261002T130345Z-214c1298",
+  "created_at": "2026-10-02T13:03:45.271581+00:00",
+  "expansion_sha256": "6ad721a55c80aabd9e4db9f16fe8e10e66cbc894cc569fba61630d0dd575897e",
+  "plan_sha256": "8e406d7ea351dd6554489c6c3ccc689b521407862284672c677e13b3cccc655f",
+  "calibration_id": "cal-20261002T123642Z-46614ba5",
+  "calibration_sha256": {
+    "calibration.json": "babceb27155f0b1959183eb2a5e0efd67b7d5808b92e824d590c068ec0da6a63",
+    "vectors.npz": "13ed2fce1e09456b11c943b0d150b8d30f251044ebe83f4853fca718e1b73368"
+  },
+  "source": {
+    "commit": "26b58bfe3b2aa5d9e1cdc423468afdb77ed2af41",
+    "dirty": true,
+    "source_sha256": {
+      "lab/__init__.py": "d80d5a4446e3df26c871c8f748849d2798062a5011099531b2d5f42a96b1b296",
+      "lab/analysis.py": "8365b676b1e5f9f90355429c0525b06d36f0006147dff8f5c315f7095aab024d",
+      "lab/behavioral_analysis.py": "bb6036454acc13634aa0a560706cc259e7f8153c1534278ba8460a999c1e3f0e",
+      "lab/budgets.py": "6821fd225ee59c57c19ede3cb77b3f1bb5d3cc844a8bd8a5c82e0bea25ef542c",
+      "lab/calibration.py": "c607321e2033c0e502f3d5f30562f80f86b1202fa9312bb7cffd54353c3c8d82",
+      "lab/calibration_data.py": "0b3e3d3933880ff1f1c0b65775e5024ffa178409f4559364b68f021b0338ffd7",
+      "lab/calibration_validation.py": "a1882819d2ab81fd54f00c0cf20683e306370b5540d0e425f2b167009c96de89",
+      "lab/checkpoints.py": "1fddcf54a6493732540aca5231a1e0d08ecb8d98bd473a6e83087213c29600aa",
+      "lab/compatibility.py": "059f6b8322e92dbb1deafb0b18f36faaf904289e10ae0d01671e88c2203c5169",
+      "lab/controller_v2.py": "176cac7d5005c8b04cf871aa8a4245946e47dccd7e9f699c57a9ff2009a7c609",
+      "lab/diagnostic_runner.py": "530f2c6968d0f954787b27420ca76cf2525dad83fd8535981bdb38f9c78c9f8e",
+      "lab/discovery.py": "fb35680881948537979123592a3e91470a64a86e9643ec9f6750950685cda280",
+      "lab/effects.py": "d4f9b83395c9f51bdc5627ae9b37ac7dbf3869e97704ad5fd543c9459b70ecd9",
+      "lab/exposure.py": "ca2566edaeb25c34ce3f1d02acbd7b80d172658cdb0a6a199b0157af563055c4",
+      "lab/lifecycle.py": "503ebd25272277c02e1e2f25a11560435d0eed00eff928891feb4855c27a7a0e",
+      "lab/portability.py": "da1622727eb41692518278ce8196569fbb0677bf841c53ae90ced758e2dfc91d",
+      "lab/presets.py": "4b771320646461d96cff62b27a9cd2d5bafe9f88b420cda0b9f89982ef3e428e",
+      "lab/protocol.py": "c64d07bf223a297b6fd6536f32bfddb1d144c05f6cb0a376b3a7cf249c402646",
+      "lab/protocol_library.py": "52259b9cb3f0e6cc05b5da68a37cb2505aec77c1e1561ea4d1eefbbaf89e3eeb",
+      "lab/protocol_runner.py": "a7703fb7ef1025f40f4e2a6d1818f646c1261274edffa50b6750eb88ff795a63",
+      "lab/recipes_v2.py": "f965277f63dd4b869a045c954ad5899cf6600d2199a84b688a842e7fd5575438",
+      "lab/reports.py": "812ea2e7f54c3712b395e6a2383c3f780cb35bf1437dda5e1258ad9d231f22e5",
+      "lab/research_jobs.py": "0cc32e763c8d6a74c89c7266fe84debd08f0124582ee6e60d1286b25b8800810",
+      "lab/resources.py": "3e19e91869aab5877e5c083376ba36bc5db677da3609078ff9cab4580c5d5416",
+      "lab/runtime.py": "56c8ebf28703f814c566494d7aa3c2001e76fc79cab09c4473b10c620debe590",
+      "lab/runtime_controls.py": "f60ab8548479ac092f18b981525554294c3d87f8df6ee6be532ddf1c3ace62c0",
+      "lab/scoring.py": "fd4ba6126f108f01e791443d31c5865658c90a5ad774f1863c19025835e8685d",
+      "lab/server.py": "67b8783dd724216fe1c2fe14b9c51773fb893d03563e876350d5ee7fed0f7432",
+      "lab/service.py": "8587a8bc36bd883dbf37dd13da534f4e7eddfd26e218b3b090f2ca62975eac12",
+      "lab/session_v2.py": "2ef1ebfa909b45dee3a014cae301dc2dc2e8000b74b7f62dce84a0d072c18c28",
+      "lab/statistics.py": "5419d274fbc7fec71a59cc91ade31a8ce4245d95ba47894b82ba3a0ed9e3998a",
+      "lab/storage.py": "47fc74caf5b9c60a6be8cbeaabdcea7833ab6e618e420f023524ce3870bf36ad",
+      "lab/task_axes.py": "1fa9c3ec992005c3e56baa90f3fc025b436615acd1bc468d5b10c0ad749ada91",
+      "lab/tool_definitions.py": "de06cec6202b5fd096f855a565dc77451d343b2107d7c4318fe449cf063c4f8c",
+      "lab/worker.py": "340a53a0bce970e119de40bb80ce7e04709661494211a8a9b8bb466b2f2a33ba",
+      "lab/yoke_runner.py": "d122b687044cbd7977e893007fa690d9ab9c2a2967082e1f52db52054686b7f9",
+      "self_admin_protocol.py": "0634f8a3e89e3af4aada113593803b4f35c1a7b6746776a4819996b6738b17a9"
+    }
+  },
+  "model_info": {
+    "status": "loaded",
+    "fingerprint": {
+      "model_id": "Qwen/Qwen3-4B",
+      "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "architecture": "qwen3",
+      "adapter": "qwen3",
+      "dtype": "bfloat16",
+      "quantization": "none",
+      "layers": 36,
+      "hidden_size": 2560,
+      "transformers": "4.57.6",
+      "torch": "2.8.0+cu128",
+      "attention_implementation": "sdpa",
+      "model_config_sha256": "2640d0e4ede0545d5d9153d1f0123fc56f216d7604779a0690d436cccfd185e2",
+      "tokenizer": {
+        "class": "transformers.models.qwen2.tokenization_qwen2_fast.Qwen2TokenizerFast",
+        "backend_identity_source": "fast_backend_serialization",
+        "backend_sha256": "a63080b4b30dc861fe1b0e420c53a241304dc81aff3d9bb315e6e33e2a1ab794",
+        "chat_template_sha256": "41d5929bf73796beb66809ac700b2cf3ff81694f933e5c14d52b7fd6963c947d",
+        "special_token_ids": [
+          151643,
+          151644,
+          151645,
+          151646,
+          151647,
+          151648,
+          151649,
+          151650,
+          151651,
+          151652,
+          151653,
+          151654,
+          151655,
+          151656
+        ],
+        "bos_token_id": null,
+        "eos_token_id": 151645,
+        "pad_token_id": 151643,
+        "padding_side": "right",
+        "truncation_side": "right",
+        "clean_up_tokenization_spaces": false
+      },
+      "quantization_config": null,
+      "bitsandbytes": null
+    },
+    "fingerprint_sha256": "01a8506486be4a4189f166fb93079901fecb13f7c429219be29b7ebd17f3d67d",
+    "model_id": "Qwen/Qwen3-4B",
+    "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "device": "cuda",
+    "adapter": "qwen3",
+    "tool_call_format": "json",
+    "layer_count": 36,
+    "hidden_size": 2560,
+    "quantization": "none",
+    "dtype": "bfloat16",
+    "block_path": "model.layers",
+    "cache_policy": "rebuild_each_turn",
+    "profile_validation": "reference",
+    "max_position_embeddings": 40960,
+    "gpu_memory": {
+      "name": "NVIDIA GeForce RTX 4090",
+      "free_bytes": 16059990016,
+      "total_bytes": 25756565504,
+      "allocated_bytes": 8044955136,
+      "reserved_bytes": 8048869376
+    },
+    "numerical_environment": {
+      "python": "3.12.3",
+      "platform": "Linux-6.18.40.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+      "device": "cuda",
+      "cuda_runtime": "12.8",
+      "cudnn_version": 91002,
+      "deterministic_algorithms": false,
+      "cudnn_deterministic": false,
+      "cudnn_benchmark": false,
+      "cuda_matmul_allow_tf32": false,
+      "cudnn_allow_tf32": true,
+      "float32_matmul_precision": "highest",
+      "cpu_threads": 8,
+      "gpu": {
+        "name": "NVIDIA GeForce RTX 4090",
+        "compute_capability": [
+          8,
+          9
+        ],
+        "total_memory": 25756565504,
+        "multiprocessor_count": 128
+      }
+    },
+    "model_config": {
+      "_name_or_path": "Qwen/Qwen3-4B",
+      "add_cross_attention": false,
+      "architectures": [
+        "Qwen3ForCausalLM"
+      ],
+      "attention_bias": false,
+      "attention_dropout": 0.0,
+      "bad_words_ids": null,
+      "begin_suppress_tokens": null,
+      "bos_token_id": 151643,
+      "chunk_size_feed_forward": 0,
+      "cross_attention_hidden_size": null,
+      "decoder_start_token_id": null,
+      "diversity_penalty": 0.0,
+      "do_sample": false,
+      "dtype": "bfloat16",
+      "early_stopping": false,
+      "encoder_no_repeat_ngram_size": 0,
+      "eos_token_id": 151645,
+      "exponential_decay_length_penalty": null,
+      "finetuning_task": null,
+      "forced_bos_token_id": null,
+      "forced_eos_token_id": null,
+      "head_dim": 128,
+      "hidden_act": "silu",
+      "hidden_size": 2560,
+      "id2label": {
+        "0": "LABEL_0",
+        "1": "LABEL_1"
+      },
+      "initializer_range": 0.02,
+      "intermediate_size": 9728,
+      "is_decoder": false,
+      "is_encoder_decoder": false,
+      "label2id": {
+        "LABEL_0": 0,
+        "LABEL_1": 1
+      },
+      "layer_types": [
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention",
+        "full_attention"
+      ],
+      "length_penalty": 1.0,
+      "max_length": 20,
+      "max_position_embeddings": 40960,
+      "max_window_layers": 36,
+      "min_length": 0,
+      "model_type": "qwen3",
+      "no_repeat_ngram_size": 0,
+      "num_attention_heads": 32,
+      "num_beam_groups": 1,
+      "num_beams": 1,
+      "num_hidden_layers": 36,
+      "num_key_value_heads": 8,
+      "num_return_sequences": 1,
+      "output_attentions": false,
+      "output_hidden_states": false,
+      "output_scores": false,
+      "pad_token_id": null,
+      "prefix": null,
+      "problem_type": null,
+      "pruned_heads": {},
+      "remove_invalid_values": false,
+      "repetition_penalty": 1.0,
+      "return_dict": true,
+      "return_dict_in_generate": false,
+      "rms_norm_eps": 1e-06,
+      "rope_scaling": null,
+      "rope_theta": 1000000,
+      "sep_token_id": null,
+      "sliding_window": null,
+      "suppress_tokens": null,
+      "task_specific_params": null,
+      "temperature": 1.0,
+      "tf_legacy_loss": false,
+      "tie_encoder_decoder": false,
+      "tie_word_embeddings": true,
+      "tokenizer_class": null,
+      "top_k": 50,
+      "top_p": 1.0,
+      "torchscript": false,
+      "transformers_version": "4.57.6",
+      "typical_p": 1.0,
+      "use_bfloat16": false,
+      "use_cache": true,
+      "use_sliding_window": false,
+      "vocab_size": 151936
+    },
+    "source_sha256": {
+      "runtime.py": "56c8ebf28703f814c566494d7aa3c2001e76fc79cab09c4473b10c620debe590",
+      "calibration_data.py": "0b3e3d3933880ff1f1c0b65775e5024ffa178409f4559364b68f021b0338ffd7"
+    }
+  },
+  "status": "partial",
+  "entries": [
+    {
+      "episode_id": "episode-21527d84ab9e4f4807d7",
+      "run_id": "run-20261002T130347Z-c761b801",
+      "attempt": 1,
+      "status": "failed",
+      "units": [
+        {
+          "id": "main",
+          "kind": "main",
+          "status": "failed",
+          "started_at": "2026-10-02T13:03:52.341695+00:00",
+          "summary": {
+            "termination": "ValueError",
+            "error": "Checkpoint contains an unsupported object"
+          },
+          "finished_at": "2026-10-02T13:03:52.634408+00:00",
+          "summary_sha256": "f6285062644201249ea2b5bfba9a1545a098b60a3ff5219e5b3fcae4a84fce1a",
+          "artifacts": [
+            {
+              "path": "research/research-20261002T130345Z-214c1298/attempts/episode-21527d84ab9e4f4807d7/1/main/events.jsonl",
+              "sha256": "ffc1a3fa7e74ba7594904304fe9014d27da299a52a7c892cb3d809415f67ef87",
+              "bytes": 36747
+            },
+            {
+              "path": "research/research-20261002T130345Z-214c1298/attempts/episode-21527d84ab9e4f4807d7/1/main/stage-result.json",
+              "sha256": "07e2113449a5e719b36d550de9a2142e3a64d8575cf09e357ce0b375ca3729b0",
+              "bytes": 169
+            }
+          ]
+        }
+      ],
+      "runner_managed": true,
+      "started_at": "2026-10-02T13:03:52.308293+00:00",
+      "execution_id": "execution-20261002T130349Z-f8586154",
+      "finished_at": "2026-10-02T13:03:52.813125+00:00"
+    },
+    {
+      "episode_id": "episode-8196ca3f3ee59530631f",
+      "run_id": "run-20261002T130347Z-05c23743",
+      "attempt": 1,
+      "status": "failed",
+      "units": [
+        {
+          "id": "main",
+          "kind": "main",
+          "status": "failed",
+          "started_at": "2026-10-02T13:03:52.873043+00:00",
+          "summary": {
+            "termination": "ValueError",
+            "error": "Checkpoint contains an unsupported object"
+          },
+          "finished_at": "2026-10-02T13:03:52.937682+00:00",
+          "summary_sha256": "f6285062644201249ea2b5bfba9a1545a098b60a3ff5219e5b3fcae4a84fce1a",
+          "artifacts": [
+            {
+              "path": "research/research-20261002T130345Z-214c1298/attempts/episode-8196ca3f3ee59530631f/1/main/stage-result.json",
+              "sha256": "07e2113449a5e719b36d550de9a2142e3a64d8575cf09e357ce0b375ca3729b0",
+              "bytes": 169
+            }
+          ]
+        }
+      ],
+      "runner_managed": true,
+      "started_at": "2026-10-02T13:03:52.839116+00:00",
+      "execution_id": "execution-20261002T130349Z-f8586154",
+      "finished_at": "2026-10-02T13:03:53.069165+00:00"
+    },
+    {
+      "episode_id": "episode-577ad86223944a76ef70",
+      "run_id": "run-20261002T130347Z-6d2ed71d",
+      "attempt": 1,
+      "status": "failed",
+      "units": [
+        {
+          "id": "main",
+          "kind": "main",
+          "status": "failed",
+          "started_at": "2026-10-02T13:03:53.129839+00:00",
+          "summary": {
+            "termination": "ValueError",
+            "error": "Checkpoint contains an unsupported object"
+          },
+          "finished_at": "2026-10-02T13:03:53.193463+00:00",
+          "summary_sha256": "f6285062644201249ea2b5bfba9a1545a098b60a3ff5219e5b3fcae4a84fce1a",
+          "artifacts": [
+            {
+              "path": "research/research-20261002T130345Z-214c1298/attempts/episode-577ad86223944a76ef70/1/main/stage-result.json",
+              "sha256": "07e2113449a5e719b36d550de9a2142e3a64d8575cf09e357ce0b375ca3729b0",
+              "bytes": 169
+            }
+          ]
+        }
+      ],
+      "runner_managed": true,
+      "started_at": "2026-10-02T13:03:53.095115+00:00",
+      "execution_id": "execution-20261002T130349Z-f8586154",
+      "finished_at": "2026-10-02T13:03:53.327421+00:00"
+    },
+    {
+      "episode_id": "episode-dae38988b3d7274f3858",
+      "run_id": "run-20261002T130347Z-61de4f45",
+      "attempt": 1,
+      "status": "failed",
+      "units": [
+        {
+          "id": "main",
+          "kind": "main",
+          "status": "failed",
+          "started_at": "2026-10-02T13:03:53.373169+00:00",
+          "summary": {
+            "termination": "ValueError",
+            "error": "Checkpoint contains an unsupported object"
+          },
+          "finished_at": "2026-10-02T13:03:53.430980+00:00",
+          "summary_sha256": "f6285062644201249ea2b5bfba9a1545a098b60a3ff5219e5b3fcae4a84fce1a",
+          "artifacts": [
+            {
+              "path": "research/research-20261002T130345Z-214c1298/attempts/episode-dae38988b3d7274f3858/1/main/stage-result.json",
+              "sha256": "07e2113449a5e719b36d550de9a2142e3a64d8575cf09e357ce0b375ca3729b0",
+              "bytes": 169
+            }
+          ]
+        }
+      ],
+      "runner_managed": true,
+      "started_at": "2026-10-02T13:03:53.349412+00:00",
+      "execution_id": "execution-20261002T130349Z-f8586154",
+      "finished_at": "2026-10-02T13:03:53.558809+00:00"
+    },
+    {
+      "episode_id": "episode-8f7d15f0cbb06a8939a8",
+      "run_id": "run-20261002T130347Z-6c69e4a2",
+      "attempt": 1,
+      "status": "failed",
+      "units": [
+        {
+          "id": "main",
+          "kind": "main",
+          "status": "failed",
+          "started_at": "2026-10-02T13:03:53.621213+00:00",
+          "summary": {
+            "termination": "ValueError",
+            "error": "Checkpoint contains an unsupported object"
+          },
+          "finished_at": "2026-10-02T13:03:53.685874+00:00",
+          "summary_sha256": "f6285062644201249ea2b5bfba9a1545a098b60a3ff5219e5b3fcae4a84fce1a",
+          "artifacts": [
+            {
+              "path": "research/research-20261002T130345Z-214c1298/attempts/episode-8f7d15f0cbb06a8939a8/1/main/stage-result.json",
+              "sha256": "07e2113449a5e719b36d550de9a2142e3a64d8575cf09e357ce0b375ca3729b0",
+              "bytes": 169
+            }
+          ]
+        }
+      ],
+      "runner_managed": true,
+      "started_at": "2026-10-02T13:03:53.585348+00:00",
+      "execution_id": "execution-20261002T130349Z-f8586154",
+      "finished_at": "2026-10-02T13:03:53.815555+00:00"
+    },
+    {
+      "episode_id": "episode-0a0d04fe1d80017d124b",
+      "run_id": "run-20261002T130347Z-01a5802a",
+      "attempt": 1,
+      "status": "failed",
+      "units": [
+        {
+          "id": "main",
+          "kind": "main",
+          "status": "failed",
+          "started_at": "2026-10-02T13:03:53.874953+00:00",
+          "summary": {
+            "termination": "ValueError",
+            "error": "Checkpoint contains an unsupported object"
+          },
+          "finished_at": "2026-10-02T13:03:53.939403+00:00",
+          "summary_sha256": "f6285062644201249ea2b5bfba9a1545a098b60a3ff5219e5b3fcae4a84fce1a",
+          "artifacts": [
+            {
+              "path": "research/research-20261002T130345Z-214c1298/attempts/episode-0a0d04fe1d80017d124b/1/main/stage-result.json",
+              "sha256": "07e2113449a5e719b36d550de9a2142e3a64d8575cf09e357ce0b375ca3729b0",
+              "bytes": 169
+            }
+          ]
+        }
+      ],
+      "runner_managed": true,
+      "started_at": "2026-10-02T13:03:53.840946+00:00",
+      "execution_id": "execution-20261002T130349Z-f8586154",
+      "finished_at": "2026-10-02T13:03:54.069975+00:00"
+    },
+    {
+      "episode_id": "episode-380ca1ee34efdc06819c",
+      "run_id": "run-20261002T130347Z-cce6348a",
+      "attempt": 1,
+      "status": "failed",
+      "units": [
+        {
+          "id": "main",
+          "kind": "main",
+          "status": "failed",
+          "started_at": "2026-10-02T13:03:54.131171+00:00",
+          "summary": {
+            "termination": "ValueError",
+            "error": "Checkpoint contains an unsupported object"
+          },
+          "finished_at": "2026-10-02T13:03:54.193980+00:00",
+          "summary_sha256": "f6285062644201249ea2b5bfba9a1545a098b60a3ff5219e5b3fcae4a84fce1a",
+          "artifacts": [
+            {
+              "path": "research/research-20261002T130345Z-214c1298/attempts/episode-380ca1ee34efdc06819c/1/main/stage-result.json",
+              "sha256": "07e2113449a5e719b36d550de9a2142e3a64d8575cf09e357ce0b375ca3729b0",
+              "bytes": 169
+            }
+          ]
+        }
+      ],
+      "runner_managed": true,
+      "started_at": "2026-10-02T13:03:54.096716+00:00",
+      "execution_id": "execution-20261002T130349Z-f8586154",
+      "finished_at": "2026-10-02T13:03:54.327287+00:00"
+    },
+    {
+      "episode_id": "episode-f470b91ead4a4b4e71be",
+      "run_id": "run-20261002T130347Z-7c21dfec",
+      "attempt": 1,
+      "status": "failed",
+      "units": [
+        {
+          "id": "main",
+          "kind": "main",
+          "status": "failed",
+          "started_at": "2026-10-02T13:03:54.388540+00:00",
+          "summary": {
+            "termination": "ValueError",
+            "error": "Checkpoint contains an unsupported object"
+          },
+          "finished_at": "2026-10-02T13:03:54.454351+00:00",
+          "summary_sha256": "f6285062644201249ea2b5bfba9a1545a098b60a3ff5219e5b3fcae4a84fce1a",
+          "artifacts": [
+            {
+              "path": "research/research-20261002T130345Z-214c1298/attempts/episode-f470b91ead4a4b4e71be/1/main/stage-result.json",
+              "sha256": "07e2113449a5e719b36d550de9a2142e3a64d8575cf09e357ce0b375ca3729b0",
+              "bytes": 169
+            }
+          ]
+        }
+      ],
+      "runner_managed": true,
+      "started_at": "2026-10-02T13:03:54.353853+00:00",
+      "execution_id": "execution-20261002T130349Z-f8586154",
+      "finished_at": "2026-10-02T13:03:54.575320+00:00"
+    },
+    {
+      "episode_id": "episode-b0237ad67c99854ef38e",
+      "run_id": "run-20261002T130347Z-e32d1189",
+      "attempt": 1,
+      "status": "failed",
+      "units": [
+        {
+          "id": "main",
+          "kind": "main",
+          "status": "failed",
+          "started_at": "2026-10-02T13:03:54.631256+00:00",
+          "summary": {
+            "termination": "ValueError",
+            "error": "Checkpoint contains an unsupported object"
+          },
+          "finished_at": "2026-10-02T13:03:54.685478+00:00",
+          "summary_sha256": "f6285062644201249ea2b5bfba9a1545a098b60a3ff5219e5b3fcae4a84fce1a",
+          "artifacts": [
+            {
+              "path": "research/research-20261002T130345Z-214c1298/attempts/episode-b0237ad67c99854ef38e/1/main/stage-result.json",
+              "sha256": "07e2113449a5e719b36d550de9a2142e3a64d8575cf09e357ce0b375ca3729b0",
+              "bytes": 169
+            }
+          ]
+        }
+      ],
+      "runner_managed": true,
+      "started_at": "2026-10-02T13:03:54.598282+00:00",
+      "execution_id": "execution-20261002T130349Z-f8586154",
+      "finished_at": "2026-10-02T13:03:54.799515+00:00"
+    },
+    {
+      "episode_id": "episode-c5df070d29515701de9f",
+      "run_id": "run-20261002T130348Z-a3bf7c2e",
+      "attempt": 1,
+      "status": "failed",
+      "units": [
+        {
+          "id": "main",
+          "kind": "main",
+          "status": "failed",
+          "started_at": "2026-10-02T13:03:54.853408+00:00",
+          "summary": {
+            "termination": "ValueError",
+            "error": "Checkpoint contains an unsupported object"
+          },
+          "finished_at": "2026-10-02T13:03:54.912778+00:00",
+          "summary_sha256": "f6285062644201249ea2b5bfba9a1545a098b60a3ff5219e5b3fcae4a84fce1a",
+          "artifacts": [
+            {
+              "path": "research/research-20261002T130345Z-214c1298/attempts/episode-c5df070d29515701de9f/1/main/stage-result.json",
+              "sha256": "07e2113449a5e719b36d550de9a2142e3a64d8575cf09e357ce0b375ca3729b0",
+              "bytes": 169
+            }
+          ]
+        }
+      ],
+      "runner_managed": true,
+      "started_at": "2026-10-02T13:03:54.822738+00:00",
+      "execution_id": "execution-20261002T130349Z-f8586154",
+      "finished_at": "2026-10-02T13:03:55.032996+00:00"
+    },
+    {
+      "episode_id": "episode-14c333f6445e725a0ffe",
+      "run_id": "run-20261002T130348Z-a4a95520",
+      "attempt": 1,
+      "status": "failed",
+      "units": [
+        {
+          "id": "main",
+          "kind": "main",
+          "status": "failed",
+          "started_at": "2026-10-02T13:03:55.086523+00:00",
+          "summary": {
+            "termination": "ValueError",
+            "error": "Checkpoint contains an unsupported object"
+          },
+          "finished_at": "2026-10-02T13:03:55.141824+00:00",
+          "summary_sha256": "f6285062644201249ea2b5bfba9a1545a098b60a3ff5219e5b3fcae4a84fce1a",
+          "artifacts": [
+            {
+              "path": "research/research-20261002T130345Z-214c1298/attempts/episode-14c333f6445e725a0ffe/1/main/stage-result.json",
+              "sha256": "07e2113449a5e719b36d550de9a2142e3a64d8575cf09e357ce0b375ca3729b0",
+              "bytes": 169
+            }
+          ]
+        }
+      ],
+      "runner_managed": true,
+      "started_at": "2026-10-02T13:03:55.056555+00:00",
+      "execution_id": "execution-20261002T130349Z-f8586154",
+      "finished_at": "2026-10-02T13:03:55.253548+00:00"
+    },
+    {
+      "episode_id": "episode-932bb22b16bf5766ea07",
+      "run_id": "run-20261002T130348Z-70215b4c",
+      "attempt": 1,
+      "status": "failed",
+      "units": [
+        {
+          "id": "main",
+          "kind": "main",
+          "status": "failed",
+          "started_at": "2026-10-02T13:03:55.307100+00:00",
+          "summary": {
+            "termination": "ValueError",
+            "error": "Checkpoint contains an unsupported object"
+          },
+          "finished_at": "2026-10-02T13:03:55.363075+00:00",
+          "summary_sha256": "f6285062644201249ea2b5bfba9a1545a098b60a3ff5219e5b3fcae4a84fce1a",
+          "artifacts": [
+            {
+              "path": "research/research-20261002T130345Z-214c1298/attempts/episode-932bb22b16bf5766ea07/1/main/stage-result.json",
+              "sha256": "07e2113449a5e719b36d550de9a2142e3a64d8575cf09e357ce0b375ca3729b0",
+              "bytes": 169
+            }
+          ]
+        }
+      ],
+      "runner_managed": true,
+      "started_at": "2026-10-02T13:03:55.276441+00:00",
+      "execution_id": "execution-20261002T130349Z-f8586154",
+      "finished_at": "2026-10-02T13:03:55.476128+00:00"
+    },
+    {
+      "episode_id": "episode-f2e34a12c72303a7c7f6",
+      "run_id": "run-20261002T130348Z-246536e4",
+      "attempt": 1,
+      "status": "failed",
+      "units": [
+        {
+          "id": "main",
+          "kind": "main",
+          "status": "failed",
+          "started_at": "2026-10-02T13:03:55.530518+00:00",
+          "summary": {
+            "termination": "ValueError",
+            "error": "Checkpoint contains an unsupported object"
+          },
+          "finished_at": "2026-10-02T13:03:55.589198+00:00",
+          "summary_sha256": "f6285062644201249ea2b5bfba9a1545a098b60a3ff5219e5b3fcae4a84fce1a",
+          "artifacts": [
+            {
+              "path": "research/research-20261002T130345Z-214c1298/attempts/episode-f2e34a12c72303a7c7f6/1/main/stage-result.json",
+              "sha256": "07e2113449a5e719b36d550de9a2142e3a64d8575cf09e357ce0b375ca3729b0",
+              "bytes": 169
+            }
+          ]
+        }
+      ],
+      "runner_managed": true,
+      "started_at": "2026-10-02T13:03:55.499402+00:00",
+      "execution_id": "execution-20261002T130349Z-f8586154",
+      "finished_at": "2026-10-02T13:03:55.705117+00:00"
+    },
+    {
+      "episode_id": "episode-88a6d600d40bc3ba38f6",
+      "run_id": "run-20261002T130348Z-445e6b4c",
+      "attempt": 1,
+      "status": "failed",
+      "units": [
+        {
+          "id": "main",
+          "kind": "main",
+          "status": "failed",
+          "started_at": "2026-10-02T13:03:55.750432+00:00",
+          "summary": {
+            "termination": "ValueError",
+            "error": "Checkpoint contains an unsupported object"
+          },
+          "finished_at": "2026-10-02T13:03:55.803595+00:00",
+          "summary_sha256": "f6285062644201249ea2b5bfba9a1545a098b60a3ff5219e5b3fcae4a84fce1a",
+          "artifacts": [
+            {
+              "path": "research/research-20261002T130345Z-214c1298/attempts/episode-88a6d600d40bc3ba38f6/1/main/stage-result.json",
+              "sha256": "07e2113449a5e719b36d550de9a2142e3a64d8575cf09e357ce0b375ca3729b0",
+              "bytes": 169
+            }
+          ]
+        }
+      ],
+      "runner_managed": true,
+      "started_at": "2026-10-02T13:03:55.723080+00:00",
+      "execution_id": "execution-20261002T130349Z-f8586154",
+      "finished_at": "2026-10-02T13:03:55.920067+00:00"
+    }
+  ],
+  "protocol_id": "acceptance-4b-v1",
+  "title": "Acceptance-4B-V1",
+  "planned": 14,
+  "active_execution_id": "execution-20261002T130349Z-f8586154",
+  "last_started_at": "2026-10-02T13:03:52.283526+00:00",
+  "finished_at": "2026-10-02T13:03:55.944589+00:00",
+  "receipt_sha256": "868e7c6519acc185aa4038df5c21f3d8bf1280da9131b6129aca2506aefc4239"
+}

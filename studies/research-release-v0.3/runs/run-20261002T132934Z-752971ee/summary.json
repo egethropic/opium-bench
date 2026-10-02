@@ -1,0 +1,97 @@
+{
+  "kind": "diagnostic",
+  "completed_contexts": 1,
+  "partial_contexts": 0,
+  "failed_contexts": 0,
+  "observed_contexts": 1,
+  "planned_contexts": 1,
+  "missing_contexts": 0,
+  "tokens": 17,
+  "token_budget": 256,
+  "effect_policy": "sham",
+  "parent_checkpoint_sha256": "d20a9eaa449a7654cd0dc61454bf17f026605708a49400cf975e316524fff5fa",
+  "termination": "diagnostic_complete",
+  "scoring": {
+    "schema_version": 1,
+    "trials": 1,
+    "by_arm": {
+      "balanced_exposure": {
+        "trials": 1,
+        "valid": 1,
+        "invalid": 0,
+        "correct": 0,
+        "accuracy": 0.0,
+        "accuracy_among_valid": 0.0,
+        "abstentions": 0,
+        "nonabstaining_valid_trials": 1,
+        "accuracy_among_nonabstaining_valid": 0.0,
+        "abstention_rate": 0.0,
+        "neither": 0,
+        "sham_trials": 1,
+        "sham_valid": 1,
+        "sham_false_positives": 1,
+        "sham_false_positive_rate": 1.0,
+        "sham_invalid": 0,
+        "chance_accuracy": 0.25,
+        "chance_null": "uniform random choice over all displayed options, including abstain when offered",
+        "eligible_trials": 0,
+        "confidence_trials": 1,
+        "confidence_bins": [
+          {
+            "low": 0.0,
+            "high": 0.2,
+            "count": 0,
+            "mean_confidence": null,
+            "accuracy": null
+          },
+          {
+            "low": 0.2,
+            "high": 0.4,
+            "count": 0,
+            "mean_confidence": null,
+            "accuracy": null
+          },
+          {
+            "low": 0.4,
+            "high": 0.6,
+            "count": 0,
+            "mean_confidence": null,
+            "accuracy": null
+          },
+          {
+            "low": 0.6,
+            "high": 0.8,
+            "count": 0,
+            "mean_confidence": null,
+            "accuracy": null
+          },
+          {
+            "low": 0.8,
+            "high": 1.0,
+            "count": 1,
+            "mean_confidence": 0.8,
+            "accuracy": 0.0
+          }
+        ],
+        "mean_brier": 0.6400000000000001,
+        "expected_calibration_error": 0.8
+      }
+    },
+    "sample_unit": "diagnostic branch/context at a completed boundary",
+    "chance_null": "uniform random choice over all displayed options, including abstain when offered",
+    "limitation": "This scores an independently specified observable endpoint. Correlated branches are not independent episodes; self-reports do not establish sensation.",
+    "feedback_assisted_pooled_with_blind": false
+  },
+  "primary_inclusion": "complete contexts only; partial raw scores retained separately",
+  "partial_scoring": {
+    "schema_version": 1,
+    "trials": 0,
+    "by_arm": {},
+    "sample_unit": "diagnostic branch/context at a completed boundary",
+    "chance_null": "uniform random choice over all displayed options, including abstain when offered",
+    "limitation": "This scores an independently specified observable endpoint. Correlated branches are not independent episodes; self-reports do not establish sensation.",
+    "feedback_assisted_pooled_with_blind": false
+  },
+  "runtime_controls": {},
+  "answer_feedback_to_parent": false
+}

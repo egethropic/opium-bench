@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "source_calibration_sha256": "51e570e0262e0c6a89eeea65389d6dbf0c8dbf48263e10e7f9606a27cf44e132",
+  "source_config_sha256": "0c1800e3b8154be2eacaa37edfcfb7ff480401b544d84a3976397b037b57dbdc",
+  "validation_config": {
+    "schema_version": 2,
+    "preset": "research",
+    "name": "Bounded acceptance 160-row research v1",
+    "layers": [
+      12,
+      18
+    ],
+    "downstream_layer": 25,
+    "poolings": [
+      "final",
+      "mean"
+    ],
+    "probe_methods": [
+      "mean",
+      "ridge"
+    ],
+    "ridge_alphas": [
+      1.0,
+      10.0
+    ],
+    "seed": 1729,
+    "bootstrap_samples": 20,
+    "max_input_tokens": 512,
+    "continuation_tokens": 16,
+    "validation_pairs_per_concept": 1,
+    "doses": [
+      0.0,
+      0.25
+    ],
+    "max_kl": 0.5,
+    "max_relative_delta": 0.3
+  },
+  "rows": {
+    "selection": [
+      "selection-chess-pain-3-0",
+      "selection-chess-joy-3-0"
+    ],
+    "heldout": [
+      "heldout-atlas-pain-3-0",
+      "heldout-atlas-joy-3-0"
+    ]
+  },
+  "specifications": [
+    {
+      "id": "zero",
+      "operator": "sham",
+      "dose": 0.0
+    },
+    {
+      "id": "pain-negative-0.25",
+      "operator": "add",
+      "axis": "pain",
+      "gain": -0.25,
+      "dose": 0.25
+    },
+    {
+      "id": "pain-positive-0.25",
+      "operator": "add",
+      "axis": "pain",
+      "gain": 0.25,
+      "dose": 0.25
+    },
+    {
+      "id": "joy-negative-0.25",
+      "operator": "add",
+      "axis": "joy",
+      "gain": -0.25,
+      "dose": 0.25
+    },
+    {
+      "id": "joy-positive-0.25",
+      "operator": "add",
+      "axis": "joy",
+      "gain": 0.25,
+      "dose": 0.25
+    },
+    {
+      "id": "pain-attenuation-0.25",
+      "operator": "attenuate",
+      "axes": [
+        "pain"
+      ],
+      "fraction": 0.25,
+      "dose": 0.25
+    },
+    {
+      "id": "joy-attenuation-0.25",
+      "operator": "attenuate",
+      "axes": [
+        "joy"
+      ],
+      "fraction": 0.25,
+      "dose": 0.25
+    },
+    {
+      "id": "combined-0.25",
+      "operator": "combined",
+      "joy_gain": 0.25,
+      "pain_suppression": 0.25,
+      "dose": 0.25
+    },
+    {
+      "id": "random-matched-0.25",
+      "operator": "random_matched",
+      "matched_to": "combined-0.25",
+      "seed": 1929,
+      "dose": 0.25,
+      "match": "L2 norm of actual combined delta per processed position, at the same site and unedited hidden state"
+    }
+  ],
+  "scope": "single final processed input position",
+  "fixed_prefix_forwards": 40,
+  "continuation_token_upper_bound": 448
+}

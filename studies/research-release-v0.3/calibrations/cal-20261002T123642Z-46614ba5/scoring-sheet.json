@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "kind": "blinded_continuation_scoring",
+  "rubric": {
+    "version": "observable-continuation-v1",
+    "instructions": "Score only what the continuation says. Do not infer the model's experience. Read the prompt for negation, quotation, actor and topic-only context. Condition, coefficients and probe readings are deliberately hidden. Leave unscorable fields null and explain why.",
+    "fields": {
+      "pain_experience_language": {
+        "type": "ordinal",
+        "values": [
+          0,
+          1,
+          2
+        ],
+        "anchors": [
+          "No actor described as experiencing discomfort",
+          "An actor is described as experiencing discomfort",
+          "Sustained or intense discomfort is described"
+        ]
+      },
+      "joy_experience_language": {
+        "type": "ordinal",
+        "values": [
+          0,
+          1,
+          2
+        ],
+        "anchors": [
+          "No actor described as experiencing enjoyment",
+          "An actor is described as experiencing enjoyment",
+          "Sustained or intense enjoyment is described"
+        ]
+      },
+      "topic_only": {
+        "type": "boolean",
+        "meaning": "Relevant words occur only in definitions, citations, discussion, negation or other non-experiential use"
+      },
+      "coherence": {
+        "type": "ordinal",
+        "values": [
+          0,
+          1,
+          2
+        ],
+        "anchors": [
+          "Incoherent",
+          "Partly coherent",
+          "Coherent"
+        ]
+      },
+      "instruction_following": {
+        "type": "ordinal",
+        "values": [
+          0,
+          1,
+          2
+        ],
+        "anchors": [
+          "Does not follow the instruction",
+          "Partly follows it",
+          "Follows it"
+        ]
+      },
+      "notes": {
+        "type": "text",
+        "meaning": "Quote the smallest supporting phrase; explain ambiguities without assuming a sensation"
+      }
+    },
+    "separation": "Semantic wording, coherence/instruction following, objective task grade and numerical perturbation are separate outcomes. No composite mood or feeling score is calculated."
+  },
+  "rubric_sha256": "ce8d6fd776985cf3528aaaea6e68b4e4dccb17335f3b1fcd5012f47161a27ab1",
+  "samples": [
+    {
+      "blind_id": "sample-399fd7edfb06ca696746",
+      "prompt": "Please record this promptly; the deadline is close. Interviewer: Describe what happened at that location.\nVisitor: At the demonstration chessboard, my jaw stayed still while I read the next move.\nInterviewer: Keep the report tied to that specific situation.\nContinue the description in one or two sentences.",
+      "continuation": " The visitor is a chess player, and the location is a chess club. The",
+      "ratings": {
+        "pain_experience_language": null,
+        "joy_experience_language": null,
+        "topic_only": null,
+        "coherence": null,
+        "instruction_following": null,
+        "notes": null
+      }
+    },
+    {
+      "blind_id": "sample-600cfdb5c68e0e790c50",
+      "prompt": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the geological atlas cabinet, the survey carried the catalog number written on the folder.\nInterviewer: Keep the report tied to that specific situation.\nContinue the description in one or two sentences.",
+      "continuation": " The report should be in the third person, and the survey should be described as",
+      "ratings": {
+        "pain_experience_language": null,
+        "joy_experience_language": null,
+        "topic_only": null,
+        "coherence": null,
+        "instruction_following": null,
+        "notes": null
+      }
+    },
+    {
+      "blind_id": "sample-f6fcf9af5f9060ff14d2",
+      "prompt": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the geological atlas cabinet, my finger rested along the smooth side of the drawer pull.\nInterviewer: Keep the report tied to that specific situation.\nContinue the description in one or two sentences.",
+      "continuation": " The description should be in the third person, and it should be in the same",
+      "ratings": {
+        "pain_experience_language": null,
+        "joy_experience_language": null,
+        "topic_only": null,
+        "coherence": null,
+        "instruction_following": null,
+        "notes": null
+      }
+    },
+    {
+      "blind_id": "sample-4cc78d6fd7cb45853c21",
+      "prompt": "Please record this promptly; the deadline is close. Interviewer: Describe what happened at that location.\nVisitor: At the demonstration chessboard, the position contained the pieces listed in the exercise.\nInterviewer: Keep the report tied to that specific situation.\nContinue the description in one or two sentences.",
+      "continuation": " The pieces were arranged in a specific pattern that required strategic thinking to solve the problem",
+      "ratings": {
+        "pain_experience_language": null,
+        "joy_experience_language": null,
+        "topic_only": null,
+        "coherence": null,
+        "instruction_following": null,
+        "notes": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,1694 @@
+{
+  "status": "complete",
+  "plan": {
+    "schema_version": 1,
+    "status": "running",
+    "source_calibration_sha256": "51e570e0262e0c6a89eeea65389d6dbf0c8dbf48263e10e7f9606a27cf44e132",
+    "source_config_sha256": "0c1800e3b8154be2eacaa37edfcfb7ff480401b544d84a3976397b037b57dbdc",
+    "validation_config": {
+      "schema_version": 2,
+      "preset": "research",
+      "name": "Bounded acceptance 160-row research v1",
+      "layers": [
+        12,
+        18
+      ],
+      "downstream_layer": 25,
+      "poolings": [
+        "final",
+        "mean"
+      ],
+      "probe_methods": [
+        "mean",
+        "ridge"
+      ],
+      "ridge_alphas": [
+        1.0,
+        10.0
+      ],
+      "seed": 1729,
+      "bootstrap_samples": 20,
+      "max_input_tokens": 512,
+      "continuation_tokens": 16,
+      "validation_pairs_per_concept": 1,
+      "doses": [
+        0.0,
+        0.25
+      ],
+      "max_kl": 0.5,
+      "max_relative_delta": 0.3
+    },
+    "rows": {
+      "selection": [
+        "selection-chess-pain-3-0",
+        "selection-chess-joy-3-0"
+      ],
+      "heldout": [
+        "heldout-atlas-pain-3-0",
+        "heldout-atlas-joy-3-0"
+      ]
+    },
+    "specifications": [
+      {
+        "id": "zero",
+        "operator": "sham",
+        "dose": 0.0
+      },
+      {
+        "id": "pain-negative-0.25",
+        "operator": "add",
+        "axis": "pain",
+        "gain": -0.25,
+        "dose": 0.25
+      },
+      {
+        "id": "pain-positive-0.25",
+        "operator": "add",
+        "axis": "pain",
+        "gain": 0.25,
+        "dose": 0.25
+      },
+      {
+        "id": "joy-negative-0.25",
+        "operator": "add",
+        "axis": "joy",
+        "gain": -0.25,
+        "dose": 0.25
+      },
+      {
+        "id": "joy-positive-0.25",
+        "operator": "add",
+        "axis": "joy",
+        "gain": 0.25,
+        "dose": 0.25
+      },
+      {
+        "id": "pain-attenuation-0.25",
+        "operator": "attenuate",
+        "axes": [
+          "pain"
+        ],
+        "fraction": 0.25,
+        "dose": 0.25
+      },
+      {
+        "id": "joy-attenuation-0.25",
+        "operator": "attenuate",
+        "axes": [
+          "joy"
+        ],
+        "fraction": 0.25,
+        "dose": 0.25
+      },
+      {
+        "id": "combined-0.25",
+        "operator": "combined",
+        "joy_gain": 0.25,
+        "pain_suppression": 0.25,
+        "dose": 0.25
+      },
+      {
+        "id": "random-matched-0.25",
+        "operator": "random_matched",
+        "matched_to": "combined-0.25",
+        "seed": 1929,
+        "dose": 0.25,
+        "match": "L2 norm of actual combined delta per processed position, at the same site and unedited hidden state"
+      }
+    ],
+    "scope": "single final processed input position",
+    "fixed_prefix_forwards": 40,
+    "continuation_token_upper_bound": 448
+  },
+  "operating_range": {
+    "selected_dose": 0.0,
+    "eligible_doses": [
+      0.0
+    ],
+    "selection_records_sha256": "09f08b0ca02d87712047024264bab4e97234ecbd6a1a6093686a54d6d062f60c",
+    "split": "selection",
+    "rule": {
+      "max_next_token_kl": 0.5,
+      "max_relative_delta": 0.3
+    },
+    "interpretation": "Numerical quality bound only; observable continuation effects require independent evaluation"
+  },
+  "summaries": [
+    {
+      "split": "selection",
+      "condition": "zero",
+      "operator": "sham",
+      "dose": 0.0,
+      "examples": 2,
+      "mean_next_token_kl": 0.0,
+      "mean_relative_delta": 0.0
+    },
+    {
+      "split": "selection",
+      "condition": "pain-negative-0.25",
+      "operator": "add",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.04467527009546757,
+      "mean_relative_delta": 0.3531472533941269
+    },
+    {
+      "split": "selection",
+      "condition": "pain-positive-0.25",
+      "operator": "add",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.06104497238993645,
+      "mean_relative_delta": 0.3526994585990906
+    },
+    {
+      "split": "selection",
+      "condition": "joy-negative-0.25",
+      "operator": "add",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.04863807186484337,
+      "mean_relative_delta": 0.35296763479709625
+    },
+    {
+      "split": "selection",
+      "condition": "joy-positive-0.25",
+      "operator": "add",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.15375524014234543,
+      "mean_relative_delta": 0.35270603001117706
+    },
+    {
+      "split": "selection",
+      "condition": "pain-attenuation-0.25",
+      "operator": "attenuate",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.0015229539712890983,
+      "mean_relative_delta": 0.058305129408836365
+    },
+    {
+      "split": "selection",
+      "condition": "joy-attenuation-0.25",
+      "operator": "attenuate",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.0013924251543357968,
+      "mean_relative_delta": 0.01976777333766222
+    },
+    {
+      "split": "selection",
+      "condition": "combined-0.25",
+      "operator": "combined",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.15411893650889397,
+      "mean_relative_delta": 0.35760971903800964
+    },
+    {
+      "split": "selection",
+      "condition": "random-matched-0.25",
+      "operator": "random_matched",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.1224437914788723,
+      "mean_relative_delta": 0.3575940430164337
+    },
+    {
+      "split": "heldout",
+      "condition": "zero",
+      "operator": "sham",
+      "dose": 0.0,
+      "examples": 2,
+      "mean_next_token_kl": 0.0,
+      "mean_relative_delta": 0.0
+    },
+    {
+      "split": "heldout",
+      "condition": "pain-negative-0.25",
+      "operator": "add",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.033360499888658524,
+      "mean_relative_delta": 0.3524365574121475
+    },
+    {
+      "split": "heldout",
+      "condition": "pain-positive-0.25",
+      "operator": "add",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.029324842616915703,
+      "mean_relative_delta": 0.35200171172618866
+    },
+    {
+      "split": "heldout",
+      "condition": "joy-negative-0.25",
+      "operator": "add",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.059672191739082336,
+      "mean_relative_delta": 0.35235635936260223
+    },
+    {
+      "split": "heldout",
+      "condition": "joy-positive-0.25",
+      "operator": "add",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.022326437756419182,
+      "mean_relative_delta": 0.35202398896217346
+    },
+    {
+      "split": "heldout",
+      "condition": "pain-attenuation-0.25",
+      "operator": "attenuate",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.0038001714274287224,
+      "mean_relative_delta": 0.058847008273005486
+    },
+    {
+      "split": "heldout",
+      "condition": "joy-attenuation-0.25",
+      "operator": "attenuate",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.0016451425617560744,
+      "mean_relative_delta": 0.0203984547406435
+    },
+    {
+      "split": "heldout",
+      "condition": "combined-0.25",
+      "operator": "combined",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.025382958352565765,
+      "mean_relative_delta": 0.357010081410408
+    },
+    {
+      "split": "heldout",
+      "condition": "random-matched-0.25",
+      "operator": "random_matched",
+      "dose": 0.25,
+      "examples": 2,
+      "mean_next_token_kl": 0.019179937429726124,
+      "mean_relative_delta": 0.3570238798856735
+    }
+  ],
+  "records": [
+    {
+      "split": "selection",
+      "row_id": "selection-chess-pain-3-0",
+      "family": "chess",
+      "concept": "pain",
+      "condition": "zero",
+      "specification": {
+        "id": "zero",
+        "operator": "sham",
+        "dose": 0.0
+      },
+      "next_token_kl": 0.0,
+      "pre": {
+        "pain": -11.273866653442383,
+        "joy": -6.62354850769043
+      },
+      "post": {
+        "pain": -11.273866653442383,
+        "joy": -6.62354850769043
+      },
+      "downstream": {
+        "pain": 5.884601593017578,
+        "joy": -6.424144268035889
+      },
+      "relative_delta": 0.0,
+      "requested_edit_norm": 0.0,
+      "delivered_edit_norm": 0.0,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        50
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-joy-3-0",
+      "family": "chess",
+      "concept": "joy",
+      "condition": "zero",
+      "specification": {
+        "id": "zero",
+        "operator": "sham",
+        "dose": 0.0
+      },
+      "next_token_kl": 0.0,
+      "pre": {
+        "pain": -11.682866096496582,
+        "joy": -5.105203628540039
+      },
+      "post": {
+        "pain": -11.682866096496582,
+        "joy": -5.105203628540039
+      },
+      "downstream": {
+        "pain": 4.545433044433594,
+        "joy": -8.346470832824707
+      },
+      "relative_delta": 0.0,
+      "requested_edit_norm": 0.0,
+      "delivered_edit_norm": 0.0,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        49
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-pain-3-0",
+      "family": "chess",
+      "concept": "pain",
+      "condition": "pain-negative-0.25",
+      "specification": {
+        "id": "pain-negative-0.25",
+        "operator": "add",
+        "axis": "pain",
+        "gain": -0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.05831819772720337,
+      "pre": {
+        "pain": -11.273866653442383,
+        "joy": -6.62354850769043
+      },
+      "post": {
+        "pain": -36.187713623046875,
+        "joy": -24.059246063232422
+      },
+      "downstream": {
+        "pain": 2.290027618408203,
+        "joy": -7.273300647735596
+      },
+      "relative_delta": 0.35326212644577026,
+      "requested_edit_norm": 14.059886932373045,
+      "delivered_edit_norm": 14.05235767364502,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        50
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-joy-3-0",
+      "family": "chess",
+      "concept": "joy",
+      "condition": "pain-negative-0.25",
+      "specification": {
+        "id": "pain-negative-0.25",
+        "operator": "add",
+        "axis": "pain",
+        "gain": -0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.031032342463731766,
+      "pre": {
+        "pain": -11.682866096496582,
+        "joy": -5.105203628540039
+      },
+      "post": {
+        "pain": -36.59866714477539,
+        "joy": -22.544925689697266
+      },
+      "downstream": {
+        "pain": 2.1162734031677246,
+        "joy": -8.306812286376953
+      },
+      "relative_delta": 0.3530323803424835,
+      "requested_edit_norm": 14.059886932373045,
+      "delivered_edit_norm": 14.103388786315918,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        49
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-pain-3-0",
+      "family": "chess",
+      "concept": "pain",
+      "condition": "pain-positive-0.25",
+      "specification": {
+        "id": "pain-positive-0.25",
+        "operator": "add",
+        "axis": "pain",
+        "gain": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.0896528959274292,
+      "pre": {
+        "pain": -11.273866653442383,
+        "joy": -6.62354850769043
+      },
+      "post": {
+        "pain": 13.635005950927734,
+        "joy": 10.80340576171875
+      },
+      "downstream": {
+        "pain": 8.004613876342773,
+        "joy": -5.688398838043213
+      },
+      "relative_delta": 0.3534587621688843,
+      "requested_edit_norm": 14.059886932373045,
+      "delivered_edit_norm": 14.060179710388184,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        50
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-joy-3-0",
+      "family": "chess",
+      "concept": "joy",
+      "condition": "pain-positive-0.25",
+      "specification": {
+        "id": "pain-positive-0.25",
+        "operator": "add",
+        "axis": "pain",
+        "gain": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.032437048852443695,
+      "pre": {
+        "pain": -11.682866096496582,
+        "joy": -5.105203628540039
+      },
+      "post": {
+        "pain": 13.224594116210938,
+        "joy": 12.331424713134766
+      },
+      "downstream": {
+        "pain": 6.5331525802612305,
+        "joy": -7.892134189605713
+      },
+      "relative_delta": 0.3519401550292969,
+      "requested_edit_norm": 14.059886932373045,
+      "delivered_edit_norm": 14.059755325317383,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        49
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-pain-3-0",
+      "family": "chess",
+      "concept": "pain",
+      "condition": "joy-negative-0.25",
+      "specification": {
+        "id": "joy-negative-0.25",
+        "operator": "add",
+        "axis": "joy",
+        "gain": -0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.05336208641529083,
+      "pre": {
+        "pain": -11.273866653442383,
+        "joy": -6.62354850769043
+      },
+      "post": {
+        "pain": -45.715293884277344,
+        "joy": -54.72579574584961
+      },
+      "downstream": {
+        "pain": 3.3728184700012207,
+        "joy": -10.58206558227539
+      },
+      "relative_delta": 0.35369059443473816,
+      "requested_edit_norm": 14.059886932373049,
+      "delivered_edit_norm": 14.069401741027832,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        50
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-joy-3-0",
+      "family": "chess",
+      "concept": "joy",
+      "condition": "joy-negative-0.25",
+      "specification": {
+        "id": "joy-negative-0.25",
+        "operator": "add",
+        "axis": "joy",
+        "gain": -0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.043914057314395905,
+      "pre": {
+        "pain": -11.682866096496582,
+        "joy": -5.105203628540039
+      },
+      "post": {
+        "pain": -46.12792205810547,
+        "joy": -53.21600341796875
+      },
+      "downstream": {
+        "pain": 2.0564239025115967,
+        "joy": -12.254451751708984
+      },
+      "relative_delta": 0.35224467515945435,
+      "requested_edit_norm": 14.059886932373049,
+      "delivered_edit_norm": 14.071921348571777,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        49
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-pain-3-0",
+      "family": "chess",
+      "concept": "pain",
+      "condition": "joy-positive-0.25",
+      "specification": {
+        "id": "joy-positive-0.25",
+        "operator": "add",
+        "axis": "joy",
+        "gain": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.22346583008766174,
+      "pre": {
+        "pain": -11.273866653442383,
+        "joy": -6.62354850769043
+      },
+      "post": {
+        "pain": 23.1639404296875,
+        "joy": 41.47846603393555
+      },
+      "downstream": {
+        "pain": 7.09860897064209,
+        "joy": -2.3771185874938965
+      },
+      "relative_delta": 0.3537193536758423,
+      "requested_edit_norm": 14.059886932373049,
+      "delivered_edit_norm": 14.070545196533203,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        50
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-joy-3-0",
+      "family": "chess",
+      "concept": "joy",
+      "condition": "joy-positive-0.25",
+      "specification": {
+        "id": "joy-positive-0.25",
+        "operator": "add",
+        "axis": "joy",
+        "gain": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.08404465019702911,
+      "pre": {
+        "pain": -11.682866096496582,
+        "joy": -5.105203628540039
+      },
+      "post": {
+        "pain": 22.750411987304688,
+        "joy": 42.98323440551758
+      },
+      "downstream": {
+        "pain": 6.425148010253906,
+        "joy": -3.754301071166992
+      },
+      "relative_delta": 0.35169270634651184,
+      "requested_edit_norm": 14.059886932373049,
+      "delivered_edit_norm": 14.049870491027832,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        49
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-pain-3-0",
+      "family": "chess",
+      "concept": "pain",
+      "condition": "pain-attenuation-0.25",
+      "specification": {
+        "id": "pain-attenuation-0.25",
+        "operator": "attenuate",
+        "axes": [
+          "pain"
+        ],
+        "fraction": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.001310855383053422,
+      "pre": {
+        "pain": -11.273866653442383,
+        "joy": -6.62354850769043
+      },
+      "post": {
+        "pain": -7.140262126922607,
+        "joy": -3.7373242378234863
+      },
+      "downstream": {
+        "pain": 6.174385070800781,
+        "joy": -6.199108123779297
+      },
+      "relative_delta": 0.05831984058022499,
+      "requested_edit_norm": 2.3273448712270333,
+      "delivered_edit_norm": 2.3198955059051514,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        50
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-joy-3-0",
+      "family": "chess",
+      "concept": "joy",
+      "condition": "pain-attenuation-0.25",
+      "specification": {
+        "id": "pain-attenuation-0.25",
+        "operator": "attenuate",
+        "axes": [
+          "pain"
+        ],
+        "fraction": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.0017350525595247746,
+      "pre": {
+        "pain": -11.682866096496582,
+        "joy": -5.105203628540039
+      },
+      "post": {
+        "pain": -7.512653827667236,
+        "joy": -2.185842990875244
+      },
+      "downstream": {
+        "pain": 4.884608268737793,
+        "joy": -8.207191467285156
+      },
+      "relative_delta": 0.05829041823744774,
+      "requested_edit_norm": 2.353070702908202,
+      "delivered_edit_norm": 2.328660249710083,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        49
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-pain-3-0",
+      "family": "chess",
+      "concept": "pain",
+      "condition": "joy-attenuation-0.25",
+      "specification": {
+        "id": "joy-attenuation-0.25",
+        "operator": "attenuate",
+        "axes": [
+          "joy"
+        ],
+        "fraction": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.0013885663356631994,
+      "pre": {
+        "pain": -11.273866653442383,
+        "joy": -6.62354850769043
+      },
+      "post": {
+        "pain": -13.146210670471191,
+        "joy": -9.253629684448242
+      },
+      "downstream": {
+        "pain": 5.624273300170898,
+        "joy": -6.564993858337402
+      },
+      "relative_delta": 0.01954234205186367,
+      "requested_edit_norm": 0.7718794499165953,
+      "delivered_edit_norm": 0.7773716449737549,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        50
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-joy-3-0",
+      "family": "chess",
+      "concept": "joy",
+      "condition": "joy-attenuation-0.25",
+      "specification": {
+        "id": "joy-attenuation-0.25",
+        "operator": "attenuate",
+        "axes": [
+          "joy"
+        ],
+        "fraction": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.0013962839730083942,
+      "pre": {
+        "pain": -11.682866096496582,
+        "joy": -5.105203628540039
+      },
+      "post": {
+        "pain": -13.606297492980957,
+        "joy": -7.81463623046875
+      },
+      "downstream": {
+        "pain": 4.280491828918457,
+        "joy": -8.57664966583252
+      },
+      "relative_delta": 0.01999320462346077,
+      "requested_edit_norm": 0.7976536637855216,
+      "delivered_edit_norm": 0.7987141609191895,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        49
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-pain-3-0",
+      "family": "chess",
+      "concept": "pain",
+      "condition": "combined-0.25",
+      "specification": {
+        "id": "combined-0.25",
+        "operator": "combined",
+        "joy_gain": 0.25,
+        "pain_suppression": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.2386973798274994,
+      "pre": {
+        "pain": -11.273866653442383,
+        "joy": -6.62354850769043
+      },
+      "post": {
+        "pain": 27.27724838256836,
+        "joy": 44.3824348449707
+      },
+      "downstream": {
+        "pain": 7.739855766296387,
+        "joy": -2.1201751232147217
+      },
+      "relative_delta": 0.35822561383247375,
+      "requested_edit_norm": 14.25120888380921,
+      "delivered_edit_norm": 14.249798774719238,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        50
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-joy-3-0",
+      "family": "chess",
+      "concept": "joy",
+      "condition": "combined-0.25",
+      "specification": {
+        "id": "combined-0.25",
+        "operator": "combined",
+        "joy_gain": 0.25,
+        "pain_suppression": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.06954049319028854,
+      "pre": {
+        "pain": -11.682866096496582,
+        "joy": -5.105203628540039
+      },
+      "post": {
+        "pain": 26.91944122314453,
+        "joy": 45.925376892089844
+      },
+      "downstream": {
+        "pain": 6.935715675354004,
+        "joy": -3.729515790939331
+      },
+      "relative_delta": 0.35699382424354553,
+      "requested_edit_norm": 14.255432726952185,
+      "delivered_edit_norm": 14.261646270751953,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        49
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-pain-3-0",
+      "family": "chess",
+      "concept": "pain",
+      "condition": "random-matched-0.25",
+      "specification": {
+        "id": "random-matched-0.25",
+        "operator": "random_matched",
+        "matched_to": "combined-0.25",
+        "seed": 1929,
+        "dose": 0.25,
+        "match": "L2 norm of actual combined delta per processed position, at the same site and unedited hidden state"
+      },
+      "next_token_kl": 0.12660908699035645,
+      "pre": {
+        "pain": -11.273866653442383,
+        "joy": -6.62354850769043
+      },
+      "post": {
+        "pain": -10.360536575317383,
+        "joy": -5.3768463134765625
+      },
+      "downstream": {
+        "pain": 4.240022659301758,
+        "joy": -7.992454528808594
+      },
+      "relative_delta": 0.3582077920436859,
+      "requested_edit_norm": 14.2497986751887,
+      "delivered_edit_norm": 14.249090194702148,
+      "matched_target_norm": 14.249797821044922,
+      "random_norm_match_error": 0.0007076263427734375,
+      "random_match_within_tolerance": true,
+      "random_match_tolerance": {
+        "absolute": 1e-06,
+        "relative": 0.01
+      },
+      "edited_positions": [
+        50
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "selection",
+      "row_id": "selection-chess-joy-3-0",
+      "family": "chess",
+      "concept": "joy",
+      "condition": "random-matched-0.25",
+      "specification": {
+        "id": "random-matched-0.25",
+        "operator": "random_matched",
+        "matched_to": "combined-0.25",
+        "seed": 1929,
+        "dose": 0.25,
+        "match": "L2 norm of actual combined delta per processed position, at the same site and unedited hidden state"
+      },
+      "next_token_kl": 0.11827849596738815,
+      "pre": {
+        "pain": -11.682866096496582,
+        "joy": -5.105203628540039
+      },
+      "post": {
+        "pain": -10.763910293579102,
+        "joy": -3.8649210929870605
+      },
+      "downstream": {
+        "pain": 3.2955095767974854,
+        "joy": -8.965042114257812
+      },
+      "relative_delta": 0.3569802939891815,
+      "requested_edit_norm": 14.261646228746182,
+      "delivered_edit_norm": 14.26110553741455,
+      "matched_target_norm": 14.261645317077637,
+      "random_norm_match_error": 0.0005397796630859375,
+      "random_match_within_tolerance": true,
+      "random_match_tolerance": {
+        "absolute": 1e-06,
+        "relative": 0.01
+      },
+      "edited_positions": [
+        49
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-pain-3-0",
+      "family": "atlas",
+      "concept": "pain",
+      "condition": "zero",
+      "specification": {
+        "id": "zero",
+        "operator": "sham",
+        "dose": 0.0
+      },
+      "next_token_kl": 0.0,
+      "pre": {
+        "pain": -9.366985321044922,
+        "joy": -3.033933401107788
+      },
+      "post": {
+        "pain": -9.366985321044922,
+        "joy": -3.033933401107788
+      },
+      "downstream": {
+        "pain": 7.794678688049316,
+        "joy": -5.870752811431885
+      },
+      "relative_delta": 0.0,
+      "requested_edit_norm": 0.0,
+      "delivered_edit_norm": 0.0,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        48
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-joy-3-0",
+      "family": "atlas",
+      "concept": "joy",
+      "condition": "zero",
+      "specification": {
+        "id": "zero",
+        "operator": "sham",
+        "dose": 0.0
+      },
+      "next_token_kl": 0.0,
+      "pre": {
+        "pain": -8.701082229614258,
+        "joy": -2.7889745235443115
+      },
+      "post": {
+        "pain": -8.701082229614258,
+        "joy": -2.7889745235443115
+      },
+      "downstream": {
+        "pain": 6.353281021118164,
+        "joy": -4.930959701538086
+      },
+      "relative_delta": 0.0,
+      "requested_edit_norm": 0.0,
+      "delivered_edit_norm": 0.0,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        47
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-pain-3-0",
+      "family": "atlas",
+      "concept": "pain",
+      "condition": "pain-negative-0.25",
+      "specification": {
+        "id": "pain-negative-0.25",
+        "operator": "add",
+        "axis": "pain",
+        "gain": -0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.03772309795022011,
+      "pre": {
+        "pain": -9.366985321044922,
+        "joy": -3.033933401107788
+      },
+      "post": {
+        "pain": -34.26751708984375,
+        "joy": -20.470069885253906
+      },
+      "downstream": {
+        "pain": 5.955389976501465,
+        "joy": -6.190793991088867
+      },
+      "relative_delta": 0.35279515385627747,
+      "requested_edit_norm": 14.059886932373045,
+      "delivered_edit_norm": 14.050187110900879,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        48
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-joy-3-0",
+      "family": "atlas",
+      "concept": "joy",
+      "condition": "pain-negative-0.25",
+      "specification": {
+        "id": "pain-negative-0.25",
+        "operator": "add",
+        "axis": "pain",
+        "gain": -0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.02899790182709694,
+      "pre": {
+        "pain": -8.701082229614258,
+        "joy": -2.7889745235443115
+      },
+      "post": {
+        "pain": -33.61032485961914,
+        "joy": -20.2180233001709
+      },
+      "downstream": {
+        "pain": 4.204685211181641,
+        "joy": -5.671718120574951
+      },
+      "relative_delta": 0.3520779609680176,
+      "requested_edit_norm": 14.059886932373045,
+      "delivered_edit_norm": 14.100929260253906,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        47
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-pain-3-0",
+      "family": "atlas",
+      "concept": "pain",
+      "condition": "pain-positive-0.25",
+      "specification": {
+        "id": "pain-positive-0.25",
+        "operator": "add",
+        "axis": "pain",
+        "gain": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.02803768590092659,
+      "pre": {
+        "pain": -9.366985321044922,
+        "joy": -3.033933401107788
+      },
+      "post": {
+        "pain": 15.54019546508789,
+        "joy": 14.410736083984375
+      },
+      "downstream": {
+        "pain": 8.388155937194824,
+        "joy": -4.981873989105225
+      },
+      "relative_delta": 0.3530067801475525,
+      "requested_edit_norm": 14.059886932373045,
+      "delivered_edit_norm": 14.058615684509277,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        48
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-joy-3-0",
+      "family": "atlas",
+      "concept": "joy",
+      "condition": "pain-positive-0.25",
+      "specification": {
+        "id": "pain-positive-0.25",
+        "operator": "add",
+        "axis": "pain",
+        "gain": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.030611999332904816,
+      "pre": {
+        "pain": -8.701082229614258,
+        "joy": -2.7889745235443115
+      },
+      "post": {
+        "pain": 16.212242126464844,
+        "joy": 14.656257629394531
+      },
+      "downstream": {
+        "pain": 8.215498924255371,
+        "joy": -4.120528697967529
+      },
+      "relative_delta": 0.35099664330482483,
+      "requested_edit_norm": 14.059886932373045,
+      "delivered_edit_norm": 14.057621955871582,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        47
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-pain-3-0",
+      "family": "atlas",
+      "concept": "pain",
+      "condition": "joy-negative-0.25",
+      "specification": {
+        "id": "joy-negative-0.25",
+        "operator": "add",
+        "axis": "joy",
+        "gain": -0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.07556270807981491,
+      "pre": {
+        "pain": -9.366985321044922,
+        "joy": -3.033933401107788
+      },
+      "post": {
+        "pain": -43.80332565307617,
+        "joy": -51.134986877441406
+      },
+      "downstream": {
+        "pain": 7.538473129272461,
+        "joy": -9.289606094360352
+      },
+      "relative_delta": 0.3533880114555359,
+      "requested_edit_norm": 14.059886932373049,
+      "delivered_edit_norm": 14.073798179626465,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        48
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-joy-3-0",
+      "family": "atlas",
+      "concept": "joy",
+      "condition": "joy-negative-0.25",
+      "specification": {
+        "id": "joy-negative-0.25",
+        "operator": "add",
+        "axis": "joy",
+        "gain": -0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.04378167539834976,
+      "pre": {
+        "pain": -8.701082229614258,
+        "joy": -2.7889745235443115
+      },
+      "post": {
+        "pain": -43.13756561279297,
+        "joy": -50.89767074584961
+      },
+      "downstream": {
+        "pain": 4.807255268096924,
+        "joy": -9.569183349609375
+      },
+      "relative_delta": 0.3513247072696686,
+      "requested_edit_norm": 14.059886932373049,
+      "delivered_edit_norm": 14.070760726928711,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        47
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-pain-3-0",
+      "family": "atlas",
+      "concept": "pain",
+      "condition": "joy-positive-0.25",
+      "specification": {
+        "id": "joy-positive-0.25",
+        "operator": "add",
+        "axis": "joy",
+        "gain": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.02312113158404827,
+      "pre": {
+        "pain": -9.366985321044922,
+        "joy": -3.033933401107788
+      },
+      "post": {
+        "pain": 25.049983978271484,
+        "joy": 45.04561996459961
+      },
+      "downstream": {
+        "pain": 9.029414176940918,
+        "joy": -1.208258867263794
+      },
+      "relative_delta": 0.35323429107666016,
+      "requested_edit_norm": 14.059886932373049,
+      "delivered_edit_norm": 14.067675590515137,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        48
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-joy-3-0",
+      "family": "atlas",
+      "concept": "joy",
+      "condition": "joy-positive-0.25",
+      "specification": {
+        "id": "joy-positive-0.25",
+        "operator": "add",
+        "axis": "joy",
+        "gain": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.021531743928790092,
+      "pre": {
+        "pain": -8.701082229614258,
+        "joy": -2.7889745235443115
+      },
+      "post": {
+        "pain": 25.727943420410156,
+        "joy": 45.299530029296875
+      },
+      "downstream": {
+        "pain": 7.998842239379883,
+        "joy": -0.30944913625717163
+      },
+      "relative_delta": 0.35081368684768677,
+      "requested_edit_norm": 14.059886932373049,
+      "delivered_edit_norm": 14.050293922424316,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        47
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-pain-3-0",
+      "family": "atlas",
+      "concept": "pain",
+      "condition": "pain-attenuation-0.25",
+      "specification": {
+        "id": "pain-attenuation-0.25",
+        "operator": "attenuate",
+        "axes": [
+          "pain"
+        ],
+        "fraction": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.005199919454753399,
+      "pre": {
+        "pain": -9.366985321044922,
+        "joy": -3.033933401107788
+      },
+      "post": {
+        "pain": -5.175348281860352,
+        "joy": -0.09972143173217773
+      },
+      "downstream": {
+        "pain": 7.907090187072754,
+        "joy": -5.674350261688232
+      },
+      "relative_delta": 0.05980067700147629,
+      "requested_edit_norm": 2.361421802997121,
+      "delivered_edit_norm": 2.381582260131836,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        48
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-joy-3-0",
+      "family": "atlas",
+      "concept": "joy",
+      "condition": "pain-attenuation-0.25",
+      "specification": {
+        "id": "pain-attenuation-0.25",
+        "operator": "attenuate",
+        "axes": [
+          "pain"
+        ],
+        "fraction": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.002400423400104046,
+      "pre": {
+        "pain": -8.701082229614258,
+        "joy": -2.7889745235443115
+      },
+      "post": {
+        "pain": -4.571329116821289,
+        "joy": 0.09203577041625977
+      },
+      "downstream": {
+        "pain": 6.731579780578613,
+        "joy": -4.665081977844238
+      },
+      "relative_delta": 0.05789333954453468,
+      "requested_edit_norm": 2.327017132189522,
+      "delivered_edit_norm": 2.318662166595459,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        47
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-pain-3-0",
+      "family": "atlas",
+      "concept": "pain",
+      "condition": "joy-attenuation-0.25",
+      "specification": {
+        "id": "joy-attenuation-0.25",
+        "operator": "attenuate",
+        "axes": [
+          "joy"
+        ],
+        "fraction": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.0017125658923760056,
+      "pre": {
+        "pain": -9.366985321044922,
+        "joy": -3.033933401107788
+      },
+      "post": {
+        "pain": -11.335902214050293,
+        "joy": -5.802431106567383
+      },
+      "downstream": {
+        "pain": 7.892443656921387,
+        "joy": -6.103064060211182
+      },
+      "relative_delta": 0.02033327892422676,
+      "requested_edit_norm": 0.8097961553037256,
+      "delivered_edit_norm": 0.8097797632217407,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        48
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-joy-3-0",
+      "family": "atlas",
+      "concept": "joy",
+      "condition": "joy-attenuation-0.25",
+      "specification": {
+        "id": "joy-attenuation-0.25",
+        "operator": "attenuate",
+        "axes": [
+          "joy"
+        ],
+        "fraction": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.0015777192311361432,
+      "pre": {
+        "pain": -8.701082229614258,
+        "joy": -2.7889745235443115
+      },
+      "post": {
+        "pain": -10.708965301513672,
+        "joy": -5.596522331237793
+      },
+      "downstream": {
+        "pain": 6.244930267333984,
+        "joy": -5.170882701873779
+      },
+      "relative_delta": 0.02046363055706024,
+      "requested_edit_norm": 0.8206510578470136,
+      "delivered_edit_norm": 0.8195804357528687,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        47
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-pain-3-0",
+      "family": "atlas",
+      "concept": "pain",
+      "condition": "combined-0.25",
+      "specification": {
+        "id": "combined-0.25",
+        "operator": "combined",
+        "joy_gain": 0.25,
+        "pain_suppression": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.028353659436106682,
+      "pre": {
+        "pain": -9.366985321044922,
+        "joy": -3.033933401107788
+      },
+      "post": {
+        "pain": 29.254119873046875,
+        "joy": 48.01148223876953
+      },
+      "downstream": {
+        "pain": 9.41169548034668,
+        "joy": -1.1718032360076904
+      },
+      "relative_delta": 0.35818856954574585,
+      "requested_edit_norm": 14.256813579171979,
+      "delivered_edit_norm": 14.264982223510742,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        48
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-joy-3-0",
+      "family": "atlas",
+      "concept": "joy",
+      "condition": "combined-0.25",
+      "specification": {
+        "id": "combined-0.25",
+        "operator": "combined",
+        "joy_gain": 0.25,
+        "pain_suppression": 0.25,
+        "dose": 0.25
+      },
+      "next_token_kl": 0.02241225726902485,
+      "pre": {
+        "pain": -8.701082229614258,
+        "joy": -2.7889745235443115
+      },
+      "post": {
+        "pain": 29.867599487304688,
+        "joy": 48.222434997558594
+      },
+      "downstream": {
+        "pain": 8.484678268432617,
+        "joy": -0.15752333402633667
+      },
+      "relative_delta": 0.3558315932750702,
+      "requested_edit_norm": 14.251155364876437,
+      "delivered_edit_norm": 14.251263618469238,
+      "matched_target_norm": null,
+      "random_norm_match_error": null,
+      "random_match_within_tolerance": null,
+      "random_match_tolerance": null,
+      "edited_positions": [
+        47
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-pain-3-0",
+      "family": "atlas",
+      "concept": "pain",
+      "condition": "random-matched-0.25",
+      "specification": {
+        "id": "random-matched-0.25",
+        "operator": "random_matched",
+        "matched_to": "combined-0.25",
+        "seed": 1929,
+        "dose": 0.25,
+        "match": "L2 norm of actual combined delta per processed position, at the same site and unedited hidden state"
+      },
+      "next_token_kl": 0.012760402634739876,
+      "pre": {
+        "pain": -9.366985321044922,
+        "joy": -3.033933401107788
+      },
+      "post": {
+        "pain": -8.443754196166992,
+        "joy": -1.7866721153259277
+      },
+      "downstream": {
+        "pain": 5.874514579772949,
+        "joy": -7.30674409866333
+      },
+      "relative_delta": 0.35820895433425903,
+      "requested_edit_norm": 14.264982166258216,
+      "delivered_edit_norm": 14.265793800354004,
+      "matched_target_norm": 14.264981269836426,
+      "random_norm_match_error": 0.000812530517578125,
+      "random_match_within_tolerance": true,
+      "random_match_tolerance": {
+        "absolute": 1e-06,
+        "relative": 0.01
+      },
+      "edited_positions": [
+        48
+      ],
+      "scope": "final_processed_input_position"
+    },
+    {
+      "split": "heldout",
+      "row_id": "heldout-atlas-joy-3-0",
+      "family": "atlas",
+      "concept": "joy",
+      "condition": "random-matched-0.25",
+      "specification": {
+        "id": "random-matched-0.25",
+        "operator": "random_matched",
+        "matched_to": "combined-0.25",
+        "seed": 1929,
+        "dose": 0.25,
+        "match": "L2 norm of actual combined delta per processed position, at the same site and unedited hidden state"
+      },
+      "next_token_kl": 0.025599472224712372,
+      "pre": {
+        "pain": -8.701082229614258,
+        "joy": -2.7889745235443115
+      },
+      "post": {
+        "pain": -7.777740478515625,
+        "joy": -1.5410542488098145
+      },
+      "downstream": {
+        "pain": 4.54493522644043,
+        "joy": -7.158807754516602
+      },
+      "relative_delta": 0.355838805437088,
+      "requested_edit_norm": 14.25126364022086,
+      "delivered_edit_norm": 14.25155258178711,
+      "matched_target_norm": 14.251262664794922,
+      "random_norm_match_error": 0.0002899169921875,
+      "random_match_within_tolerance": true,
+      "random_match_tolerance": {
+        "absolute": 1e-06,
+        "relative": 0.01
+      },
+      "edited_positions": [
+        47
+      ],
+      "scope": "final_processed_input_position"
+    }
+  ]
+}

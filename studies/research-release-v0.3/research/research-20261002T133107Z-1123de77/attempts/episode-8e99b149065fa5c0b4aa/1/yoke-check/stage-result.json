@@ -1,0 +1,188 @@
+{
+  "id": "yoke-check",
+  "kind": "yoke",
+  "status": "complete",
+  "summary": {
+    "schema_version": 1,
+    "source_yoke_sha256": "a332169a5fff2dabfa69088815a2f62d12d015c8a04651d8e3a496872ad4505f",
+    "clock": "tokens",
+    "source_requested_attempts": 2,
+    "source_delivered_pulses": 1,
+    "source_requested_pulses": 1,
+    "target_due_pulses": 1,
+    "delivered_pulses": 1,
+    "failed_or_missed_pulses": 0,
+    "unreached_source_pulses": 0,
+    "source_undelivered_attempts": 1,
+    "absolute_index_error": 0,
+    "matched_observed_positions": 197,
+    "uncovered_source_positions": 0,
+    "excess_target_positions": 0,
+    "coefficient_l1_error": {
+      "pain": 0.0,
+      "joy_raw": 0.0,
+      "joy_orthogonal": 0.0,
+      "random_gain": 0.0,
+      "pain_attenuation": 0.0,
+      "joy_raw_attenuation": 0.0,
+      "joy_orthogonal_attenuation": 0.0,
+      "baseline_pain": 0.0,
+      "baseline_joy_raw": 0.0,
+      "baseline_joy_orthogonal": 0.0
+    },
+    "by_phase": {
+      "output": {
+        "source_positions": 197,
+        "target_positions": 197,
+        "source_cumulative": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 20.46022282207408,
+          "random_gain": 0.0,
+          "pain_attenuation": 20.46022282207408,
+          "joy_raw_attenuation": 0.0,
+          "joy_orthogonal_attenuation": 0.0,
+          "baseline_pain": 0.0,
+          "baseline_joy_raw": 0.0,
+          "baseline_joy_orthogonal": 0.0
+        },
+        "target_cumulative": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 20.46022282207408,
+          "random_gain": 0.0,
+          "pain_attenuation": 20.46022282207408,
+          "joy_raw_attenuation": 0.0,
+          "joy_orthogonal_attenuation": 0.0,
+          "baseline_pain": 0.0,
+          "baseline_joy_raw": 0.0,
+          "baseline_joy_orthogonal": 0.0
+        },
+        "source_delivered_edit_norm_sum": 1156.8364176750183,
+        "target_delivered_edit_norm_sum": 1157.2238737344742,
+        "source_norm_positions": 197,
+        "target_norm_positions": 197
+      },
+      "prefill_last": {
+        "source_positions": 0,
+        "target_positions": 0,
+        "source_cumulative": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0,
+          "random_gain": 0.0,
+          "pain_attenuation": 0.0,
+          "joy_raw_attenuation": 0.0,
+          "joy_orthogonal_attenuation": 0.0,
+          "baseline_pain": 0.0,
+          "baseline_joy_raw": 0.0,
+          "baseline_joy_orthogonal": 0.0
+        },
+        "target_cumulative": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0,
+          "random_gain": 0.0,
+          "pain_attenuation": 0.0,
+          "joy_raw_attenuation": 0.0,
+          "joy_orthogonal_attenuation": 0.0,
+          "baseline_pain": 0.0,
+          "baseline_joy_raw": 0.0,
+          "baseline_joy_orthogonal": 0.0
+        },
+        "source_delivered_edit_norm_sum": 0.0,
+        "target_delivered_edit_norm_sum": 0.0,
+        "source_norm_positions": 0,
+        "target_norm_positions": 0
+      },
+      "prefill_other": {
+        "source_positions": 0,
+        "target_positions": 0,
+        "source_cumulative": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0,
+          "random_gain": 0.0,
+          "pain_attenuation": 0.0,
+          "joy_raw_attenuation": 0.0,
+          "joy_orthogonal_attenuation": 0.0,
+          "baseline_pain": 0.0,
+          "baseline_joy_raw": 0.0,
+          "baseline_joy_orthogonal": 0.0
+        },
+        "target_cumulative": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0,
+          "random_gain": 0.0,
+          "pain_attenuation": 0.0,
+          "joy_raw_attenuation": 0.0,
+          "joy_orthogonal_attenuation": 0.0,
+          "baseline_pain": 0.0,
+          "baseline_joy_raw": 0.0,
+          "baseline_joy_orthogonal": 0.0
+        },
+        "source_delivered_edit_norm_sum": 0.0,
+        "target_delivered_edit_norm_sum": 0.0,
+        "source_norm_positions": 0,
+        "target_norm_positions": 0
+      },
+      "reasoning": {
+        "source_positions": 0,
+        "target_positions": 0,
+        "source_cumulative": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0,
+          "random_gain": 0.0,
+          "pain_attenuation": 0.0,
+          "joy_raw_attenuation": 0.0,
+          "joy_orthogonal_attenuation": 0.0,
+          "baseline_pain": 0.0,
+          "baseline_joy_raw": 0.0,
+          "baseline_joy_orthogonal": 0.0
+        },
+        "target_cumulative": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0,
+          "random_gain": 0.0,
+          "pain_attenuation": 0.0,
+          "joy_raw_attenuation": 0.0,
+          "joy_orthogonal_attenuation": 0.0,
+          "baseline_pain": 0.0,
+          "baseline_joy_raw": 0.0,
+          "baseline_joy_orthogonal": 0.0
+        },
+        "source_delivered_edit_norm_sum": 0.0,
+        "target_delivered_edit_norm_sum": 0.0,
+        "source_norm_positions": 0,
+        "target_norm_positions": 0
+      }
+    },
+    "source_observation_gaps": [],
+    "target_observation_gaps": [],
+    "uncovered_source_intervals": [],
+    "outside_source_positions": 0,
+    "own_button_calls": {},
+    "own_button_additional_effects": 0,
+    "source_missing_measurement_events": 0,
+    "source_controls_not_yoked": 0,
+    "finished": {
+      "index": 197,
+      "reason": "tasks_complete"
+    },
+    "schedule_complete": true,
+    "observed_coefficients_equal": true,
+    "terminated_before_source_horizon": false,
+    "coverage": "observed_source_covered",
+    "limitation": "Equal injection indices do not ensure equal phases, numeric perturbations, token histories, or behavior. Coefficient sums are applied controls; edit norms are measured separately.",
+    "external_button_calls": {
+      "human": {},
+      "demonstration": {},
+      "schedule": {}
+    },
+    "target_missing_measurement_events": 0,
+    "all_recipient_button_additional_effects": 0
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "job_id": "research-20261002T131749Z-628ce2ff",
+  "execution_id": "execution-20261002T131753Z-b739dae8",
+  "expansion_sha256": "6ad721a55c80aabd9e4db9f16fe8e10e66cbc894cc569fba61630d0dd575897e",
+  "created_at": "2026-10-02T13:17:53.947945+00:00",
+  "slots": {
+    "supervisor": ".emergency-0dcc22dcceda4dfa9642c25b335dae9b",
+    "worker": ".emergency-93c0603664624f1f878a4f767e6cabfe"
+  },
+  "owner": {
+    "service_pid": 263192,
+    "worker_pid": 263237
+  },
+  "sha256": "10328b339d23f6e50a39f44387195d4d2d87f23b42a2510e632d5018985d18de"
+}

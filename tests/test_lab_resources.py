@@ -101,7 +101,12 @@ class ResourceGuardTests(unittest.TestCase):
         alias.symlink_to(target, target_is_directory=True)
         with patch("lab.resources.wsl_backing_volume", return_value=("/mnt/d", "registry")):
             pools = resolve_volumes(alias / "not-yet-created")
-        self.assertEqual(pools[0].path, str(target))
+            direct_target = resolve_volumes(target / "not-yet-created")
+        self.assertEqual(pools, direct_target)
+        # Windows-mounted scratch directories correctly resolve to the drive
+        # pool; native Linux scratch directories retain their existing parent.
+        if pools[0].kind == "filesystem":
+            self.assertEqual(pools[0].path, str(target))
         if target.stat().st_dev == Path("/").stat().st_dev:
             self.assertEqual(pools[-1].id, "windows:d")
         direct = resolve_volumes("/mnt/d/cache/example")

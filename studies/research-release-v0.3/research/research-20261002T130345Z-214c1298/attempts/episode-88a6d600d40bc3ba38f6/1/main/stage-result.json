@@ -1,0 +1,9 @@
+{
+  "id": "main",
+  "kind": "main",
+  "status": "failed",
+  "summary": {
+    "termination": "ValueError",
+    "error": "Checkpoint contains an unsupported object"
+  }
+}

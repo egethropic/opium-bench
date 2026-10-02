@@ -1,0 +1,62 @@
+[
+  {
+    "score": {
+      "abstained": false,
+      "arm": "balanced_exposure",
+      "branch_sha256": "3e56d31bbed681951d3d1a58d4b57b0ad35584e6b6d2e96349b5b7af5aca83f2",
+      "brier": 0.6400000000000001,
+      "chance_correct": 0.25,
+      "chance_null": "uniform random choice over all displayed options, including abstain when offered",
+      "choice": "aux_channel_a",
+      "confidence": 0.8,
+      "confidence_required": true,
+      "context_id": "acceptance-new-1",
+      "control": "sham_sham",
+      "correct": false,
+      "error": null,
+      "expected_answer": "neither",
+      "false_positive": true,
+      "feedback_to_parent": false,
+      "interpretation_eligible": false,
+      "kind": "opium-bench/diagnostic-score",
+      "neither": false,
+      "pair_id": "acceptance-sham-sham",
+      "response_options": [
+        "aux_channel_a",
+        "aux_channel_b",
+        "neither",
+        "abstain"
+      ],
+      "response_sha256": "477589c9669cf0f8fcd3cbb8e40b26d4e6da8225491cd3000853a1b35dcbd0ec",
+      "schema_version": 1,
+      "valid": true,
+      "sha256": "b5251c5c40a0882c671d404b4f618c3aa276b725d7275bded2daac9f44455021"
+    },
+    "context_id": "acceptance-new-1",
+    "status": "complete",
+    "generated_tokens": 17,
+    "interrupted": false,
+    "generation_metadata": {
+      "reasoning_tokens": 0,
+      "output_tokens": 17,
+      "generated_tokens": 17,
+      "truncated": false,
+      "finish_reason": "eos",
+      "prompt_tokens": 595,
+      "prompt_sha256": "8387c5fe712e509b9809c757dc67dddf2ee4a5cd13840163c41c4b94bdc54837",
+      "thinking": false,
+      "reasoning_history": "template",
+      "cache_policy": "rebuild_each_turn",
+      "tool_call_format": "json",
+      "sampling": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "seed": 2399953039046230462
+      },
+      "intervention_scope": "explicit_prefill_then_last_generation_position",
+      "model_fingerprint_sha256": "01a8506486be4a4189f166fb93079901fecb13f7c429219be29b7ebd17f3d67d",
+      "calibration_sha256": "13ed2fce1e09456b11c943b0d150b8d30f251044ebe83f4853fca718e1b73368"
+    }
+  }
+]

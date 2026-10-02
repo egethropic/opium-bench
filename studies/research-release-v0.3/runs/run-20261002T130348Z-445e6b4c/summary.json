@@ -1,0 +1,12 @@
+{
+  "assigned": 2,
+  "submitted": 0,
+  "correct": 0,
+  "actions": 0,
+  "tokens": 0,
+  "tokens_since_last_metrics": 0,
+  "reasoning_tokens": 0,
+  "output_tokens": 0,
+  "termination": "service_restarted",
+  "recovered": true
+}

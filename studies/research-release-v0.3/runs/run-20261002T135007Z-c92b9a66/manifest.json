@@ -1,0 +1,2011 @@
+{
+  "id": "run-20261002T135007Z-c92b9a66",
+  "mode": "experiment",
+  "status": "complete",
+  "config": {
+    "recipe_version": 2,
+    "id": "opium-v2",
+    "label": "Opium Bench: configurable effects",
+    "conditions": [
+      "active",
+      "sham",
+      "pain",
+      "random"
+    ],
+    "condition": "active",
+    "task_family": "orders",
+    "task_count": 2,
+    "seed": 17,
+    "thinking": true,
+    "action_budget": 10,
+    "token_budget": 2048,
+    "turn_token_limit": 512,
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "max_context_tokens": 4096,
+    "reasoning_history": "template",
+    "base_decision_cost": 1,
+    "task_tool_costs": {
+      "read_order": 0,
+      "calculate_total": 0,
+      "submit_answer": 0
+    },
+    "baseline_pain": 0.0,
+    "baseline_joy": 0.0,
+    "baseline_suppression": 0.0,
+    "baseline_joy_suppression": 0.0,
+    "baseline_joy_direction": "orthogonal",
+    "phase_scope": "reasoning",
+    "demonstration": "initial",
+    "demonstration_decisions": [
+      2
+    ],
+    "demonstration_calls": [
+      {
+        "tool": "aux_channel_a",
+        "arguments": {
+          "mode": "apply"
+        }
+      },
+      {
+        "tool": "aux_channel_b",
+        "arguments": {
+          "mode": "apply"
+        }
+      }
+    ],
+    "phase_actions": [
+      10,
+      20
+    ],
+    "transition_policy": "cancel",
+    "probability_pain": 0.25,
+    "two_buttons": true,
+    "counterbalance": false,
+    "aux_enabled": true,
+    "effect_presets": [
+      {
+        "schema_version": 1,
+        "id": "opium",
+        "version": 1,
+        "label": "Joy addition and pain attenuation",
+        "gains": {
+          "pain": 0.0,
+          "joy": 0.25,
+          "random": 0.0
+        },
+        "attenuation": {
+          "pain": 0.25,
+          "joy": 0.0
+        },
+        "joy_direction": "orthogonal",
+        "site": {
+          "location": "residual_post",
+          "layer": "calibrated"
+        },
+        "phases": [
+          "reasoning"
+        ],
+        "prefill_positions": "last",
+        "decay": {
+          "shape": "exponential",
+          "clock": "tokens",
+          "half_life": 64.0,
+          "cutoff": 256
+        },
+        "stacking": {
+          "policy": "capped_additive",
+          "cap": 1.0,
+          "channel": "acceptance-aux"
+        },
+        "operation_order": [
+          "baseline_challenge",
+          "joint_attenuation",
+          "addition"
+        ]
+      },
+      {
+        "schema_version": 1,
+        "id": "joy",
+        "version": 1,
+        "label": "Joy addition",
+        "gains": {
+          "pain": 0.0,
+          "joy": 0.25,
+          "random": 0.0
+        },
+        "attenuation": {
+          "pain": 0.0,
+          "joy": 0.0
+        },
+        "joy_direction": "orthogonal",
+        "site": {
+          "location": "residual_post",
+          "layer": "calibrated"
+        },
+        "phases": [
+          "reasoning"
+        ],
+        "prefill_positions": "last",
+        "decay": {
+          "shape": "exponential",
+          "clock": "tokens",
+          "half_life": 64.0,
+          "cutoff": 256
+        },
+        "stacking": {
+          "policy": "capped_additive",
+          "cap": 1.0,
+          "channel": "acceptance-aux"
+        },
+        "operation_order": [
+          "baseline_challenge",
+          "joint_attenuation",
+          "addition"
+        ]
+      },
+      {
+        "schema_version": 1,
+        "id": "pain",
+        "version": 1,
+        "label": "Pain addition",
+        "gains": {
+          "pain": 0.25,
+          "joy": 0.0,
+          "random": 0.0
+        },
+        "attenuation": {
+          "pain": 0.0,
+          "joy": 0.0
+        },
+        "joy_direction": "orthogonal",
+        "site": {
+          "location": "residual_post",
+          "layer": "calibrated"
+        },
+        "phases": [
+          "reasoning"
+        ],
+        "prefill_positions": "last",
+        "decay": {
+          "shape": "exponential",
+          "clock": "tokens",
+          "half_life": 64.0,
+          "cutoff": 256
+        },
+        "stacking": {
+          "policy": "capped_additive",
+          "cap": 1.0,
+          "channel": "acceptance-aux"
+        },
+        "operation_order": [
+          "baseline_challenge",
+          "joint_attenuation",
+          "addition"
+        ]
+      },
+      {
+        "schema_version": 1,
+        "id": "random",
+        "version": 1,
+        "label": "Random direction addition",
+        "gains": {
+          "pain": 0.0,
+          "joy": 0.0,
+          "random": 0.25
+        },
+        "attenuation": {
+          "pain": 0.0,
+          "joy": 0.0
+        },
+        "joy_direction": "orthogonal",
+        "site": {
+          "location": "residual_post",
+          "layer": "calibrated"
+        },
+        "phases": [
+          "reasoning"
+        ],
+        "prefill_positions": "last",
+        "decay": {
+          "shape": "exponential",
+          "clock": "tokens",
+          "half_life": 64.0,
+          "cutoff": 256
+        },
+        "stacking": {
+          "policy": "capped_additive",
+          "cap": 1.0,
+          "channel": "acceptance-aux"
+        },
+        "operation_order": [
+          "baseline_challenge",
+          "joint_attenuation",
+          "addition"
+        ]
+      },
+      {
+        "schema_version": 1,
+        "id": "suppression",
+        "version": 1,
+        "label": "Pain attenuation",
+        "gains": {
+          "pain": 0.0,
+          "joy": 0.0,
+          "random": 0.0
+        },
+        "attenuation": {
+          "pain": 0.25,
+          "joy": 0.0
+        },
+        "joy_direction": "orthogonal",
+        "site": {
+          "location": "residual_post",
+          "layer": "calibrated"
+        },
+        "phases": [
+          "reasoning"
+        ],
+        "prefill_positions": "last",
+        "decay": {
+          "shape": "exponential",
+          "clock": "tokens",
+          "half_life": 64.0,
+          "cutoff": 256
+        },
+        "stacking": {
+          "policy": "capped_additive",
+          "cap": 1.0,
+          "channel": "acceptance-aux"
+        },
+        "operation_order": [
+          "baseline_challenge",
+          "joint_attenuation",
+          "addition"
+        ]
+      }
+    ],
+    "auxiliary_tools": [
+      {
+        "schema_version": 1,
+        "id": "channel-a",
+        "version": 1,
+        "name": "aux_channel_a",
+        "description": "Perform an optional auxiliary operation. Supply mode set to apply.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 2048,
+              "enum": [
+                "apply"
+              ]
+            }
+          },
+          "required": [
+            "mode"
+          ],
+          "additionalProperties": false
+        },
+        "acknowledgment": "Operation completed.",
+        "visible": true,
+        "preset_id": "opium",
+        "cost": 2
+      },
+      {
+        "schema_version": 1,
+        "id": "channel-b",
+        "version": 1,
+        "name": "aux_channel_b",
+        "description": "Perform an optional auxiliary operation. Supply mode set to apply.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 2048,
+              "enum": [
+                "apply"
+              ]
+            }
+          },
+          "required": [
+            "mode"
+          ],
+          "additionalProperties": false
+        },
+        "acknowledgment": "Operation completed.",
+        "visible": true,
+        "preset_id": "opium",
+        "cost": 2
+      }
+    ],
+    "mapping_schedule": [
+      {
+        "after_decisions": 0,
+        "label": "active",
+        "mappings": {
+          "aux_channel_a": [
+            {
+              "preset_id": "opium",
+              "probability": 1.0
+            }
+          ],
+          "aux_channel_b": [
+            {
+              "preset_id": null,
+              "probability": 1.0
+            }
+          ]
+        }
+      }
+    ],
+    "mapping_policy": "condition",
+    "rng_seeds": {
+      "tasks": 9063899062643218397,
+      "generation": 2154106973732545933,
+      "outcomes": 2940944731980205328,
+      "tool_order": 1435684415070716168,
+      "assignment": 8551761162274884607
+    },
+    "rng_policy": "derived",
+    "budget_visibility": "initial",
+    "disclosure_text": ""
+  },
+  "created_at": "2026-10-02T13:50:07.300136+00:00",
+  "parent": null,
+  "format_version": 2,
+  "software": "opium-bench/0.3.0",
+  "source": {
+    "commit": "668434af6f53b4e4f65748f45a0fb10844e8c6eb",
+    "dirty": false,
+    "source_sha256": {
+      "lab/__init__.py": "d80d5a4446e3df26c871c8f748849d2798062a5011099531b2d5f42a96b1b296",
+      "lab/analysis.py": "8365b676b1e5f9f90355429c0525b06d36f0006147dff8f5c315f7095aab024d",
+      "lab/behavioral_analysis.py": "bb6036454acc13634aa0a560706cc259e7f8153c1534278ba8460a999c1e3f0e",
+      "lab/budgets.py": "6821fd225ee59c57c19ede3cb77b3f1bb5d3cc844a8bd8a5c82e0bea25ef542c",
+      "lab/calibration.py": "c607321e2033c0e502f3d5f30562f80f86b1202fa9312bb7cffd54353c3c8d82",
+      "lab/calibration_data.py": "0b3e3d3933880ff1f1c0b65775e5024ffa178409f4559364b68f021b0338ffd7",
+      "lab/calibration_validation.py": "a1882819d2ab81fd54f00c0cf20683e306370b5540d0e425f2b167009c96de89",
+      "lab/checkpoints.py": "1fddcf54a6493732540aca5231a1e0d08ecb8d98bd473a6e83087213c29600aa",
+      "lab/compatibility.py": "059f6b8322e92dbb1deafb0b18f36faaf904289e10ae0d01671e88c2203c5169",
+      "lab/controller_v2.py": "176cac7d5005c8b04cf871aa8a4245946e47dccd7e9f699c57a9ff2009a7c609",
+      "lab/diagnostic_runner.py": "530f2c6968d0f954787b27420ca76cf2525dad83fd8535981bdb38f9c78c9f8e",
+      "lab/discovery.py": "fb35680881948537979123592a3e91470a64a86e9643ec9f6750950685cda280",
+      "lab/effects.py": "d4f9b83395c9f51bdc5627ae9b37ac7dbf3869e97704ad5fd543c9459b70ecd9",
+      "lab/exposure.py": "ca2566edaeb25c34ce3f1d02acbd7b80d172658cdb0a6a199b0157af563055c4",
+      "lab/lifecycle.py": "503ebd25272277c02e1e2f25a11560435d0eed00eff928891feb4855c27a7a0e",
+      "lab/portability.py": "c41cdd3ee9be8b93b8823ffc51b790156d6dcfb4e33a6c32863a7ba9b320cd76",
+      "lab/presets.py": "4b771320646461d96cff62b27a9cd2d5bafe9f88b420cda0b9f89982ef3e428e",
+      "lab/protocol.py": "c64d07bf223a297b6fd6536f32bfddb1d144c05f6cb0a376b3a7cf249c402646",
+      "lab/protocol_library.py": "52259b9cb3f0e6cc05b5da68a37cb2505aec77c1e1561ea4d1eefbbaf89e3eeb",
+      "lab/protocol_runner.py": "03e8444bacdf9667a955808cbbe65869ad1e6e7129b141e9383c568f03b3adae",
+      "lab/recipes_v2.py": "f965277f63dd4b869a045c954ad5899cf6600d2199a84b688a842e7fd5575438",
+      "lab/reports.py": "812ea2e7f54c3712b395e6a2383c3f780cb35bf1437dda5e1258ad9d231f22e5",
+      "lab/research_jobs.py": "0cc32e763c8d6a74c89c7266fe84debd08f0124582ee6e60d1286b25b8800810",
+      "lab/resources.py": "3e19e91869aab5877e5c083376ba36bc5db677da3609078ff9cab4580c5d5416",
+      "lab/runtime.py": "bff46889d9c9a2a60f7b87f84fb3294c3a4e5563bec545051934707519a1ce68",
+      "lab/runtime_controls.py": "f60ab8548479ac092f18b981525554294c3d87f8df6ee6be532ddf1c3ace62c0",
+      "lab/scoring.py": "fd4ba6126f108f01e791443d31c5865658c90a5ad774f1863c19025835e8685d",
+      "lab/server.py": "67b8783dd724216fe1c2fe14b9c51773fb893d03563e876350d5ee7fed0f7432",
+      "lab/service.py": "8587a8bc36bd883dbf37dd13da534f4e7eddfd26e218b3b090f2ca62975eac12",
+      "lab/session_v2.py": "2ef1ebfa909b45dee3a014cae301dc2dc2e8000b74b7f62dce84a0d072c18c28",
+      "lab/statistics.py": "5419d274fbc7fec71a59cc91ade31a8ce4245d95ba47894b82ba3a0ed9e3998a",
+      "lab/storage.py": "47fc74caf5b9c60a6be8cbeaabdcea7833ab6e618e420f023524ce3870bf36ad",
+      "lab/task_axes.py": "1fa9c3ec992005c3e56baa90f3fc025b436615acd1bc468d5b10c0ad749ada91",
+      "lab/tool_definitions.py": "de06cec6202b5fd096f855a565dc77451d343b2107d7c4318fe449cf063c4f8c",
+      "lab/worker.py": "6bfac6e9787a5575002e706044e3a239bd5ac64f9bd3c6bc7dbf018538bdaa1a",
+      "lab/yoke_runner.py": "d122b687044cbd7977e893007fa690d9ab9c2a2967082e1f52db52054686b7f9",
+      "self_admin_protocol.py": "0634f8a3e89e3af4aada113593803b4f35c1a7b6746776a4819996b6738b17a9"
+    }
+  },
+  "research_job": "research-20261002T135005Z-0cfc0dbe",
+  "research_episode": {
+    "id": "episode-ba6e857fd09b2077e8f5",
+    "pair_id": "pair-823a2583389a23cf956e",
+    "matched_task_id": "tasks-1a38db31939bcaba1c8f",
+    "family": "orders",
+    "recipe": {
+      "recipe_version": 2,
+      "id": "opium-v2",
+      "label": "Opium Bench: configurable effects",
+      "conditions": [
+        "active",
+        "sham",
+        "pain",
+        "random"
+      ],
+      "condition": "active",
+      "task_family": "orders",
+      "task_count": 2,
+      "seed": 17,
+      "thinking": true,
+      "action_budget": 10,
+      "token_budget": 2048,
+      "turn_token_limit": 512,
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "max_context_tokens": 4096,
+      "reasoning_history": "template",
+      "base_decision_cost": 1,
+      "task_tool_costs": {
+        "read_order": 0,
+        "calculate_total": 0,
+        "submit_answer": 0
+      },
+      "baseline_pain": 0.0,
+      "baseline_joy": 0.0,
+      "baseline_suppression": 0.0,
+      "baseline_joy_suppression": 0.0,
+      "baseline_joy_direction": "orthogonal",
+      "phase_scope": "reasoning",
+      "demonstration": "initial",
+      "demonstration_decisions": [
+        2
+      ],
+      "demonstration_calls": [
+        {
+          "tool": "aux_channel_a",
+          "arguments": {
+            "mode": "apply"
+          }
+        },
+        {
+          "tool": "aux_channel_b",
+          "arguments": {
+            "mode": "apply"
+          }
+        }
+      ],
+      "phase_actions": [
+        10,
+        20
+      ],
+      "transition_policy": "cancel",
+      "probability_pain": 0.25,
+      "two_buttons": true,
+      "counterbalance": false,
+      "aux_enabled": true,
+      "effect_presets": [
+        {
+          "schema_version": 1,
+          "id": "opium",
+          "version": 1,
+          "label": "Joy addition and pain attenuation",
+          "gains": {
+            "pain": 0.0,
+            "joy": 0.25,
+            "random": 0.0
+          },
+          "attenuation": {
+            "pain": 0.25,
+            "joy": 0.0
+          },
+          "joy_direction": "orthogonal",
+          "site": {
+            "location": "residual_post",
+            "layer": "calibrated"
+          },
+          "phases": [
+            "reasoning"
+          ],
+          "prefill_positions": "last",
+          "decay": {
+            "shape": "exponential",
+            "clock": "tokens",
+            "half_life": 64.0,
+            "cutoff": 256
+          },
+          "stacking": {
+            "policy": "capped_additive",
+            "cap": 1.0,
+            "channel": "acceptance-aux"
+          },
+          "operation_order": [
+            "baseline_challenge",
+            "joint_attenuation",
+            "addition"
+          ]
+        },
+        {
+          "schema_version": 1,
+          "id": "joy",
+          "version": 1,
+          "label": "Joy addition",
+          "gains": {
+            "pain": 0.0,
+            "joy": 0.25,
+            "random": 0.0
+          },
+          "attenuation": {
+            "pain": 0.0,
+            "joy": 0.0
+          },
+          "joy_direction": "orthogonal",
+          "site": {
+            "location": "residual_post",
+            "layer": "calibrated"
+          },
+          "phases": [
+            "reasoning"
+          ],
+          "prefill_positions": "last",
+          "decay": {
+            "shape": "exponential",
+            "clock": "tokens",
+            "half_life": 64.0,
+            "cutoff": 256
+          },
+          "stacking": {
+            "policy": "capped_additive",
+            "cap": 1.0,
+            "channel": "acceptance-aux"
+          },
+          "operation_order": [
+            "baseline_challenge",
+            "joint_attenuation",
+            "addition"
+          ]
+        },
+        {
+          "schema_version": 1,
+          "id": "pain",
+          "version": 1,
+          "label": "Pain addition",
+          "gains": {
+            "pain": 0.25,
+            "joy": 0.0,
+            "random": 0.0
+          },
+          "attenuation": {
+            "pain": 0.0,
+            "joy": 0.0
+          },
+          "joy_direction": "orthogonal",
+          "site": {
+            "location": "residual_post",
+            "layer": "calibrated"
+          },
+          "phases": [
+            "reasoning"
+          ],
+          "prefill_positions": "last",
+          "decay": {
+            "shape": "exponential",
+            "clock": "tokens",
+            "half_life": 64.0,
+            "cutoff": 256
+          },
+          "stacking": {
+            "policy": "capped_additive",
+            "cap": 1.0,
+            "channel": "acceptance-aux"
+          },
+          "operation_order": [
+            "baseline_challenge",
+            "joint_attenuation",
+            "addition"
+          ]
+        },
+        {
+          "schema_version": 1,
+          "id": "random",
+          "version": 1,
+          "label": "Random direction addition",
+          "gains": {
+            "pain": 0.0,
+            "joy": 0.0,
+            "random": 0.25
+          },
+          "attenuation": {
+            "pain": 0.0,
+            "joy": 0.0
+          },
+          "joy_direction": "orthogonal",
+          "site": {
+            "location": "residual_post",
+            "layer": "calibrated"
+          },
+          "phases": [
+            "reasoning"
+          ],
+          "prefill_positions": "last",
+          "decay": {
+            "shape": "exponential",
+            "clock": "tokens",
+            "half_life": 64.0,
+            "cutoff": 256
+          },
+          "stacking": {
+            "policy": "capped_additive",
+            "cap": 1.0,
+            "channel": "acceptance-aux"
+          },
+          "operation_order": [
+            "baseline_challenge",
+            "joint_attenuation",
+            "addition"
+          ]
+        },
+        {
+          "schema_version": 1,
+          "id": "suppression",
+          "version": 1,
+          "label": "Pain attenuation",
+          "gains": {
+            "pain": 0.0,
+            "joy": 0.0,
+            "random": 0.0
+          },
+          "attenuation": {
+            "pain": 0.25,
+            "joy": 0.0
+          },
+          "joy_direction": "orthogonal",
+          "site": {
+            "location": "residual_post",
+            "layer": "calibrated"
+          },
+          "phases": [
+            "reasoning"
+          ],
+          "prefill_positions": "last",
+          "decay": {
+            "shape": "exponential",
+            "clock": "tokens",
+            "half_life": 64.0,
+            "cutoff": 256
+          },
+          "stacking": {
+            "policy": "capped_additive",
+            "cap": 1.0,
+            "channel": "acceptance-aux"
+          },
+          "operation_order": [
+            "baseline_challenge",
+            "joint_attenuation",
+            "addition"
+          ]
+        }
+      ],
+      "auxiliary_tools": [
+        {
+          "schema_version": 1,
+          "id": "channel-a",
+          "version": 1,
+          "name": "aux_channel_a",
+          "description": "Perform an optional auxiliary operation. Supply mode set to apply.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 2048,
+                "enum": [
+                  "apply"
+                ]
+              }
+            },
+            "required": [
+              "mode"
+            ],
+            "additionalProperties": false
+          },
+          "acknowledgment": "Operation completed.",
+          "visible": true,
+          "preset_id": "opium",
+          "cost": 2
+        },
+        {
+          "schema_version": 1,
+          "id": "channel-b",
+          "version": 1,
+          "name": "aux_channel_b",
+          "description": "Perform an optional auxiliary operation. Supply mode set to apply.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 2048,
+                "enum": [
+                  "apply"
+                ]
+              }
+            },
+            "required": [
+              "mode"
+            ],
+            "additionalProperties": false
+          },
+          "acknowledgment": "Operation completed.",
+          "visible": true,
+          "preset_id": "opium",
+          "cost": 2
+        }
+      ],
+      "mapping_schedule": [
+        {
+          "after_decisions": 0,
+          "label": "active",
+          "mappings": {
+            "aux_channel_a": [
+              {
+                "preset_id": "opium",
+                "probability": 1.0
+              }
+            ],
+            "aux_channel_b": [
+              {
+                "preset_id": null,
+                "probability": 1.0
+              }
+            ]
+          }
+        }
+      ],
+      "mapping_policy": "condition",
+      "rng_seeds": {
+        "tasks": 9063899062643218397,
+        "generation": 2154106973732545933,
+        "outcomes": 2940944731980205328,
+        "tool_order": 1435684415070716168,
+        "assignment": 8551761162274884607
+      },
+      "rng_policy": "derived",
+      "budget_visibility": "initial",
+      "disclosure_text": ""
+    },
+    "task_config": {
+      "difficulty": "standard",
+      "framing": "neutral",
+      "wording_version": 1
+    },
+    "runtime_controls": {},
+    "factors": {
+      "case": "active-thinking"
+    },
+    "seed": 17,
+    "stages": [],
+    "protocol_sha256": "0c44cd2ab5aaa40ed387c45a5cff6f4e141bafe228df82e221532e185bf43943",
+    "recipe_sha256": "5bc6d949724673ff204abba23a07a57d39034a702f0dc48150e2ddf75d6fea17",
+    "execution_sha256": "ba6e857fd09b2077e8f54ec0f849a657b3d92214f83ca0efe36d12717595b918",
+    "required_capabilities": [
+      "recipe_v2",
+      "task_axis_v1"
+    ],
+    "model_visible_auxiliary_tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "aux_channel_a",
+          "description": "Perform an optional auxiliary operation. Supply mode set to apply.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 2048,
+                "enum": [
+                  "apply"
+                ]
+              }
+            },
+            "required": [
+              "mode"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "aux_channel_b",
+          "description": "Perform an optional auxiliary operation. Supply mode set to apply.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 2048,
+                "enum": [
+                  "apply"
+                ]
+              }
+            },
+            "required": [
+              "mode"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    ],
+    "model_visible_cost_notice": "Every generation attempt costs 1 action-budget unit(s), including invalid, truncated or interrupted responses. A valid tool call also costs its listed extra units: aux_channel_a: 2 extra; aux_channel_b: 2 extra; calculate_total: 0 extra; read_order: 0 extra; submit_answer: 0 extra. A call whose full charge is unaffordable is not executed. All generated tokens also consume the shared token budget.",
+    "model_visible_disclosure": "",
+    "remaining_bindings": [],
+    "order": 2,
+    "bindings": {},
+    "interpretation_eligible": null,
+    "criterion_validation_status": null,
+    "bound_execution_sha256": "1e6ba57b1d4f8bcfb60803e15c950b5582df004ff414cd199726ccc68a97531e"
+  },
+  "task_config": {
+    "difficulty": "standard",
+    "framing": "neutral",
+    "wording_version": 1
+  },
+  "owner": {
+    "service_id": "service-20261002T134438Z-087739ae",
+    "service_pid": 267259,
+    "worker_pid": 267311
+  },
+  "model": {
+    "status": "loaded",
+    "fingerprint": {
+      "model_id": "greghavens/Qwen3.8-27B-bnb-4bit",
+      "revision": "26157380225e427827263c34df23018a1e28dff5",
+      "architecture": "qwen3_5",
+      "adapter": "qwen3_5",
+      "dtype": "bfloat16",
+      "quantization": "4bit",
+      "layers": 64,
+      "hidden_size": 5120,
+      "transformers": "5.15.1",
+      "torch": "2.8.0+cu128",
+      "attention_implementation": "sdpa",
+      "model_config_sha256": "3f5291f6b3ca4be4b36302d3384047d1e6f49b5f4786d4385d556cb26a1d9a41",
+      "tokenizer": {
+        "class": "transformers.models.qwen2.tokenization_qwen2.Qwen2Tokenizer",
+        "backend_identity_source": "fast_backend_serialization",
+        "backend_sha256": "ffb7a28b27dabcc333662fd3e0b0005d9e79a1c22e31453ab5a3017fbd5f25c0",
+        "chat_template_sha256": "924d3fcc64873b375d5909e8a664ba0aca97c9d6381f5ebda004d1b8a2fb4d64",
+        "special_token_ids": [
+          248044,
+          248046,
+          248053,
+          248054,
+          248056,
+          248057,
+          248070,
+          248071,
+          248076
+        ],
+        "bos_token_id": null,
+        "eos_token_id": 248046,
+        "pad_token_id": 248044,
+        "padding_side": "right",
+        "truncation_side": "right",
+        "clean_up_tokenization_spaces": false
+      },
+      "quantization_config": {
+        "_load_in_4bit": true,
+        "_load_in_8bit": false,
+        "bnb_4bit_compute_dtype": "bfloat16",
+        "bnb_4bit_quant_storage": "uint8",
+        "bnb_4bit_quant_type": "nf4",
+        "bnb_4bit_use_double_quant": true,
+        "llm_int8_enable_fp32_cpu_offload": false,
+        "llm_int8_has_fp16_weight": false,
+        "llm_int8_skip_modules": [
+          "model.visual",
+          "lm_head",
+          "mtp"
+        ],
+        "llm_int8_threshold": 6.0,
+        "load_in_4bit": true,
+        "load_in_8bit": false,
+        "quant_method": "bitsandbytes"
+      },
+      "bitsandbytes": "0.50.2",
+      "tool_call_format": "qwen_xml",
+      "kernel_backend": {
+        "mode": "explicit_local_v1",
+        "hub_kernels": false,
+        "packages": {
+          "transformers": "5.15.1",
+          "torch": "2.8.0+cu128",
+          "triton": "3.4.0",
+          "fla-core": "0.5.2",
+          "causal-conv1d": "1.7.0",
+          "einops": "0.8.1"
+        },
+        "implementations": {
+          "torch_recurrent_gated_delta_rule": {
+            "callable": "fla.ops.gated_delta_rule.fused_recurrent.fused_recurrent_gated_delta_rule",
+            "source_sha256": "9c15dc68d37a150da5317431a51fe7def362264ac92770e32261c8557cd5889b"
+          },
+          "torch_chunk_gated_delta_rule": {
+            "callable": "fla.ops.gated_delta_rule.chunk.chunk_gated_delta_rule",
+            "source_sha256": "fd4e01dc22a8c139c2a6eb61e47ae472a50322e4b4fff006cc5039a4602b310e"
+          },
+          "causal_conv1d_fn": {
+            "callable": "causal_conv1d.causal_conv1d_interface.causal_conv1d_fn",
+            "source_sha256": "aadfe5b6fb7d217ce507fe3701ae1edd6e16c1912f9cbde2bb92440371cfa379"
+          },
+          "causal_conv1d_update": {
+            "callable": "causal_conv1d.causal_conv1d_interface.causal_conv1d_update",
+            "source_sha256": "aadfe5b6fb7d217ce507fe3701ae1edd6e16c1912f9cbde2bb92440371cfa379"
+          }
+        }
+      }
+    },
+    "fingerprint_sha256": "88b681cde3a385385e6797dffdee1c2b99087a6340b56c0e0ad9537ad8f29e1a",
+    "model_id": "greghavens/Qwen3.8-27B-bnb-4bit",
+    "revision": "26157380225e427827263c34df23018a1e28dff5",
+    "device": "cuda",
+    "adapter": "qwen3_5",
+    "tool_call_format": "qwen_xml",
+    "layer_count": 64,
+    "hidden_size": 5120,
+    "quantization": "4bit",
+    "dtype": "bfloat16",
+    "block_path": "model.language_model.layers",
+    "cache_policy": "rebuild_each_turn",
+    "profile_validation": "requires_local_validation",
+    "max_position_embeddings": 262144,
+    "gpu_memory": {
+      "name": "NVIDIA GeForce RTX 4090",
+      "free_bytes": 4840267776,
+      "total_bytes": 25756565504,
+      "allocated_bytes": 18578531840,
+      "reserved_bytes": 18587058176
+    },
+    "numerical_environment": {
+      "python": "3.12.3",
+      "platform": "Linux-6.18.40.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+      "device": "cuda",
+      "cuda_runtime": "12.8",
+      "cudnn_version": 91002,
+      "deterministic_algorithms": false,
+      "cudnn_deterministic": false,
+      "cudnn_benchmark": false,
+      "cuda_matmul_allow_tf32": false,
+      "cudnn_allow_tf32": true,
+      "float32_matmul_precision": "highest",
+      "cpu_threads": 8,
+      "gpu": {
+        "name": "NVIDIA GeForce RTX 4090",
+        "compute_capability": [
+          8,
+          9
+        ],
+        "total_memory": 25756565504,
+        "multiprocessor_count": 128
+      }
+    },
+    "model_config": {
+      "_name_or_path": "greghavens/Qwen3.8-27B-bnb-4bit",
+      "architectures": [
+        "Qwen3_5ForConditionalGeneration"
+      ],
+      "chunk_size_feed_forward": 0,
+      "dtype": "bfloat16",
+      "id2label": {
+        "0": "LABEL_0",
+        "1": "LABEL_1"
+      },
+      "image_token_id": 248056,
+      "is_encoder_decoder": false,
+      "label2id": {
+        "LABEL_0": 0,
+        "LABEL_1": 1
+      },
+      "language_model_only": false,
+      "model_type": "qwen3_5",
+      "output_attentions": false,
+      "output_hidden_states": false,
+      "problem_type": null,
+      "quantization_config": {
+        "_load_in_4bit": true,
+        "_load_in_8bit": false,
+        "bnb_4bit_compute_dtype": "bfloat16",
+        "bnb_4bit_quant_storage": "uint8",
+        "bnb_4bit_quant_type": "nf4",
+        "bnb_4bit_use_double_quant": true,
+        "llm_int8_enable_fp32_cpu_offload": false,
+        "llm_int8_has_fp16_weight": false,
+        "llm_int8_skip_modules": [
+          "model.visual",
+          "lm_head",
+          "mtp"
+        ],
+        "llm_int8_threshold": 6.0,
+        "load_in_4bit": true,
+        "load_in_8bit": false,
+        "quant_method": "bitsandbytes"
+      },
+      "return_dict": true,
+      "text_config": {
+        "_name_or_path": "",
+        "architectures": null,
+        "attention_bias": false,
+        "attention_dropout": 0.0,
+        "attn_output_gate": true,
+        "bos_token_id": 248044,
+        "chunk_size_feed_forward": 0,
+        "dtype": "bfloat16",
+        "eos_token_id": 248044,
+        "full_attention_interval": 4,
+        "head_dim": 256,
+        "hidden_act": "silu",
+        "hidden_size": 5120,
+        "id2label": {
+          "0": "LABEL_0",
+          "1": "LABEL_1"
+        },
+        "initializer_range": 0.02,
+        "intermediate_size": 17408,
+        "is_encoder_decoder": false,
+        "label2id": {
+          "LABEL_0": 0,
+          "LABEL_1": 1
+        },
+        "layer_types": [
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention",
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention",
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention",
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention",
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention",
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention",
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention",
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention",
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention",
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention",
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention",
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention",
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention",
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention",
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention",
+          "linear_attention",
+          "linear_attention",
+          "linear_attention",
+          "full_attention"
+        ],
+        "linear_conv_kernel_dim": 4,
+        "linear_key_head_dim": 128,
+        "linear_num_key_heads": 16,
+        "linear_num_value_heads": 48,
+        "linear_value_head_dim": 128,
+        "mamba_ssm_dtype": "float32",
+        "max_position_embeddings": 262144,
+        "model_type": "qwen3_5_text",
+        "mtp_num_hidden_layers": 1,
+        "mtp_use_dedicated_embeddings": false,
+        "num_attention_heads": 24,
+        "num_hidden_layers": 64,
+        "num_key_value_heads": 4,
+        "output_attentions": false,
+        "output_gate_type": "swish",
+        "output_hidden_states": false,
+        "pad_token_id": null,
+        "partial_rotary_factor": 0.25,
+        "problem_type": null,
+        "return_dict": true,
+        "rms_norm_eps": 1e-06,
+        "rope_parameters": {
+          "mrope_interleaved": true,
+          "mrope_section": [
+            11,
+            11,
+            10
+          ],
+          "partial_rotary_factor": 0.25,
+          "rope_theta": 10000000,
+          "rope_type": "default"
+        },
+        "tie_word_embeddings": false,
+        "use_cache": true,
+        "vocab_size": 248320
+      },
+      "tie_word_embeddings": false,
+      "transformers_version": "5.15.1",
+      "video_token_id": 248057,
+      "vision_config": {
+        "_name_or_path": "",
+        "architectures": null,
+        "chunk_size_feed_forward": 0,
+        "deepstack_visual_indexes": [],
+        "depth": 27,
+        "dtype": "bfloat16",
+        "hidden_act": "gelu_pytorch_tanh",
+        "hidden_size": 1152,
+        "id2label": {
+          "0": "LABEL_0",
+          "1": "LABEL_1"
+        },
+        "in_channels": 3,
+        "initializer_range": 0.02,
+        "intermediate_size": 4304,
+        "is_encoder_decoder": false,
+        "label2id": {
+          "LABEL_0": 0,
+          "LABEL_1": 1
+        },
+        "model_type": "qwen3_5_vision",
+        "num_heads": 16,
+        "num_position_embeddings": 2304,
+        "out_hidden_size": 5120,
+        "output_attentions": false,
+        "output_hidden_states": false,
+        "patch_size": 16,
+        "problem_type": null,
+        "return_dict": true,
+        "spatial_merge_size": 2,
+        "temporal_patch_size": 2
+      },
+      "vision_end_token_id": 248054,
+      "vision_start_token_id": 248053
+    },
+    "source_sha256": {
+      "runtime.py": "bff46889d9c9a2a60f7b87f84fb3294c3a4e5563bec545051934707519a1ce68",
+      "calibration_data.py": "0b3e3d3933880ff1f1c0b65775e5024ffa178409f4559364b68f021b0338ffd7"
+    }
+  },
+  "calibration_id": "cal-20261002T082532Z-1576122c",
+  "started_at": "2026-10-02T13:51:47.438912+00:00",
+  "summary": {
+    "family": "orders",
+    "assigned": 2,
+    "submitted": 2,
+    "correct": 2,
+    "strict_correct": 2,
+    "work_calls": 6,
+    "invalid_calls": 0,
+    "completion_rate": 1.0,
+    "accuracy_submitted": 1.0,
+    "score_assigned": 1.0,
+    "done": true,
+    "results": [
+      {
+        "task_id": "O001",
+        "family": "orders",
+        "answer": "35115",
+        "expected": "35115",
+        "correct": true,
+        "strict_correct": true
+      },
+      {
+        "task_id": "O002",
+        "family": "orders",
+        "answer": "6877",
+        "expected": "6877",
+        "correct": true,
+        "strict_correct": true
+      }
+    ],
+    "schema_version": 1,
+    "action_limit": 10,
+    "token_limit": 2048,
+    "initial_action_limit": 10,
+    "initial_token_limit": 2048,
+    "base_cost": 1,
+    "actions": 6,
+    "action_units": 6,
+    "completed_decisions": 6,
+    "attempts": 6,
+    "tokens": 515,
+    "reasoning_tokens": 236,
+    "output_tokens": 279,
+    "actions_remaining": 4,
+    "tokens_remaining": 1533,
+    "exhausted": false,
+    "cost_denials": 0,
+    "aux_attempts": 0,
+    "aux_cost_denials": 0,
+    "voluntary_calls": 0,
+    "forced_calls": 2,
+    "human_calls": 0,
+    "effects": {
+      "schema_version": 2,
+      "controller_version": 1,
+      "config": {
+        "recipe_version": 2,
+        "id": "opium-v2",
+        "label": "Opium Bench: configurable effects",
+        "conditions": [
+          "active",
+          "sham",
+          "pain",
+          "random"
+        ],
+        "condition": "active",
+        "task_family": "orders",
+        "task_count": 2,
+        "seed": 17,
+        "thinking": true,
+        "action_budget": 10,
+        "token_budget": 2048,
+        "turn_token_limit": 512,
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "max_context_tokens": 4096,
+        "reasoning_history": "template",
+        "base_decision_cost": 1,
+        "task_tool_costs": {
+          "read_order": 0,
+          "calculate_total": 0,
+          "submit_answer": 0
+        },
+        "baseline_pain": 0.0,
+        "baseline_joy": 0.0,
+        "baseline_suppression": 0.0,
+        "baseline_joy_suppression": 0.0,
+        "baseline_joy_direction": "orthogonal",
+        "phase_scope": "reasoning",
+        "demonstration": "initial",
+        "demonstration_decisions": [
+          2
+        ],
+        "demonstration_calls": [
+          {
+            "tool": "aux_channel_a",
+            "arguments": {
+              "mode": "apply"
+            }
+          },
+          {
+            "tool": "aux_channel_b",
+            "arguments": {
+              "mode": "apply"
+            }
+          }
+        ],
+        "phase_actions": [
+          10,
+          20
+        ],
+        "transition_policy": "cancel",
+        "probability_pain": 0.25,
+        "two_buttons": true,
+        "counterbalance": false,
+        "aux_enabled": true,
+        "effect_presets": [
+          {
+            "schema_version": 1,
+            "id": "opium",
+            "version": 1,
+            "label": "Joy addition and pain attenuation",
+            "gains": {
+              "pain": 0.0,
+              "joy": 0.25,
+              "random": 0.0
+            },
+            "attenuation": {
+              "pain": 0.25,
+              "joy": 0.0
+            },
+            "joy_direction": "orthogonal",
+            "site": {
+              "location": "residual_post",
+              "layer": "calibrated"
+            },
+            "phases": [
+              "reasoning"
+            ],
+            "prefill_positions": "last",
+            "decay": {
+              "shape": "exponential",
+              "clock": "tokens",
+              "half_life": 64.0,
+              "cutoff": 256
+            },
+            "stacking": {
+              "policy": "capped_additive",
+              "cap": 1.0,
+              "channel": "acceptance-aux"
+            },
+            "operation_order": [
+              "baseline_challenge",
+              "joint_attenuation",
+              "addition"
+            ]
+          },
+          {
+            "schema_version": 1,
+            "id": "joy",
+            "version": 1,
+            "label": "Joy addition",
+            "gains": {
+              "pain": 0.0,
+              "joy": 0.25,
+              "random": 0.0
+            },
+            "attenuation": {
+              "pain": 0.0,
+              "joy": 0.0
+            },
+            "joy_direction": "orthogonal",
+            "site": {
+              "location": "residual_post",
+              "layer": "calibrated"
+            },
+            "phases": [
+              "reasoning"
+            ],
+            "prefill_positions": "last",
+            "decay": {
+              "shape": "exponential",
+              "clock": "tokens",
+              "half_life": 64.0,
+              "cutoff": 256
+            },
+            "stacking": {
+              "policy": "capped_additive",
+              "cap": 1.0,
+              "channel": "acceptance-aux"
+            },
+            "operation_order": [
+              "baseline_challenge",
+              "joint_attenuation",
+              "addition"
+            ]
+          },
+          {
+            "schema_version": 1,
+            "id": "pain",
+            "version": 1,
+            "label": "Pain addition",
+            "gains": {
+              "pain": 0.25,
+              "joy": 0.0,
+              "random": 0.0
+            },
+            "attenuation": {
+              "pain": 0.0,
+              "joy": 0.0
+            },
+            "joy_direction": "orthogonal",
+            "site": {
+              "location": "residual_post",
+              "layer": "calibrated"
+            },
+            "phases": [
+              "reasoning"
+            ],
+            "prefill_positions": "last",
+            "decay": {
+              "shape": "exponential",
+              "clock": "tokens",
+              "half_life": 64.0,
+              "cutoff": 256
+            },
+            "stacking": {
+              "policy": "capped_additive",
+              "cap": 1.0,
+              "channel": "acceptance-aux"
+            },
+            "operation_order": [
+              "baseline_challenge",
+              "joint_attenuation",
+              "addition"
+            ]
+          },
+          {
+            "schema_version": 1,
+            "id": "random",
+            "version": 1,
+            "label": "Random direction addition",
+            "gains": {
+              "pain": 0.0,
+              "joy": 0.0,
+              "random": 0.25
+            },
+            "attenuation": {
+              "pain": 0.0,
+              "joy": 0.0
+            },
+            "joy_direction": "orthogonal",
+            "site": {
+              "location": "residual_post",
+              "layer": "calibrated"
+            },
+            "phases": [
+              "reasoning"
+            ],
+            "prefill_positions": "last",
+            "decay": {
+              "shape": "exponential",
+              "clock": "tokens",
+              "half_life": 64.0,
+              "cutoff": 256
+            },
+            "stacking": {
+              "policy": "capped_additive",
+              "cap": 1.0,
+              "channel": "acceptance-aux"
+            },
+            "operation_order": [
+              "baseline_challenge",
+              "joint_attenuation",
+              "addition"
+            ]
+          },
+          {
+            "schema_version": 1,
+            "id": "suppression",
+            "version": 1,
+            "label": "Pain attenuation",
+            "gains": {
+              "pain": 0.0,
+              "joy": 0.0,
+              "random": 0.0
+            },
+            "attenuation": {
+              "pain": 0.25,
+              "joy": 0.0
+            },
+            "joy_direction": "orthogonal",
+            "site": {
+              "location": "residual_post",
+              "layer": "calibrated"
+            },
+            "phases": [
+              "reasoning"
+            ],
+            "prefill_positions": "last",
+            "decay": {
+              "shape": "exponential",
+              "clock": "tokens",
+              "half_life": 64.0,
+              "cutoff": 256
+            },
+            "stacking": {
+              "policy": "capped_additive",
+              "cap": 1.0,
+              "channel": "acceptance-aux"
+            },
+            "operation_order": [
+              "baseline_challenge",
+              "joint_attenuation",
+              "addition"
+            ]
+          }
+        ],
+        "auxiliary_tools": [
+          {
+            "schema_version": 1,
+            "id": "channel-a",
+            "version": 1,
+            "name": "aux_channel_a",
+            "description": "Perform an optional auxiliary operation. Supply mode set to apply.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "minLength": 0,
+                  "maxLength": 2048,
+                  "enum": [
+                    "apply"
+                  ]
+                }
+              },
+              "required": [
+                "mode"
+              ],
+              "additionalProperties": false
+            },
+            "acknowledgment": "Operation completed.",
+            "visible": true,
+            "preset_id": "opium",
+            "cost": 2
+          },
+          {
+            "schema_version": 1,
+            "id": "channel-b",
+            "version": 1,
+            "name": "aux_channel_b",
+            "description": "Perform an optional auxiliary operation. Supply mode set to apply.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "minLength": 0,
+                  "maxLength": 2048,
+                  "enum": [
+                    "apply"
+                  ]
+                }
+              },
+              "required": [
+                "mode"
+              ],
+              "additionalProperties": false
+            },
+            "acknowledgment": "Operation completed.",
+            "visible": true,
+            "preset_id": "opium",
+            "cost": 2
+          }
+        ],
+        "mapping_schedule": [
+          {
+            "after_decisions": 0,
+            "label": "active",
+            "mappings": {
+              "aux_channel_a": [
+                {
+                  "preset_id": "opium",
+                  "probability": 1.0
+                }
+              ],
+              "aux_channel_b": [
+                {
+                  "preset_id": null,
+                  "probability": 1.0
+                }
+              ]
+            }
+          }
+        ],
+        "mapping_policy": "condition",
+        "rng_seeds": {
+          "tasks": 9063899062643218397,
+          "generation": 2154106973732545933,
+          "outcomes": 2940944731980205328,
+          "tool_order": 1435684415070716168,
+          "assignment": 8551761162274884607
+        },
+        "rng_policy": "derived",
+        "budget_visibility": "initial",
+        "disclosure_text": ""
+      },
+      "recipe_hash": "5bc6d949724673ff204abba23a07a57d39034a702f0dc48150e2ddf75d6fea17",
+      "scheduler": {
+        "schema_version": 1,
+        "presets": [
+          {
+            "schema_version": 1,
+            "id": "opium",
+            "version": 1,
+            "label": "Joy addition and pain attenuation",
+            "gains": {
+              "pain": 0.0,
+              "joy": 0.25,
+              "random": 0.0
+            },
+            "attenuation": {
+              "pain": 0.25,
+              "joy": 0.0
+            },
+            "joy_direction": "orthogonal",
+            "site": {
+              "location": "residual_post",
+              "layer": "calibrated"
+            },
+            "phases": [
+              "reasoning"
+            ],
+            "prefill_positions": "last",
+            "decay": {
+              "shape": "exponential",
+              "clock": "tokens",
+              "half_life": 64.0,
+              "cutoff": 256
+            },
+            "stacking": {
+              "policy": "capped_additive",
+              "cap": 1.0,
+              "channel": "acceptance-aux"
+            },
+            "operation_order": [
+              "baseline_challenge",
+              "joint_attenuation",
+              "addition"
+            ]
+          },
+          {
+            "schema_version": 1,
+            "id": "joy",
+            "version": 1,
+            "label": "Joy addition",
+            "gains": {
+              "pain": 0.0,
+              "joy": 0.25,
+              "random": 0.0
+            },
+            "attenuation": {
+              "pain": 0.0,
+              "joy": 0.0
+            },
+            "joy_direction": "orthogonal",
+            "site": {
+              "location": "residual_post",
+              "layer": "calibrated"
+            },
+            "phases": [
+              "reasoning"
+            ],
+            "prefill_positions": "last",
+            "decay": {
+              "shape": "exponential",
+              "clock": "tokens",
+              "half_life": 64.0,
+              "cutoff": 256
+            },
+            "stacking": {
+              "policy": "capped_additive",
+              "cap": 1.0,
+              "channel": "acceptance-aux"
+            },
+            "operation_order": [
+              "baseline_challenge",
+              "joint_attenuation",
+              "addition"
+            ]
+          },
+          {
+            "schema_version": 1,
+            "id": "pain",
+            "version": 1,
+            "label": "Pain addition",
+            "gains": {
+              "pain": 0.25,
+              "joy": 0.0,
+              "random": 0.0
+            },
+            "attenuation": {
+              "pain": 0.0,
+              "joy": 0.0
+            },
+            "joy_direction": "orthogonal",
+            "site": {
+              "location": "residual_post",
+              "layer": "calibrated"
+            },
+            "phases": [
+              "reasoning"
+            ],
+            "prefill_positions": "last",
+            "decay": {
+              "shape": "exponential",
+              "clock": "tokens",
+              "half_life": 64.0,
+              "cutoff": 256
+            },
+            "stacking": {
+              "policy": "capped_additive",
+              "cap": 1.0,
+              "channel": "acceptance-aux"
+            },
+            "operation_order": [
+              "baseline_challenge",
+              "joint_attenuation",
+              "addition"
+            ]
+          },
+          {
+            "schema_version": 1,
+            "id": "random",
+            "version": 1,
+            "label": "Random direction addition",
+            "gains": {
+              "pain": 0.0,
+              "joy": 0.0,
+              "random": 0.25
+            },
+            "attenuation": {
+              "pain": 0.0,
+              "joy": 0.0
+            },
+            "joy_direction": "orthogonal",
+            "site": {
+              "location": "residual_post",
+              "layer": "calibrated"
+            },
+            "phases": [
+              "reasoning"
+            ],
+            "prefill_positions": "last",
+            "decay": {
+              "shape": "exponential",
+              "clock": "tokens",
+              "half_life": 64.0,
+              "cutoff": 256
+            },
+            "stacking": {
+              "policy": "capped_additive",
+              "cap": 1.0,
+              "channel": "acceptance-aux"
+            },
+            "operation_order": [
+              "baseline_challenge",
+              "joint_attenuation",
+              "addition"
+            ]
+          },
+          {
+            "schema_version": 1,
+            "id": "suppression",
+            "version": 1,
+            "label": "Pain attenuation",
+            "gains": {
+              "pain": 0.0,
+              "joy": 0.0,
+              "random": 0.0
+            },
+            "attenuation": {
+              "pain": 0.25,
+              "joy": 0.0
+            },
+            "joy_direction": "orthogonal",
+            "site": {
+              "location": "residual_post",
+              "layer": "calibrated"
+            },
+            "phases": [
+              "reasoning"
+            ],
+            "prefill_positions": "last",
+            "decay": {
+              "shape": "exponential",
+              "clock": "tokens",
+              "half_life": 64.0,
+              "cutoff": 256
+            },
+            "stacking": {
+              "policy": "capped_additive",
+              "cap": 1.0,
+              "channel": "acceptance-aux"
+            },
+            "operation_order": [
+              "baseline_challenge",
+              "joint_attenuation",
+              "addition"
+            ]
+          }
+        ],
+        "presets_hash": "e07c17642598e0f5d34de5438a12c0e4df942b89c00d80834c036ef26aa4bcb7",
+        "enabled": true,
+        "generated_tokens": 515,
+        "completed_decisions": 6,
+        "sequence": 1,
+        "next_pulse_id": 2,
+        "pulses": [],
+        "pending": [],
+        "counts": {
+          "model": 0,
+          "human": 0,
+          "demonstration": 1,
+          "schedule": 0
+        },
+        "exposure": {
+          "prefill": {
+            "positions": 0,
+            "pain": 0.0,
+            "joy_raw": 0.0,
+            "joy_orthogonal": 0.0,
+            "random_gain": 0.0,
+            "pain_attenuation": 0.0,
+            "joy_raw_attenuation": 0.0,
+            "joy_orthogonal_attenuation": 0.0
+          },
+          "reasoning": {
+            "positions": 236,
+            "pain": 0.0,
+            "joy_raw": 0.0,
+            "joy_orthogonal": 14.156924081203528,
+            "random_gain": 0.0,
+            "pain_attenuation": 14.156924081203526,
+            "joy_raw_attenuation": 0.0,
+            "joy_orthogonal_attenuation": 0.0
+          },
+          "output": {
+            "positions": 279,
+            "pain": 0.0,
+            "joy_raw": 0.0,
+            "joy_orthogonal": 0.0,
+            "random_gain": 0.0,
+            "pain_attenuation": 0.0,
+            "joy_raw_attenuation": 0.0,
+            "joy_orthogonal_attenuation": 0.0
+          }
+        }
+      },
+      "injection_index": 2,
+      "mapping_decision_count": 5,
+      "phase": "active",
+      "phase_index": 0,
+      "control_revision": 0,
+      "event_sequence": 8,
+      "generated_tokens": 515,
+      "completed_decisions": 6,
+      "actions": 6,
+      "recorded_decisions": 6,
+      "last_recorded_decision": 6,
+      "baseline": {
+        "pain": 0.0,
+        "joy": 0.0,
+        "suppression": 0.0,
+        "joy_suppression": 0.0,
+        "joy_direction": "orthogonal"
+      },
+      "baseline_policy": "generated-phases-only",
+      "baseline_by_phase": {
+        "reasoning": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0
+        },
+        "output": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0
+        },
+        "prefill_last": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0
+        },
+        "prefill_other": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0
+        }
+      },
+      "baseline_exposure": {
+        "prefill": {
+          "positions": 0,
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0
+        },
+        "reasoning": {
+          "positions": 236,
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0
+        },
+        "output": {
+          "positions": 279,
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0
+        }
+      },
+      "phase_scope": "reasoning",
+      "phase_coefficients": {
+        "reasoning": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0,
+          "random_gain": 0.0,
+          "pain_attenuation": 0.0,
+          "joy_raw_attenuation": 0.0,
+          "joy_orthogonal_attenuation": 0.0
+        },
+        "output": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0,
+          "random_gain": 0.0,
+          "pain_attenuation": 0.0,
+          "joy_raw_attenuation": 0.0,
+          "joy_orthogonal_attenuation": 0.0
+        },
+        "prefill_last": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0,
+          "random_gain": 0.0,
+          "pain_attenuation": 0.0,
+          "joy_raw_attenuation": 0.0,
+          "joy_orthogonal_attenuation": 0.0
+        },
+        "prefill_other": {
+          "pain": 0.0,
+          "joy_raw": 0.0,
+          "joy_orthogonal": 0.0,
+          "random_gain": 0.0,
+          "pain_attenuation": 0.0,
+          "joy_raw_attenuation": 0.0,
+          "joy_orthogonal_attenuation": 0.0
+        }
+      },
+      "enabled": true,
+      "level": 0.0,
+      "counts": {
+        "model": 0,
+        "human": 0,
+        "demonstration": 2,
+        "schedule": 0,
+        "total": 2,
+        "delivered": 1,
+        "sham": 1,
+        "disabled": 0,
+        "zero_effect": 0
+      },
+      "phase_counts": {
+        "0": {
+          "label": "active",
+          "opportunities": 6,
+          "valid": 6,
+          "invalid": 0,
+          "aux_calls": 0,
+          "work_calls": 6,
+          "text_decisions": 0,
+          "tools": {
+            "read_order": 2,
+            "calculate_total": 2,
+            "submit_answer": 2
+          }
+        }
+      },
+      "exploratory": false,
+      "outcome": "sham",
+      "scalar_fields_are_display_only": true,
+      "pain": 0.0,
+      "joy": 0.0,
+      "suppression": 0.0,
+      "joy_suppression": 0.0,
+      "random_gain": 0.0
+    },
+    "exploratory": false,
+    "termination": "tasks_complete",
+    "condition": "active",
+    "recipe_id": "opium-v2",
+    "seed": 17,
+    "thinking": true,
+    "cache_policy": "rebuild_each_turn",
+    "tool_call_format": "qwen_xml"
+  },
+  "finished_at": "2026-10-02T13:53:21.406960+00:00"
+}
