@@ -2,13 +2,14 @@
 from copy import deepcopy
 import json
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import threading
 import unittest
 from unittest.mock import patch
 
-from lab.resources import ResourceGuard, Volume
+from lab.resources import ResourceGuard, Volume, cancel_owned_process
 from prepare_runtime import child_environment, command_plan, run_command
 
 
@@ -51,10 +52,31 @@ class PreparationTests(unittest.TestCase):
             result=run_command(self.plan(),guard=self.guard,cancel_event=event,record_dir=self.root/"records")
         self.assertEqual(result["status"],"cancelled");launch.assert_not_called()
     def test_external_capacity_drop_kills_only_owned_blocked_child_and_saves_record(self):
-        timer=threading.Timer(.12,lambda:setattr(self,"low",True));timer.start();self.addCleanup(timer.cancel)
-        result=run_command(self.plan("import time; time.sleep(30)"),guard=self.guard,record_dir=self.root/"records",poll_seconds=.01)
+        ready=self.root/"tmp"/"child-ready"
+        # Setup writes may take longer than child startup on a busy filesystem.
+        # Drop capacity only once this child has atomically published its PID.
+        self.guard.telemetry=lambda path:{"free_bytes":0 if ready.exists() else 8*2**30,"total_bytes":16*2**30}
+        bystander=subprocess.Popen([sys.executable,"-c","import time; time.sleep(30)"],
+            stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+        self.addCleanup(lambda:cancel_owned_process(bystander,grace_seconds=.2))
+        launch=subprocess.Popen;children=[]
+        def owned_child(*args,**kwargs):
+            child=launch(*args,**kwargs);children.append(child)
+            self.addCleanup(lambda:cancel_owned_process(child,grace_seconds=.2))
+            return child
+        code=("import os,time; from pathlib import Path; "
+              "ready=Path(os.environ['TMPDIR'])/'child-ready'; "
+              "pending=ready.with_suffix('.pending'); pending.write_text(str(os.getpid())); "
+              "pending.replace(ready); time.sleep(30)")
+        with patch("prepare_runtime.subprocess.Popen",side_effect=owned_child):
+            result=run_command(self.plan(code),guard=self.guard,record_dir=self.root/"records",poll_seconds=.01)
+        self.assertEqual(len(children),1)
+        self.assertEqual(int(ready.read_text()),children[0].pid)
         self.assertEqual(result["status"],"resource_stopped")
         self.assertIsNotNone(result["returncode"])
+        self.assertNotEqual(result["returncode"],0)
+        self.assertEqual(children[0].poll(),result["returncode"])
+        self.assertIsNone(bystander.poll())
         self.assertEqual(json.loads(Path(result["record"]).read_text())["status"],"resource_stopped")
         self.assertEqual(self.guard.reservations,{})
     def test_shared_destinations_admission_aggregates_estimates(self):
