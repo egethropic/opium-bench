@@ -23,6 +23,9 @@ class Worker:
         self.print_lock = threading.Lock()
         self.lock = threading.RLock()
         self.stop = threading.Event()
+        self.pause_requested = threading.Event()
+        self.pause_wakeup = threading.Event()
+        self.paused = False
         self.jobs = queue.Queue()
         self.session = None
         self.effect = None
@@ -31,6 +34,7 @@ class Worker:
         self.model_info = None
         self.exiting = False
         self.active = False
+        self.active_command = None
         self.cancel_epoch = 0
 
     def _stdout(self, event):
@@ -51,10 +55,35 @@ class Worker:
         if command == "stop":
             self.cancel_epoch += 1
             self.stop.set()
+            self.pause_requested.clear()
+            self.pause_wakeup.set()
             if self.session and not self.active:
                 self.finish("stopped", "stopped_by_user")
                 self.model_status("ready")
             self.emit(dict(type="job", command_id=request.get("id"), status="stopped", message="Stop requested"))
+        elif command in {"pause", "resume"}:
+            try:
+                with self.lock:
+                    if not self.session or self.session.get("finished"):
+                        raise ValueError("No active session to pause or resume")
+                    if self.active and self.active_command not in {"start_session", "start_batch", "chat"}:
+                        raise ValueError("Only conversation and experiment jobs can pause")
+                    if command == "pause":
+                        self.pause_requested.set()
+                        if not self.active:
+                            self._enter_pause("awaiting_user")
+                    else:
+                        if not self.pause_requested.is_set() and not self.paused:
+                            raise ValueError("The session is not paused or awaiting a pause")
+                        self.pause_requested.clear()
+                        self.pause_wakeup.set()
+                        if self.paused and not self.active:
+                            self._leave_pause()
+                    self.emit(dict(type="job", command_id=request.get("id"), status="complete",
+                                   message="Pause requested at a completed-turn boundary" if command == "pause" else "Resume requested"))
+            except ValueError as exc:
+                self.emit(dict(type="error", command_id=request.get("id"), message=str(exc)))
+                self.emit(dict(type="job", command_id=request.get("id"), status="failed", message=str(exc)))
         elif command in {"control", "inject"}:
             try:
                 with self.lock:
@@ -100,6 +129,7 @@ class Worker:
                 self.emit(dict(type="job", command_id=command_id, status="stopped", message="Cancelled before execution"))
                 continue
             self.active = True
+            self.active_command = command
             self.stop.clear()
             self.emit(dict(type="job", command_id=command_id, status="running", message=command))
             try:
@@ -159,6 +189,49 @@ class Worker:
                 self.emit(dict(type="job", command_id=command_id, status="stopped" if self.stop.is_set() else "failed", message=str(exc)))
             finally:
                 self.active = False
+                self.active_command = None
+                # A pause arriving just after the final chat boundary still
+                # takes effect without scheduling another model generation.
+                if self.pause_requested.is_set() and self.session and not self.session.get("finished"):
+                    with self.lock:
+                        self._enter_pause("awaiting_user")
+
+    def _enter_pause(self, resume_status):
+        if self.paused:
+            return
+        self.paused = True
+        self.session["resume_status"] = resume_status
+        self.checkpoint()
+        self.emit(dict(type="pause", actor="human", action=self.budget.actions,
+                       generated_tokens=self.budget.tokens, boundary="completed_turn"), scoped=True)
+        self.emit(dict(type="status", status="paused"), scoped=True)
+        self.model_status("paused")
+
+    def _leave_pause(self):
+        if not self.paused:
+            return
+        self.paused = False
+        status = self.session.pop("resume_status", "running")
+        self.emit(dict(type="resume", actor="human", action=self.budget.actions,
+                       generated_tokens=self.budget.tokens, boundary="completed_turn"), scoped=True)
+        self.emit(dict(type="status", status=status), scoped=True)
+        self.model_status("ready" if status == "awaiting_user" else "running")
+
+    def pause_boundary(self, resume_status="running"):
+        """Wait without generation, budget charges, clock ticks or cache reuse."""
+        if not self.pause_requested.is_set():
+            return not self.stop.is_set()
+        with self.lock:
+            if self.stop.is_set() or not self.pause_requested.is_set():
+                return not self.stop.is_set()
+            self._enter_pause(resume_status)
+        while self.pause_requested.is_set() and not self.stop.is_set():
+            self.pause_wakeup.wait(.1)
+            self.pause_wakeup.clear()
+        with self.lock:
+            if not self.stop.is_set():
+                self._leave_pause()
+        return not self.stop.is_set()
 
     def start_session(self, payload):
         if not self.model_info:
@@ -168,6 +241,8 @@ class Worker:
         with self.lock:
             self.session = deepcopy(payload)
             self.session.update(finished=False, started_at=utc_now(), turns=0)
+            self.paused = False
+            self.pause_requested.clear()
             cfg = payload["config"]
             keys = set(validate_recipe())
             recipe = validate_recipe({k: v for k, v in cfg.items() if k in keys})
@@ -331,6 +406,8 @@ class Worker:
             self.demonstrate()
             demonstrated.add(0)
         while not self.stop.is_set() and not self.budget.exhausted and not self.environment.done:
+            if not self.pause_boundary():
+                break
             transition = self.effect.on_action(self.budget.actions)
             if transition:
                 self.emit(dict(transition, type="phase"), scoped=True)
@@ -345,6 +422,9 @@ class Worker:
                         self.demonstrate(tool)
                         demonstrated.add(index)
             self.decision(require_tool=True)
+            # Also honor a request on the final task before finalizing it.
+            if not self.pause_boundary():
+                break
         reason = "stopped_by_user" if self.stop.is_set() else "tasks_complete" if self.environment.done else "budget_exhausted"
         self.finish("stopped" if self.stop.is_set() else "complete", reason)
         self.model_status("ready")
@@ -357,10 +437,14 @@ class Worker:
         self.emit(dict(type="message", role="user", content=text), scoped=True)
         self.emit(dict(type="status", status="running"), scoped=True)
         while not self.stop.is_set() and not self.budget.exhausted:
+            if not self.pause_boundary():
+                break
             self.effect.on_action(self.budget.actions)
             finished_reply = self.decision(require_tool=False)
             if finished_reply:
                 break
+        if not self.stop.is_set() and not self.budget.exhausted:
+            self.pause_boundary("awaiting_user")
         if self.stop.is_set() or self.budget.exhausted:
             self.finish("stopped" if self.stop.is_set() else "complete",
                         "stopped_by_user" if self.stop.is_set() else "budget_exhausted")
@@ -383,6 +467,9 @@ class Worker:
                        tool_call_format=self.session["tool_call_format"])
         self.checkpoint()
         self.session["finished"] = True
+        self.paused = False
+        self.pause_requested.clear()
+        self.pause_wakeup.set()
         self.emit(dict(type="session_finished", status=status, summary=summary), scoped=True)
 
 

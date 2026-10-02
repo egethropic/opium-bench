@@ -27,7 +27,7 @@ PROFILES = [
          description="Pinned NF4 conversion of official Qwen3.8-27B. Requires the separate 27B runtime and model-specific calibration."),
 ]
 COMMANDS = {"load_model", "unload_model", "calibrate", "start_session", "chat",
-            "control", "inject", "stop", "restart", "start_batch"}
+            "control", "inject", "stop", "restart", "start_batch", "pause", "resume"}
 
 
 def normalize_config(raw, default="opium"):
@@ -127,7 +127,7 @@ class LabService:
         """
         for path in self.store.runs.iterdir():
             manifest = read_json(path / "manifest.json", {}) if path.is_dir() else {}
-            if manifest.get("status") not in {"queued", "running", "awaiting_user"}:
+            if manifest.get("status") not in {"queued", "running", "awaiting_user", "paused"}:
                 continue
             owner = manifest.get("owner")
             if not isinstance(owner, dict) or not owner.get("service_id"):
@@ -143,7 +143,7 @@ class LabService:
     def _finalize_interrupted_run(self, identifier, reason, intentional=False):
         run = self.store.read_run(identifier)
         manifest, events = run["manifest"], run["events"]
-        if manifest.get("status") not in {"queued", "running", "awaiting_user"}:
+        if manifest.get("status") not in {"queued", "running", "awaiting_user", "paused"}:
             return
         summary = deepcopy(run.get("summary") or {})
         for event in events:
@@ -271,6 +271,8 @@ class LabService:
                 if kind == "session_finished":
                     self.store.update(identifier, status=e.get("status", "complete"),
                                       summary=e.get("summary", {}), finished_at=utc_now())
+                elif kind == "status":
+                    self.store.update(identifier, status=e.get("status", "running"))
             return e
 
     def _launch(self):
@@ -377,7 +379,7 @@ class LabService:
         if command not in COMMANDS or not isinstance(payload, dict):
             raise ValueError("Unknown command or invalid payload")
         with self.lock:
-            busy = self.worker.get("status") in {"loading", "calibrating", "running"} or (self.job or {}).get("status") == "running"
+            busy = self.worker.get("status") in {"loading", "calibrating", "running", "paused"} or (self.job or {}).get("status") == "running"
             if busy and command in {"load_model", "unload_model", "calibrate", "start_session", "start_batch", "restart"}:
                 raise ValueError("Stop the current job before starting another")
             if command == "stop":
@@ -420,6 +422,12 @@ class LabService:
                 return self._send(command, {})
             if self.worker.get("model") is None:
                 raise ValueError("Load a model first")
+            if command in {"pause", "resume"}:
+                if not self.session.get("id") or self.session.get("status") in {"complete", "failed", "stopped", "cancelled"}:
+                    raise ValueError("Start an active session first")
+                if payload:
+                    raise ValueError("Pause and resume do not take settings")
+                return self._send(command, {})
             if command == "calibrate":
                 preflight(self.store.root, 64 * 2**20)
                 identifier = new_id("cal")

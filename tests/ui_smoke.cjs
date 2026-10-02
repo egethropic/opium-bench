@@ -58,6 +58,8 @@ function command(request) {
     fixture.session.metrics={tokens:50,reasoning_tokens:50,output_tokens:0,actions:1,voluntary_calls:1,correct:1,submitted:1,assigned:6,accuracy_submitted:1};
   }
   if(request.command==='control') append({type:'control',settings:p,actor:'human'});
+  if(request.command==='pause') {fixture.session.status='paused';fixture.worker.status='paused';append({type:'status',status:'paused'});}
+  if(request.command==='resume') {fixture.session.status='awaiting_user';fixture.worker.status='ready';append({type:'status',status:'awaiting_user'});}
   if(request.command==='stop') {fixture.session.status='stopped';append({type:'session_finished',status:'stopped',summary:{termination:'stopped_by_user'}});}
   if(request.command==='calibrate') fixture.job={kind:'calibrate',status:'complete',message:'Fixture only'};
   if(request.command==='start_batch') fixture.job={kind:'batch',status:'complete',message:'Fixture only'};
@@ -104,6 +106,8 @@ async function run() {
     await page.locator('#effect-enabled').uncheck();await page.waitForTimeout(100);assert(commands.some(c=>c.command==='control'&&c.payload.enabled===false));
     await clickCommand('#inject','inject');assert(commands.some(c=>c.command==='inject'&&c.payload.joy===.75));
     await clickCommand('#reset-controls','control');assert(commands.some(c=>c.command==='control'&&c.payload.reset));
+    await clickCommand('#pause-session','pause');assert(await page.locator('#resume-session').isVisible());assert(await page.locator('#chat-text').isDisabled());assert(await page.locator('#start-session').isDisabled());assert.equal(await page.locator('#stop-session').isDisabled(),false);
+    await clickCommand('#resume-session','resume');assert(await page.locator('#pause-session').isVisible());assert.equal(await page.locator('#chat-text').isDisabled(),false);
     await clickCommand('#global-stop','stop');await page.waitForFunction(()=>document.querySelector('#metric-status').textContent==='stopped');
     const readsBeforeReset=runReads;forceReset=true;
     await page.waitForTimeout(1800);
@@ -126,9 +130,9 @@ async function run() {
     await page.reload();await page.waitForFunction(()=>document.querySelector('#chat-form').classList.contains('hidden'));
     await page.locator('[data-tab="models"]').click();await page.locator('.model-card button').last().click();assert(await page.locator('#advanced-model-form').isVisible());assert.equal(await page.locator('#advanced-model-id').inputValue(),'Qwen/Qwen3.8-27B');
     await page.locator('[data-tab="live"]').click();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
-    await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+    for(const width of [320,390,768]){await page.setViewportSize({width,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);}
     assert.deepEqual(errors,[]);
-    console.log(JSON.stringify({passed:true,commands:commands.map(c=>c.command),checks:['safe reasoning rendering','tool outcomes','dose graph','control acknowledgment','aux gate','manual pulse','reset','global stop','full-history reconnect recovery','streamed phase counters','assigned-task score','autonomous composer hidden','calibration compatibility','custom corpus upload and size limit','recipe-preserving demonstrations','explicit demo override','thinking allowance','advanced checkpoint form','desktop/mobile overflow'],errors}));
+    console.log(JSON.stringify({passed:true,commands:commands.map(c=>c.command),checks:['safe reasoning rendering','tool outcomes','dose graph','control acknowledgment','aux gate','manual pulse','reset','pause/resume controls','global stop','full-history reconnect recovery','streamed phase counters','assigned-task score','autonomous composer hidden','calibration compatibility','custom corpus upload and size limit','recipe-preserving demonstrations','explicit demo override','thinking allowance','advanced checkpoint form','desktop/mobile overflow'],errors}));
   } finally {if(browser)await browser.close();await new Promise(resolve=>server.close(resolve));}
 }
 run().catch(error=>{console.error(error);process.exitCode=1;});

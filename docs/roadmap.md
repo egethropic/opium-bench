@@ -13,7 +13,7 @@ the current 27B study does not complete every item in that plan.
   examples can replace the bundled corpus.
 - Conversation, visible generated reasoning, independent chat scrolling, live
   measurements, baseline sliders, manual or model-triggered pulses, decay,
-  effect gating, reset, stop, and restart.
+  effect gating, reset, stop, restart, and in-process pause/resume.
 - Shared task/effect budgets; active/sham, demonstration/no-demonstration,
   thinking, ingredient, two-button reversal, joy-to-pain transition, and
   probabilistic-outcome recipes. Orders and constraint puzzles have local graders.
@@ -39,7 +39,7 @@ and 24 model-visible payloads. Run `python3 check_compatibility.py` to verify it
 | [Tool and effect design](../LAB_PLAN.html#workbench) | Recipes expose preset parameters, but auxiliary names, schemas, and acknowledgment are fixed. A general editor, variable per-tool costs, selectable raw/orthogonalized directions, and optional capped dose stacking remain. |
 | [Button discovery](../LAB_PLAN.html#den) | Balanced exposure, disclosure, and reversal exist. Separate scored predictions of what a button does, false-positive/no-effect tests, and automatic matched-exposure controls remain. Repetition or generated explanations alone do not establish discovery. |
 | [Calibration specificity](../LAB_PLAN.html#calibration) | Current calibration uses 72 authored sentences, final-token activations, mean-contrast probes, and one selected edit layer. Broader lexical/context controls, pooling comparisons, label-shuffled validation, signed calibration sweeps, and independently scored continuation effects remain. |
-| [Session controls and branches](../LAB_PLAN.html#workbench) | Stop/restart work; pause/resume does not. API branches accept user/assistant text, without restoring tool state, cache, or RNG. A complete conversation-branch workflow remains; exact internal-state continuation is a separate protocol. |
+| [Session controls and branches](../LAB_PLAN.html#workbench) | Stop/restart and completed-turn pause/resume work. Durable checkpoint recovery is still in progress. API branches currently accept user/assistant text, without restoring tool state, cache, or RNG. A complete conversation-branch workflow remains; exact internal-state continuation is a separate protocol. |
 | [Timing and research batteries](../LAB_PLAN.html#thinking) | Decay uses generated tokens; action-based decay remains. The stress/relief, cost/transfer, and broader task-pressure comparisons in the plan are not complete automated batteries. Confirmatory sample planning and uncertainty analysis also remain beyond the descriptive pilot. |
 | [Storage safeguards](../LAB_PLAN.html#models) | Admission checks preserve a configured reserve. Continuous monitoring and clean cancellation before every large job exhausts that reserve remain. |
 

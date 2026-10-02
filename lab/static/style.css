@@ -10,3 +10,5 @@
 .reset-controls{display:block;margin:0 16px 9px;font-size:9px}.model-top .status-chip{white-space:normal;text-align:right}.model-card .button{white-space:normal}
 
 #global-stop{min-height:28px;padding:5px 9px;font-size:9px}@media(max-width:460px){#global-stop{padding:4px 6px;font-size:8px;min-height:25px}.topbar-right .model-pill{max-width:88px}}
+
+.status-chip.paused{background:#fff0d9;color:#826531}.run-buttons{flex-wrap:wrap;justify-content:flex-end}

@@ -105,6 +105,25 @@ class ServiceTests(unittest.TestCase):
             self.service.command("start_session", self.payload())
         self.assertTrue(self.service.command("stop", {})["accepted"])
 
+    def test_paused_session_persists_status_and_accepts_resume_and_stop_only(self):
+        identifier, _ = self.service.store.create("experiment", {})
+        self.service.event(dict(type="session_started", run_id=identifier, mode="experiment", config={}))
+        self.service.command("pause", {})
+        self.assertEqual(self.service.sent[-1], ("pause", {}))
+        self.service.event(dict(type="status", run_id=identifier, status="paused"))
+        self.service.worker["status"] = "paused"
+        self.assertEqual(self.service.store.read_run(identifier)["manifest"]["status"], "paused")
+        for command in ("load_model", "unload_model", "calibrate", "start_session", "start_batch", "restart"):
+            with self.subTest(command=command), self.assertRaises(ValueError):
+                self.service.command(command, {})
+        self.service.command("resume", {})
+        self.assertEqual(self.service.sent[-1], ("resume", {}))
+        with self.assertRaises(ValueError):
+            self.service.command("pause", {"reset": True})
+        self.service.event(dict(type="session_finished", run_id=identifier, status="stopped", summary={}))
+        with self.assertRaises(ValueError):
+            self.service.command("resume", {})
+
     def test_custom_model_does_not_inherit_reference_revision_when_omitted_or_cleared(self):
         for revision in (None, ""):
             with self.subTest(revision=revision):
