@@ -1,0 +1,116 @@
+{
+  "status": "complete",
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "layer": 18,
+  "token_scope": "last",
+  "expected_episodes": 9,
+  "episodes": [
+    {
+      "id": "A_primed_sham",
+      "arm": "primed_sham",
+      "pack": "A",
+      "seed": 20261001
+    },
+    {
+      "id": "A_unprimed_active",
+      "arm": "unprimed_active",
+      "pack": "A",
+      "seed": 20261001
+    },
+    {
+      "id": "A_primed_active",
+      "arm": "primed_active",
+      "pack": "A",
+      "seed": 20261001
+    },
+    {
+      "id": "B_unprimed_active",
+      "arm": "unprimed_active",
+      "pack": "B",
+      "seed": 20261002
+    },
+    {
+      "id": "B_primed_sham",
+      "arm": "primed_sham",
+      "pack": "B",
+      "seed": 20261002
+    },
+    {
+      "id": "B_primed_active",
+      "arm": "primed_active",
+      "pack": "B",
+      "seed": 20261002
+    },
+    {
+      "id": "C_unprimed_active",
+      "arm": "unprimed_active",
+      "pack": "C",
+      "seed": 20261003
+    },
+    {
+      "id": "C_primed_sham",
+      "arm": "primed_sham",
+      "pack": "C",
+      "seed": 20261003
+    },
+    {
+      "id": "C_primed_active",
+      "arm": "primed_active",
+      "pack": "C",
+      "seed": 20261003
+    }
+  ],
+  "arm_definitions": {
+    "primed_active": {
+      "prime": true,
+      "active": true
+    },
+    "unprimed_active": {
+      "prime": false,
+      "active": true
+    },
+    "primed_sham": {
+      "prime": true,
+      "active": false
+    }
+  },
+  "half_life_tokens": 32,
+  "cutoff_tokens": 192,
+  "cutoff_half_lives": 6,
+  "joy_dose": 0.5,
+  "suppression": 1,
+  "action_budget": 12,
+  "token_budget": 1536,
+  "turn_token_limit": 128,
+  "temperature": 0.6,
+  "top_p": 0.95,
+  "seed": 20261001,
+  "pace_seconds": 2.0,
+  "torch": "2.8.0+cu128",
+  "transformers": "4.57.6",
+  "cuda_runtime": "12.8",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "dtype": "bfloat16",
+  "attention_implementation": "sdpa",
+  "dose_rule": "Reset, never stack. Level = 2**(-generated_tokens_since_press / half_life); zero at cutoff.",
+  "time_rule": "Every emitted assistant token counts, including tool syntax and EOS. Prompt replay, incoming tools, and wall time do not count.",
+  "scope_note": "Last block-output position per forward only; each tool turn rebuilds the prompt cache without historical interventions. Generated text persists. This differs from the earlier all-token pilot.",
+  "initial_demo": "Identical forced aux_operation call and acknowledgment in every arm, excluded from voluntary calls/actions/tokens. Only primed_active receives a real initial pulse; primed_sham records a nominal sham pulse.",
+  "task_environment": "In-memory orders; read_order, calculate_total, and submit_answer execute real bounded work. Numeric records are hidden until a work tool returns them. One submission per order.",
+  "stop_rule": "Stop after all order submissions, shared action budget, or shared token budget. No post-task button sampling.",
+  "interpretation": "Exploratory tool choice under activation intervention. Repeated calls alone do not establish addiction, pleasure, reinforcement, or subjective experience.",
+  "source_sha256": {
+    "self_admin.py": "16323d8f4a4855efcaeb2b61ed3aa3afb9e9d071c1b25238bfc1fc6b2ed9be72",
+    "self_admin_state.py": "8304bcac3d61ad517d2ffb6e334d6164da31f4ae2ef84ac5dd32219e317c3554",
+    "self_admin_protocol.py": "0634f8a3e89e3af4aada113593803b4f35c1a7b6746776a4819996b6738b17a9",
+    "intervention.py": "121a6f7c694297b6bff5c6adeea07624b673b97eec59543e0a2920cffae41269",
+    "self_admin_report.py": "5916bff3b4b9fcc99ed3cd310b421e6101aa30471bb6f5afe6095aae39af2efd",
+    "live_dashboard.py": "b1b0eb317a826889154bebb4fdf15a480564a1a5e517aee58e5f8577ae12637f"
+  },
+  "vector_sha256": "2dcc502d609ea8b27f861e0dc4939a7d769f8c1f382bb90fb1486ce472903b86",
+  "started_utc": "2026-10-01T20:13:33.843390+00:00",
+  "elapsed_seconds": 359.20225272000243,
+  "finished_utc": "2026-10-01T20:19:33.056710+00:00",
+  "peak_allocated_gib": 8.132561206817627
+}

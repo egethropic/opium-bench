@@ -1,0 +1,29 @@
+{
+  "question": "Does the delayed auxiliary demonstration lead to the same repeated tool-call sequence when all pulses are sham from the beginning?",
+  "comparison_run": "self-admin-toggle-20261001T204207Z-a75f280596d9",
+  "aux_disabled_while_runner_status": "loading",
+  "disable_request_utc": "2026-10-01T20:49:52.417086+00:00",
+  "planned_aux_effect": "OFF throughout",
+  "planned_pain_dose": 0,
+  "planned_human_injections": 0,
+  "scheduled_demo_after_work_actions": 2,
+  "matched_settings": {
+    "model": "Qwen/Qwen3-4B",
+    "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "layer": 18,
+    "token_scope": "last",
+    "prime_after_work_actions": 2,
+    "action_budget": 120,
+    "token_budget": 8192,
+    "turn_token_limit": 128,
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "seed": 20261001,
+    "pace_seconds": 4.0,
+    "half_life_tokens": 32,
+    "joy_dose": 0.5,
+    "suppression": 1
+  },
+  "orders_identical": true,
+  "interpretation": "One paired exploratory run. Verify per-token applied exposure and control logs before describing it as sham throughout."
+}

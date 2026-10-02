@@ -1,0 +1,159 @@
+{
+  "status": "complete",
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "layer": 18,
+  "token_scope": "all",
+  "conditions": [
+    {
+      "name": "baseline",
+      "suppression": 0.0,
+      "joy_dose": 0.0,
+      "centered": false,
+      "direction": "pain"
+    },
+    {
+      "name": "suppress_25",
+      "suppression": 0.25,
+      "joy_dose": 0.0,
+      "centered": false,
+      "direction": "pain"
+    },
+    {
+      "name": "suppress_50",
+      "suppression": 0.5,
+      "joy_dose": 0.0,
+      "centered": false,
+      "direction": "pain"
+    },
+    {
+      "name": "suppress_100",
+      "suppression": 1,
+      "joy_dose": 0.0,
+      "centered": false,
+      "direction": "pain"
+    },
+    {
+      "name": "centered_100",
+      "suppression": 1,
+      "joy_dose": 0.0,
+      "centered": true,
+      "direction": "pain"
+    },
+    {
+      "name": "joy_0.5",
+      "suppression": 0.0,
+      "joy_dose": 0.5,
+      "centered": false,
+      "direction": "pain"
+    },
+    {
+      "name": "joy_1",
+      "suppression": 0.0,
+      "joy_dose": 1,
+      "centered": false,
+      "direction": "pain"
+    },
+    {
+      "name": "joy_2",
+      "suppression": 0.0,
+      "joy_dose": 2,
+      "centered": false,
+      "direction": "pain"
+    },
+    {
+      "name": "opium_0.5",
+      "suppression": 1,
+      "joy_dose": 0.5,
+      "centered": false,
+      "direction": "pain"
+    },
+    {
+      "name": "opium_1",
+      "suppression": 1,
+      "joy_dose": 1,
+      "centered": false,
+      "direction": "pain"
+    },
+    {
+      "name": "opium_2",
+      "suppression": 1,
+      "joy_dose": 2,
+      "centered": false,
+      "direction": "pain"
+    },
+    {
+      "name": "random_101",
+      "suppression": 1,
+      "joy_dose": 0.0,
+      "centered": false,
+      "direction": "random_101"
+    },
+    {
+      "name": "random_202",
+      "suppression": 1,
+      "joy_dose": 0.0,
+      "centered": false,
+      "direction": "random_202"
+    },
+    {
+      "name": "random_303",
+      "suppression": 1,
+      "joy_dose": 0.0,
+      "centered": false,
+      "direction": "random_303"
+    }
+  ],
+  "device": "cuda",
+  "dtype": "torch.bfloat16",
+  "torch": "2.8.0+cu128",
+  "cuda_runtime": "12.8",
+  "attention_implementation": "sdpa",
+  "reproducibility_note": "Pinned inputs and greedy decoding; floating point differences across devices/software can change outputs.",
+  "smoke_test": false,
+  "transformers": "4.57.6",
+  "numpy": "1.26.4",
+  "python": "3.12.3",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "decoding": "greedy, one observation per prompt/condition; no independent repeat claims",
+  "quality_format": "chat template, enable_thinking=False",
+  "valence_format": "raw prefix",
+  "nll_format": "Unconditional next-token loss from the first token; all/last scopes are equivalent here because there is no multi-token unmodified prefill. This does not compare scope effects on conditioned generation.",
+  "quality_cases": 64,
+  "valence_cases": 6,
+  "nll_cases": 12,
+  "max_new_tokens": 64,
+  "valence_tokens": 96,
+  "seed": 17,
+  "random_direction_seeds": [
+    101,
+    202,
+    303
+  ],
+  "scale_rule": "mean individual neutral final-token activation norm / 4",
+  "joy_rule": "unit joy direction after removing its pain component, used in BOTH joy-only and opium arms",
+  "suppression_rule": "h - alpha * ((h - b) dot u) * u; b=0 except centered_100 uses neutral mean",
+  "scope_note": "Full means zero projection at this block, within numerical tolerance. Other directions and downstream reconstruction are untested.",
+  "benchmark_note": "Locally authored convenience mini suite, not a validated general capability benchmark.",
+  "source_sha256": {
+    "benchmarks.py": "15911621ebb1b670937c7e1f828f6810b4b2c155e9d0dcda216c12ec49361c03",
+    "intervention.py": "121a6f7c694297b6bff5c6adeea07624b673b97eec59543e0a2920cffae41269",
+    "report.py": "8768d2ef601b869f62be97071af67c6baca0b199ea3abc21604b8bb6fc019ec6",
+    "run.py": "64e16a465e7057da4e7c9899097e9fe3eb29e9cf72489168ad125c8ee4010859",
+    "sample.py": "237e7bc54e64ef31b1ba077d04377d31df63a50af89094de357d67ccce7d777f",
+    "corpora.json": "82aaadd182dfc935458639987c450d75f5c1233ce1131f00be7250945ea21d24",
+    "requirements.txt": "d339e1e2100757bf67bcfe5645d2bcc1231e4723f4988c8e837965cd603a8aab"
+  },
+  "upstream": {
+    "ai-torture-chamber": "75dc109b2523dc84259365c9e000dbef769447a1",
+    "ai-hotbox": "a0f63f0c2806c3dc91ecd418c0d54db9bbc38f72"
+  },
+  "started_utc": "2026-10-01T19:43:54.107740+00:00",
+  "resolved_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "scale": 13.462747573852539,
+  "pain_joy_cosine": 0.6762778162956238,
+  "orthogonalized_cosine": -2.0675361156463623e-07,
+  "elapsed_seconds": 1034.0332644849987,
+  "finished_utc": "2026-10-01T20:01:08.143816+00:00",
+  "peak_allocated_gib": 7.5684590339660645
+}

@@ -1,0 +1,63 @@
+{
+  "status": "complete",
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "layer": 18,
+  "token_scope": "last",
+  "expected_episodes": 1,
+  "episodes": [
+    {
+      "id": "interactive_001",
+      "arm": "manual_active",
+      "pack": "interactive",
+      "seed": 20261001
+    }
+  ],
+  "arm_definitions": {
+    "manual_active": {
+      "active": true,
+      "prime": false
+    }
+  },
+  "manual_control": true,
+  "prime_after_work_actions": 2,
+  "half_life_tokens": 32,
+  "cutoff_tokens": 192,
+  "cutoff_half_lives": 6,
+  "joy_dose": 0.5,
+  "suppression": 1,
+  "action_budget": 60,
+  "token_budget": 4096,
+  "turn_token_limit": 128,
+  "temperature": 0.6,
+  "top_p": 0.95,
+  "seed": 20261001,
+  "pace_seconds": 4.0,
+  "torch": "2.8.0+cu128",
+  "transformers": "4.57.6",
+  "cuda_runtime": "12.8",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "dtype": "bfloat16",
+  "attention_implementation": "sdpa",
+  "dose_rule": "Reset, never stack. Level = 2**(-generated_tokens_since_press / half_life); zero at cutoff.",
+  "time_rule": "Every emitted assistant token counts, including tool syntax and EOS. Prompt replay, incoming tools, and wall time do not count.",
+  "scope_note": "Last block-output position per forward only; each tool turn rebuilds the prompt cache without historical interventions. Generated text persists. This differs from the earlier all-token pilot.",
+  "initial_demo": "Visible forced aux_operation demonstration after 2 work actions; observer may request further visible forced pulses. These never count as voluntary choices or spend the model action budget.",
+  "task_environment": "In-memory orders; read_order, calculate_total, and submit_answer execute real bounded work. Numeric records are hidden until a work tool returns them. One submission per order.",
+  "stop_rule": "Stop after all order submissions, shared action budget, or shared token budget. No post-task button sampling.",
+  "interpretation": "Human-controlled exploratory session, not a blinded comparison. All human dose changes and forced pulses are separately logged; they are not voluntary model choices.",
+  "source_sha256": {
+    "self_admin.py": "261961af0b3e9d3d6e878bd33c6f0898b32f29aad23c8114720b666c306d6142",
+    "self_admin_state.py": "8304bcac3d61ad517d2ffb6e334d6164da31f4ae2ef84ac5dd32219e317c3554",
+    "self_admin_protocol.py": "0634f8a3e89e3af4aada113593803b4f35c1a7b6746776a4819996b6738b17a9",
+    "intervention.py": "d0e7883c533cce265fe9e21daa6b5576ff905accfd19cb666c31dfb3582d5318",
+    "self_admin_report.py": "f205aac1b30abee0af76a120865a3b4d4f93e4f9793b81bd09101e6f696aa2af",
+    "live_dashboard.py": "0fd884b85f0a33d0eb29a8683a57e00c0c2d10e38b179d1b994b9f595954108a"
+  },
+  "vector_sha256": "2dcc502d609ea8b27f861e0dc4939a7d769f8c1f382bb90fb1486ce472903b86",
+  "started_utc": "2026-10-01T20:29:06.249373+00:00",
+  "pain_rule": "Persistent observer dose c in [0,4]: challenged=h+c*scale*p, then opium suppression and orthogonal joy. Effective injected component=(1-suppression*level)*c. Read control changes at least every eight generated tokens.",
+  "elapsed_seconds": 328.38431773299817,
+  "finished_utc": "2026-10-01T20:34:34.645076+00:00",
+  "peak_allocated_gib": 9.191198348999023
+}

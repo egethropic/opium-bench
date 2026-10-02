@@ -1,0 +1,2 @@
+{"event_id": "f825a9af-e8e4-45fa-bb9c-325476d648ef", "operation": "disable_aux", "old_pain_dose": 0.0, "pain_dose": 0.0, "opium_requests": 0, "old_aux_enabled": true, "aux_enabled": false, "revision": 1, "actor": "human", "ts": "2026-10-01T20:45:14.264741+00:00"}
+{"event_id": "064fbd710b8f4c299cbd8a1414c9b2e4", "operation": "restart_experiment", "actor": "human", "ts": "2026-10-01T20:48:11.246444+00:00", "revision": 2, "stop_requested": true}

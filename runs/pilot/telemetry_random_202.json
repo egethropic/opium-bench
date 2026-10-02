@@ -1,0 +1,11 @@
+{
+  "calls": 1412,
+  "positions": 4540,
+  "pain_projection_rms_before": 10.300959118936131,
+  "pain_projection_rms_after": 10.399382887509102,
+  "selected_projection_rms_before": 38.829743348115976,
+  "selected_projection_rms_after": 0.019978763911522018,
+  "delta_norm_rms": 38.82104243649109,
+  "relative_delta_norm": 0.018756373260417753,
+  "peak_abs_projection_over_hidden_norm": 0.0003823997394647449
+}

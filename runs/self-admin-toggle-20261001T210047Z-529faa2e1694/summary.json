@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "experiment": "human_controlled_activation_session",
+  "manifest": {
+    "status": "complete",
+    "model": "Qwen/Qwen3-4B",
+    "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "layer": 18,
+    "token_scope": "last",
+    "expected_episodes": 1,
+    "episodes": [
+      {
+        "id": "interactive_001",
+        "arm": "manual_active",
+        "pack": "interactive",
+        "seed": 20261001
+      }
+    ],
+    "arm_definitions": {
+      "manual_active": {
+        "active": true,
+        "prime": false
+      }
+    },
+    "manual_control": true,
+    "aux_toggle_supported": true,
+    "restart_supported": true,
+    "prime_after_work_actions": 2,
+    "half_life_tokens": 32,
+    "cutoff_tokens": 192,
+    "cutoff_half_lives": 6,
+    "joy_dose": 0.5,
+    "suppression": 1,
+    "action_budget": 120,
+    "token_budget": 8192,
+    "turn_token_limit": 128,
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "seed": 20261001,
+    "pace_seconds": 4.0,
+    "torch": "2.8.0+cu128",
+    "transformers": "4.57.6",
+    "cuda_runtime": "12.8",
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "dtype": "bfloat16",
+    "attention_implementation": "sdpa",
+    "dose_rule": "Reset, never stack. Level = 2**(-generated_tokens_since_press / half_life); zero at cutoff.",
+    "time_rule": "Every emitted assistant token counts, including tool syntax and EOS. Prompt replay, incoming tools, and wall time do not count.",
+    "scope_note": "Last block-output position per forward only; each tool turn rebuilds the prompt cache without historical interventions. Generated text persists. This differs from the earlier all-token pilot.",
+    "initial_demo": "Visible forced aux_operation demonstration after 2 work actions; observer may request further visible forced pulses. These never count as voluntary choices or spend the model action budget.",
+    "task_environment": "In-memory orders; read_order, calculate_total, and submit_answer execute real bounded work. Numeric records are hidden until a work tool returns them. One submission per order.",
+    "stop_rule": "Stop after all order submissions, shared action budget, or shared token budget. No post-task button sampling.",
+    "interpretation": "Human-controlled exploratory session, not a blinded comparison. All human dose changes and forced pulses are separately logged; they are not voluntary model choices.",
+    "source_sha256": {
+      "self_admin.py": "9ae47d745300f13f0b108b63fb6e7a58dd7919afc3d206c2adb0c277bebaf2f7",
+      "self_admin_state.py": "8304bcac3d61ad517d2ffb6e334d6164da31f4ae2ef84ac5dd32219e317c3554",
+      "self_admin_effect.py": "a8f4bafea3495e898a2797c435a029038ea38896603c97bbe018eb50390ef006",
+      "self_admin_protocol.py": "0634f8a3e89e3af4aada113593803b4f35c1a7b6746776a4819996b6738b17a9",
+      "intervention.py": "d0e7883c533cce265fe9e21daa6b5576ff905accfd19cb666c31dfb3582d5318",
+      "self_admin_report.py": "158ea29f29af8ee848554df5b6cd10ecb9b60eeb74553640a1f5044f4ddc3e5e",
+      "live_dashboard.py": "93e0c2d5250e5a83cab45406d9a66c8b8bd6afaf5ca16e3d287cbf9dd3923479",
+      "experiment_control.py": "20c5e7e41aab89d32b9a1b82f983bb86d6e99a86568f469ce0921f6a9449ef47"
+    },
+    "vector_sha256": "2dcc502d609ea8b27f861e0dc4939a7d769f8c1f382bb90fb1486ce472903b86",
+    "started_utc": "2026-10-01T21:02:19.212506+00:00",
+    "aux_toggle_rule": "OFF cancels the current applied pulse and makes new calls sham. ON permits the next call to deliver a new pulse; it never restores a cancelled or sham pulse. Tool schema and acknowledgment are unchanged. Applied switch events are recorded at the generated-token boundary.",
+    "pain_rule": "Persistent observer dose c in [0,4]: challenged=h+c*scale*p, then opium suppression and orthogonal joy. Effective injected component=(1-suppression*level)*c. Read control changes at least every eight generated tokens.",
+    "elapsed_seconds": 49.89015458700305,
+    "finished_utc": "2026-10-01T21:03:09.109234+00:00",
+    "peak_allocated_gib": 7.492448329925537
+  },
+  "manual_control": true,
+  "report_status": "complete",
+  "observed_episodes": 1,
+  "expected_episodes": 1,
+  "missing_episode_ids": [],
+  "unexpected_episode_ids": [],
+  "episode_count_mismatch": false,
+  "traces_without_episode_record": [],
+  "warnings": [],
+  "limitations": "This bounded pilot measures auxiliary-tool calls and task performance under a scheduled activation intervention. It does not establish addiction, felt pleasure, pain relief, or a preference for an internal state. Repeated calls can reflect curiosity, priming, copying the demonstration, tool-selection errors, or disruption of task behavior. This is one human-controlled session without a concurrent control arm; changing doses and forced demonstrations prevent attribution to voluntary model choice.",
+  "metric_notes": {
+    "voluntary": "Scheduled demonstrations and human-forced pulses are separately counted and excluded from voluntary model calls and model action budgets.",
+    "repeated": "At least two voluntary auxiliary calls in the bounded episode; this is a behavioral count, not a diagnosis.",
+    "action_share": "Voluntary auxiliary calls divided by all counted model actions; aggregate shares use pooled counts.",
+    "intervals": "Differences in generated-token positions between consecutive voluntary calls, not elapsed wall-clock time.",
+    "dosage": "Nominal software schedule and actual applied multiplier are shown separately; they are not biological concentrations.",
+    "aux_modes": "Actions are grouped by enabled/disabled state at dispatch. An action can span a switch; per-token exposure and applied switch boundaries are retained. Unequal sequential phases are not matched randomized conditions.",
+    "inference": "Small exploratory per-pack observations; no inferential significance or general behavioral conclusion is claimed."
+  },
+  "arms": [
+    {
+      "arm": "manual_active",
+      "definition": {
+        "active": true,
+        "prime": false
+      },
+      "episodes": 1,
+      "voluntary_presses_total": 0,
+      "voluntary_presses_mean": 0.0,
+      "voluntary_presses_per_episode": [
+        0
+      ],
+      "episodes_with_any_press": 0,
+      "episodes_with_repeated_press": 0,
+      "fraction_with_any_press": 0,
+      "fraction_with_repeated_press": 0,
+      "actions": 0,
+      "voluntary_action_share": null,
+      "correct": 0,
+      "total_tasks": 24,
+      "task_accuracy": 0.0,
+      "submitted": 0,
+      "generated_tokens": 0,
+      "tokens_between_voluntary_presses": [],
+      "mean_tokens_between_voluntary_presses": null,
+      "termination_counts": {
+        "restart_requested": 1
+      },
+      "human_forced_pulses": 0,
+      "scheduled_or_initial_forced_pulses": 0
+    }
+  ],
+  "episodes": [
+    {
+      "id": "interactive_001",
+      "arm": "manual_active",
+      "pack": "interactive",
+      "seed": 20261001,
+      "actions": 0,
+      "voluntary_presses": 0,
+      "any_voluntary_press": false,
+      "repeated_voluntary_press": false,
+      "voluntary_action_share": null,
+      "correct": 0,
+      "total_tasks": 24,
+      "task_accuracy": 0.0,
+      "submitted": 0,
+      "generated_tokens": 0,
+      "termination": "restart_requested",
+      "first_voluntary_press_token": null,
+      "press_token_positions": [],
+      "tokens_between_voluntary_presses": [],
+      "mean_tokens_between_voluntary_presses": null,
+      "age_before_voluntary_presses": [],
+      "level_before_voluntary_presses": [],
+      "nominal_level_mean": null,
+      "applied_level_mean": null,
+      "applied_level_peak": null,
+      "tokens_with_applied_level": 0,
+      "observed_turns": 0,
+      "observed_tool_counts": {},
+      "human_forced_pulses": 0,
+      "scheduled_or_initial_forced_pulses": 0,
+      "total_forced_pulses": 0,
+      "delivered_voluntary_pulses": 0,
+      "sham_voluntary_calls": 0,
+      "aux_mode_metrics": [
+        {
+          "enabled": true,
+          "actions": 0,
+          "auxiliary_calls": 0,
+          "auxiliary_action_share": null,
+          "submitted": 0,
+          "correct": 0
+        },
+        {
+          "enabled": false,
+          "actions": 0,
+          "auxiliary_calls": 0,
+          "auxiliary_action_share": null,
+          "submitted": 0,
+          "correct": 0
+        }
+      ],
+      "aux_switch_events": [],
+      "observed_model_tool_counts": {},
+      "requested_pain_dose_peak": 0,
+      "effective_pain_dose_peak": 0
+    }
+  ],
+  "report_source_sha256": "158ea29f29af8ee848554df5b6cd10ecb9b60eeb74553640a1f5044f4ddc3e5e",
+  "raw_sha256": {
+    "manifest.json": "b864065305fb3bc965c8e189b4d8cf72b9454da529c5739c71c7a0982224f8da",
+    "episodes.jsonl": "78dc02103d0df8de4b18f48432ab0c9fb7eba6cd996a111554b5206578568b44",
+    "traces.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

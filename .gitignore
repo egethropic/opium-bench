@@ -1,0 +1,35 @@
+# Local runtimes, caches, and downloaded model weights are not source artifacts.
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+runtime/
+hf-cache/
+.cache/
+models/
+*.safetensors
+*.gguf
+*.bin
+*.pt
+*.pth
+
+# Credentials and machine-local settings.
+.env
+.env.*
+!.env.example
+.admin_credentials
+*.pem
+*.key
+
+# Mutable observer state and process logs; preserve scientific traces/reports.
+*.log
+*.tmp
+runs/**/live.json
+runs/**/control.json
+runs/**/controller.json
+
+# Editor and OS files.
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
