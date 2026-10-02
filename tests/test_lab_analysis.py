@@ -13,7 +13,7 @@ from lab.protocol import TaskEnvironment, validate_recipe
 from lab.storage import atomic_json
 from publish_lab_study import (deterministic_gzip, publish, read_events, render_dashboard,
                                matched_condition_pairs, refresh_reference_dashboard, render_notes,
-                               prepare_reference_comparison, reference_comparison)
+                               prepare_reference_comparison, reference_comparison, engineering_evidence)
 
 
 class Trace:
@@ -343,6 +343,17 @@ class PublicationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'relative or HTTP'):
             render_notes({'links':[{'href':'javascript:alert(1)'}]})
 
+    def test_reviewed_study_notes_survive_publication_and_later_model_rendering(self):
+        with TemporaryDirectory() as name:
+            root=Path(name)
+            data,output,receipt=self.fixture(root)
+            notes={'title':'Reviewed fixture reasoning', 'paragraphs':['Synthetic authored interpretation, not a finding.']}
+            result=publish(receipt,data,output,dashboard=root/'page.html',skip_figures=True,reasoning_notes=notes)
+            self.assertEqual(result['reasoning_notes'],notes)
+            self.assertIn(notes['title'],(root/'page.html').read_text())
+            saved=json.loads((output/'results.json').read_text())
+            self.assertIn(notes['title'],render_dashboard(saved,output,root/'another.html'))
+
     def test_cross_model_references_validate_settings_without_comparing_token_ids(self):
         with TemporaryDirectory() as name:
             root=Path(name)
@@ -381,6 +392,20 @@ class PublicationTests(unittest.TestCase):
                 current['protocol']['comparison']={'reference_sources':sources}
                 with patch('publish_lab_study.ROOT',root), self.assertRaisesRegex(ValueError,pattern):
                     prepare_reference_comparison(current)
+
+    def test_declared_engineering_evidence_requires_unchanged_checksum_verified_files(self):
+        with TemporaryDirectory() as name:
+            root=Path(name);evidence=root/'engineering'
+            atomic_json(evidence/'kernel-parity.json',{'status':'synthetic test only'})
+            raw=(evidence/'kernel-parity.json').read_bytes()
+            atomic_json(evidence/'checksums.json',{'kernel-parity.json':hashlib.sha256(raw).hexdigest()})
+            protocol={'engineering_checks':{'evidence':'engineering/'}}
+            result=engineering_evidence(root,protocol)
+            self.assertEqual(result['verified_files'],1)
+            self.assertEqual(result['files'],['kernel-parity.json'])
+            (evidence/'kernel-parity.json').write_text('{}')
+            with self.assertRaisesRegex(ValueError,'checksum differs'):
+                engineering_evidence(root,protocol)
 
     def test_complete_guard_requires_explicit_partial_override(self):
         with TemporaryDirectory() as name:

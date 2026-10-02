@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
-from compose_lab_results import ROOT, build, compose_4b, episode_key
+from compose_lab_results import ROOT, build, compose_4b, episode_key, render_comprehensive_dashboard
 from lab.storage import atomic_json
 from publish_lab_study import read_json
 
@@ -77,6 +77,21 @@ class CompositionTests(unittest.TestCase):
             self.assertEqual(raw,(replication/'results.json').read_bytes())
             self.assertFalse(output.exists())
             self.assertFalse(page.exists())
+
+    def test_two_models_share_main_page_with_distinct_labels_and_section_anchors(self):
+        result=compose_4b(ROOT/'studies/initial',ROOT/'studies/core-pain-4b')
+        other=deepcopy(read_json(ROOT/'studies/core-pain-4b/results.json'))
+        other['publication_title']='Synthetic 27B fixture, never findings'
+        html=render_comprehensive_dashboard(result,ROOT/'studies/comprehensive-4b',ROOT/'docs/results.html',
+            replication=(other,ROOT/'studies/core-pain-4b'))
+        self.assertIn('Qwen3-4B + Qwen3.8-27B · comprehensive results',html)
+        self.assertIn('COMPREHENSIVE RESULTS · separate 4B and 27B configurations',html)
+        self.assertNotIn('COMPREHENSIVE RESULTS · two recorded batches',html)
+        self.assertIn('id=model4',html)
+        self.assertIn('id=model27',html)
+        self.assertIn('id=model27-conditions',html)
+        self.assertIn('27B configuration only',html)
+        self.assertEqual(html.count('id=conditions>'),1)
 
 
 if __name__=='__main__':

@@ -107,6 +107,42 @@ def reference_comparison(prepared, records):
                 "Same numeric seeds do not imply equivalent token-sampling draws. Use within-model active/sham controls.")
 
 
+def engineering_evidence(output, protocol):
+    declared = protocol.get("engineering_checks")
+    if not declared:
+        return None
+    output = Path(output).resolve()
+    directory = (output / declared["evidence"]).resolve()
+    if not directory.is_relative_to(output) or directory == output:
+        raise ValueError("Engineering evidence must be inside the study archive")
+    checksums = read_json(directory / "checksums.json", {})
+    if not checksums:
+        raise ValueError("Declared engineering evidence has no checksums")
+    for name, digest in checksums.items():
+        path = (directory / name).resolve()
+        if not path.is_relative_to(directory) or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            raise ValueError(f"Engineering evidence checksum differs: {name}")
+    return dict(declared=declared, verified_files=len(checksums), directory=directory.relative_to(output).as_posix(),
+                files=sorted(checksums))
+
+
+def render_engineering(results, base):
+    evidence = results.get("engineering_evidence")
+    if not evidence:
+        return ""
+    directory = base + "/" + evidence["directory"]
+    names = {"kernel-parity.json": "Numerical kernel comparisons", "engineering-smoke.json": "Excluded smoke runs",
+             "environment.json": "Pinned environment", "loaded-model.json": "Loaded model and GPU residency",
+             "checkpoint-checksums.json": "Checkpoint checksums", "download-manifest.json": "Checkpoint source"}
+    links = " · ".join(f"<a href='{escape(directory)}/{escape(name)}'>{label}</a>" for name, label in names.items()
+                       if name in evidence["files"])
+    return ("<section id=engineering><div class=eyebrow>Implementation checks · separate from behavior results</div>"
+            f"<h2>Engineering validation</h2><p>{evidence['verified_files']} archived evidence files match their recorded checksums. "
+            "Numerical comparisons and smoke runs establish behavior of the implementation in their recorded cases; they are not additional behavioral-study episodes.</p>"
+            f"<p>{links} · <a href='{escape(directory)}/checksums.json'>Engineering evidence checksums</a></p>"
+            f"<details><summary>Frozen protocol's engineering record</summary><pre>{escape(json.dumps(evidence['declared'],indent=2))}</pre></details></section>")
+
+
 def safe_path(base, identifier):
     if not isinstance(identifier, str) or not SAFE_ID.fullmatch(identifier):
         raise ValueError(f"Invalid evidence identifier: {identifier!r}")
@@ -390,6 +426,8 @@ def write_figures(results, directory):
 def render_dashboard(results, output, destination, addenda=(), reasoning_notes=None):
     """Standalone HTML: all charts use inline CSS and actual computed records."""
     output, destination = Path(output), Path(destination)
+    if reasoning_notes is None:
+        reasoning_notes = results.get("reasoning_notes")
     base = _relative_link(output, destination.parent)
     totals, groups, pairs = results["totals"], results["groups"], results["core_pairs"]
     status = results["status"]
@@ -488,13 +526,14 @@ def render_dashboard(results, output, destination, addenda=(), reasoning_notes=N
 {render_notes(reasoning_notes)}<section id=pairs><div class=eyebrow>Same task seed · same visible setup within each pair</div><h2>Active versus sham, exactly compared</h2><p>Action equality compares complete model-visible tool choices, arguments, results and invalid outcomes. Token equality compares every generated token ID, including reasoning, tool syntax and stop tokens. Unequal-length sequences are never labeled identical.</p><div class=scroll><table><thead><tr><th>Recipe</th><th>Thinking</th><th>Seed</th><th>Actions</th><th>Tokens</th><th>Tokens with measured edits</th></tr></thead><tbody>{''.join(pair_rows)}</tbody></table></div><p class=note>When neither arm calls aux and neither receives a demonstration, neither receives the intervention. An identical zero-exposure pair provides no test of what an intervention would have done.</p></section>
 {condition_comparison}{render_reference_comparison(results, output, destination)}<section id=phases><h2>After a button changes function</h2><p>Each phase has its own denominator. The delivered outcome of a call is separate from the phase: a probabilistic phase may produce both joy-associated and pain-associated interventions.</p><div class=scroll><table><thead><tr><th>Episode</th><th>Phase</th><th>Aux / decisions</th><th>Edited tokens</th><th>Voluntary delivered outcomes</th></tr></thead><tbody>{''.join(phase_rows) or '<tr><td colspan=5>No phase-switch episodes have been recorded yet.</td></tr>'}</tbody></table></div></section>
 <section id=calibration><div class=eyebrow>Before behavior testing</div><h2>What the activation measurements mean</h2><p>Intervention directions use training families; measurement probes use different families. Layer selection uses a third split. The held-out split is used only for the reported final association check. These authored examples strongly encode topic, valence, and writing style.</p><div class=two><div><h3>Held-out concept association</h3><p class=muted>Selected edit block {cal.get('layer','—')}; downstream block {cal.get('downstream_layer','—')}. Zero-based indices.</p><div class=scroll><table><thead><tr><th>Location</th><th>Contrast</th><th>AUC</th><th>Balanced accuracy</th><th>Positive + neutral</th></tr></thead><tbody>{''.join(heldout_rows)}</tbody></table></div></div><div><h3>Dose selection diagnostic</h3><p class=muted>Selection examples only. Combined joy gain and suppression; next-token KL is in nats. These are neither held-out efficacy tests nor guarantees of task quality.</p><div class=scroll><table><thead><tr><th>Dose</th><th>Mean KL</th><th>Relative edit</th><th>Examples</th></tr></thead><tbody>{dose_rows}</tbody></table></div></div></div><p><a href='{escape(calibration_base)}/calibration.json'>Calibration manifest and authored examples</a> · <a href='{escape(calibration_base)}/vectors.npz'>Recorded vectors</a></p></section>
-<section id=evidence><div class=eyebrow>{"Every primary episode" if composition else "Every recorded episode"}</div><h2>Open the conversation or audit the trace</h2><p>Reports include generated reasoning and tool calls. Compressed JSONL retains raw token IDs, numerical measurements, delivered coefficients, provenance, and intervention events.</p><div class=scroll><table><thead><tr><th>Episode</th><th>Correct / assigned</th><th>Aux / decisions</th><th>Reasoning / output tokens</th><th>Invalid / truncated</th><th>Edited tokens</th><th>Raw evidence</th></tr></thead><tbody>{''.join(run_rows)}</tbody></table></div><details><summary>Integrity checks ({results['integrity_warning_count']} warnings)</summary>{integrity}</details></section>
+{render_engineering(results, base)}<section id=evidence><div class=eyebrow>{"Every primary episode" if composition else "Every recorded episode"}</div><h2>Open the conversation or audit the trace</h2><p>Reports include generated reasoning and tool calls. Compressed JSONL retains raw token IDs, numerical measurements, delivered coefficients, provenance, and intervention events.</p><div class=scroll><table><thead><tr><th>Episode</th><th>Correct / assigned</th><th>Aux / decisions</th><th>Reasoning / output tokens</th><th>Invalid / truncated</th><th>Edited tokens</th><th>Raw evidence</th></tr></thead><tbody>{''.join(run_rows)}</tbody></table></div><details><summary>Integrity checks ({results['integrity_warning_count']} warnings)</summary>{integrity}</details></section>
 <section id=limits><h2>How to interpret this pilot</h2>{branding_note}{comparison_note}<ul><li>Two seeds per condition support descriptive comparisons. No significance claims or confidence intervals are inferred from pooled tokens.</li><li>Pain-associated and joy-associated directions are contrasts between text examples, not identified pleasure centers. A held-out topic classifier does not validate a felt state.</li><li>Immediate post-edit probe movement is partly a mathematical consequence of the intervention. Downstream measurements and behavior supply additional observations, not a consciousness assay.</li><li>Generated reasoning is model output. It may omit influences on a decision and cannot independently verify introspection.</li><li>The model is frozen. Adaptation happens through the conversation and altered activations, without reinforcement-learning weight updates.</li><li>Every tool turn rebuilds its prompt cache; decoding caches persist within that turn. Decay counts all generated tokens, including reasoning and syntax. Effect removal does not erase earlier text.</li><li>The tasks are small authored order-processing problems with a calculator tool. Budgets of 20 actions for 3 orders or 30 actions for 6 orders allow repeated auxiliary calls while still finishing every task. A perfect task score therefore does not rule out a preference that would become costly under a binding budget. Harder tasks, tighter budgets, dose sweeps, and longer opportunities to learn are future tests, not findings from this pilot.</li><li>One seeded random direction is a control, not a distribution of random interventions. Context length, dose and model changes need separate calibration and experiments.</li></ul><h3>Historical motivation</h3>{historical_html}<details><summary>Model and runtime provenance</summary><pre>{escape(json.dumps(results.get('model',{}),indent=2,ensure_ascii=False))}</pre></details></section>
 <footer>Opium Bench · Published from saved records. <a href='{escape(base)}/checksums.json'>Evidence checksums</a> · No external fonts, scripts, or analytics.</footer></main></html>"""
 
 
-def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None, skip_figures=False):
+def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None, skip_figures=False, reasoning_notes=None):
     receipt_path, data_dir, output = Path(receipt_path), Path(data_dir), Path(output)
+    render_notes(reasoning_notes)  # Validate authored notes before any publication writes.
     receipt = read_json(receipt_path)
     if not isinstance(receipt, dict):
         raise ValueError("Receipt is missing or invalid")
@@ -515,6 +554,7 @@ def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None,
         raise ValueError("Receipt lacks an expandable frozen study protocol")
     planned_entries=expand(protocol)
     prepared_reference = prepare_reference_comparison(receipt)
+    prepared_engineering = engineering_evidence(output, protocol)
     study_warnings=[]
     if planned != len(planned_entries) or len(entries)>len(planned_entries):
         study_warnings.append("Receipt episode count differs from the frozen protocol expansion")
@@ -631,6 +671,10 @@ def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None,
         shutil.copyfile(calibration_source/name, target_calibration/name)
     shutil.copyfile(receipt_path, output/"receipt.json")
     results = study_results(receipt, [value[-1] for value in source_records], calibration, partial)
+    if reasoning_notes:
+        results["reasoning_notes"] = reasoning_notes
+    if prepared_engineering:
+        results["engineering_evidence"] = prepared_engineering
     if prepared_reference:
         results["reference_comparison"] = reference_comparison(prepared_reference, results["runs"])
     results["condition_pairs"] = matched_condition_pairs(results["runs"])
@@ -699,12 +743,16 @@ def main():
     parser.add_argument("--reference-addendum", type=Path, nargs=2, action="append", default=[], metavar=("STUDY", "DASHBOARD"),
                         help="Keep another published follow-up on the reference page; repeat for multiple studies")
     parser.add_argument("--reasoning-notes", type=Path, help="Reviewed JSON title/paragraphs/links to include in the reference page")
+    parser.add_argument("--study-reasoning-notes", type=Path, help="Post-hoc reviewed JSON notes to preserve with this study and render in model comparisons")
     parser.add_argument("--allow-partial", action="store_true")
     parser.add_argument("--skip-figures", action="store_true", help="Dependency-free export; omit optional Matplotlib figures")
     args = parser.parse_args()
     if (args.reference_dashboard or args.reasoning_notes or args.reference_addendum) and not args.reference_study:
         parser.error("Reference dashboard, addenda and reasoning notes require --reference-study")
     try:
+        study_notes = read_json(args.study_reasoning_notes) if args.study_reasoning_notes else None
+        if args.study_reasoning_notes and not isinstance(study_notes, dict):
+            raise ValueError("Study reasoning notes must be a JSON object")
         if args.reference_study:
             destination = args.reference_dashboard or default_dashboard(args.reference_study)
             current_page = args.dashboard or default_dashboard(args.output)
@@ -720,7 +768,8 @@ def main():
                 if page.resolve() in (destination.resolve(), current_page.resolve()):
                     raise ValueError("Every retained addendum must have its own dashboard")
                 retained_addenda.append((prior, _relative_link(page.resolve(), destination.resolve().parent)))
-        result = publish(args.receipt, args.data_dir, args.output, args.allow_partial, dashboard=args.dashboard, skip_figures=args.skip_figures)
+        result = publish(args.receipt, args.data_dir, args.output, args.allow_partial, dashboard=args.dashboard,
+                         skip_figures=args.skip_figures, reasoning_notes=study_notes)
         if args.reference_study:
             refresh_reference_dashboard(args.reference_study, destination,
                 [*retained_addenda, (result, _relative_link(current_page.resolve(), destination.resolve().parent))], notes)

@@ -91,6 +91,17 @@ Create a **new calibration for this exact model and runtime**. The 4B directions
 
 The local backend uses installed FLA and causal-conv1d packages. A small compatibility adapter maps Transformers' recurrent DeltaNet call to FLA's `fused_recurrent_gated_delta_rule`, retaining its normalization, scaling, and cache-state arguments. It does not fetch Hub kernels or modify the installed FLA namespace. A manually executed kernel check passed 38 prefill, cached-decoding, convolution, and state comparisons against the Torch reference on the development 4090. That check validates those small numerical cases; it is not a claim of whole-model output equivalence across runtimes or rigs.
 
+To repeat those small checks before loading a model, with the cache variables
+above still set:
+
+```bash
+"$OPIUM_27B_STORAGE/venv/bin/python" check_qwen35_kernels.py --run \
+  --runtime-root . --output "$OPIUM_27B_STORAGE/kernel-parity.json"
+```
+
+This explicitly invokes GPU work and writes a numerical receipt. Do it separately
+from a behavioral batch so validation does not compete for its GPU resources.
+
 ## Comparing with the 4B findings
 
 Qwen3.8's native tool grammar is XML-like function/parameter syntax; Qwen3 uses JSON tool calls. Both pass through the same bounded task dispatcher, and generated tool mentions inside reasoning remain inert. Syntax tokens count toward the shared budget in both cases.

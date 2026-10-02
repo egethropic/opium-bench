@@ -83,15 +83,20 @@ def render_comprehensive_dashboard(result, output, dashboard, notes=None, replic
                         "Selection rule, verification repeats and source checksums</a></p><p>"+archives+"</p>", 1)
     if replication:
         other, path = replication
+        html = html.replace(escape(display_title(result)), "Qwen3-4B + Qwen3.8-27B · comprehensive results", 2)
+        html = html.replace("COMPREHENSIVE RESULTS · two recorded batches",
+                            "COMPREHENSIVE RESULTS · separate 4B and 27B configurations", 1)
+        html = html.replace("<main>", f"<main><section id=model4><h2>Qwen3-4B · {result['recorded_episodes']} primary episodes</h2>"
+                            "<p>The cards, charts and tables in this section describe the 4B configuration only.</p></section>", 1)
         other_html = render_dashboard(other, path, dashboard)
         # Separate model sections share the page, preserving their own denominators.
         body = other_html.split("<main>", 1)[1].rsplit("</main>", 1)[0]
         import re
         body = re.sub(r'\bid=([A-Za-z0-9_-]+)', r'id=model27-\1', body)
         body = re.sub(r'href=#([A-Za-z0-9_-]+)', r'href=#model27-\1', body)
-        label = f"<section id=model27><h2>{escape(display_title(other))}</h2><p>Separate model configuration; its {other['recorded_episodes']} episodes are not pooled with the 4B results.</p></section>"
+        label = f"<section id=model27><h2>{escape(display_title(other))}</h2><p>{other['recorded_episodes']}/{other['planned_episodes']} episodes complete. The following cards, charts and tables describe the 27B configuration only; they are not pooled with the 4B results.</p></section>"
         html = html.replace("</main></html>", label+body+"</main></html>")
-        html = html.replace("<nav>", "<nav><a href=#findings>Qwen3-4B</a><a href=#model27>Qwen3.8-27B</a>", 1)
+        html = html.replace("<nav>", "<nav><a href=#model4>Qwen3-4B</a><a href=#model27>Qwen3.8-27B</a>", 1)
     return html
 
 

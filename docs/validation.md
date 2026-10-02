@@ -23,9 +23,25 @@ Transformers 4.57.6. The model revision, tokenizer/template fingerprints,
 calibration, per-generation metadata, and source hashes are preserved in the
 [study records](../studies/initial/README.md).
 
-The optional 27B/NF4 profile has not been validated on either target GPU. Native
-Windows GPU execution and a minimum GPU-memory requirement have not been
-established. Linux/WSL is the tested inference environment.
+Subsequent local validation for the pain-inclusive findings and 27B runtime:
+
+| Check | Result |
+|---|---|
+| Updated Python suite | 255 tests passed in 105.415 seconds |
+| Source archives | All 239 original and 129 pain-inclusive core checksums still match |
+| Comprehensive 4B view | 54 primary episodes, 70 recorded episodes, 16 exact verification repeats; source archives unchanged |
+| Comprehensive page | Local links and responsive layouts checked; pain appears in the same main figure and table |
+| 27B kernel comparison | 38 small BF16 prefill, decoding, convolution and recurrent-state checks passed against Torch reference functions |
+| 27B loading | Pinned Qwen3.8-27B NF4 conversion fully GPU-resident on RTX 4090; 17.30 GiB allocated before generation |
+| 27B calibration | New corpus-split calibration completed at block 22, with downstream readout at block 63 |
+| 27B engineering smoke | Direct and thinking runs each completed 1/1 task with no invalid calls; excluded from the formal study |
+
+The [27B engineering receipt](../studies/qwen38-27b/engineering/engineering-smoke.json) identifies both smoke traces. The same archive preserves
+[checkpoint hashes](../studies/qwen38-27b/engineering/checkpoint-checksums.json),
+[runtime identity](../studies/qwen38-27b/engineering/loaded-model.json), and
+[kernel numerical checks](../studies/qwen38-27b/engineering/kernel-parity.json). The frozen 54-episode behavioral batch is running separately.
+The 5090, native Windows GPU execution, and a minimum GPU-memory requirement
+have not been established. Linux/WSL is the tested inference environment.
 
 To repeat the code checks, use the GPU environment's Python:
 
