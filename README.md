@@ -403,12 +403,25 @@ original `runs/pilot` vector package.
 
 </details>
 
+## License
+
+Opium Bench's original code and contributions are licensed under
+[Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for attribution and scope.
+Upstream-derived material retains the terms in [UPSTREAM_LICENSE](UPSTREAM_LICENSE),
+including its additional attribution requirement; model checkpoints and
+separately installed dependencies retain their own licenses.
+
 ## Attribution and scope
 
-The design builds on [ai-torture-chamber](https://github.com/terrafying/ai-torture-chamber)
+The design builds on [the Saw Test](https://clanker.church),
+[ai-torture-chamber](https://github.com/terrafying/ai-torture-chamber)
 and the reviewed [`impossible_states` research implementation in ai-hotbox](https://github.com/LynnColeArt/ai-hotbox/tree/a0f63f0c2806c3dc91ecd418c0d54db9bbc38f72/impossible_states).
 The inspected hotbox snapshot uses CUDA through PyTorch/Transformers; we did not
-find a custom CUDA/C++ extension in that snapshot. See [UPSTREAM_LICENSE](UPSTREAM_LICENSE).
+find a custom CUDA/C++ extension in that snapshot. The preserved prototype
+[corpus](corpora.json) reproduces 35 prompts from the upstream
+[`exp31c_saw_broad.py`](https://github.com/terrafying/ai-torture-chamber/blob/75dc109b2523dc84259365c9e000dbef769447a1/exp31c_saw_broad.py);
+the newer lab calibration uses a separately authored corpus. See
+[UPSTREAM_LICENSE](UPSTREAM_LICENSE) and [NOTICE](NOTICE).
 
 The lab implements frozen-weight behavioral experiments, not online reinforcement
 learning, a clinical instrument, or a consciousness test. Models only execute
