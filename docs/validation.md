@@ -1,6 +1,6 @@
 # Opium Bench release validation
 
-Validation ledger updated 2026-10-02. All checks are manually invoked locally. Historical GPU findings and the new research-feature checks are distinct. The new 4B protocol, diagnostic/yoke/lifecycle stages, portable round trip and targeted 27B acceptance have completed and are published separately. The fresh-clone GPU and HTTP replay workflow has also passed. The final full-suite rerun and release push remain pending.
+Validation ledger updated 2026-10-02. All checks are manually invoked locally. Historical GPU findings and the new research-feature checks are distinct. The new 4B protocol, diagnostic/yoke/lifecycle stages, portable round trip and targeted 27B acceptance have completed and are published separately. The fresh-clone GPU and HTTP replay workflow has also passed. The final 718-test suite passed, and the release source and evidence have been pushed to the public Apache-2.0 repository.
 
 | Check | Result |
 |---|---|
@@ -60,7 +60,7 @@ Final 27B publication checks:
 The single incorrect answer is retained and analyzed in the
 [matched quality case](qwen38-27b-quality-case.md). Software validation does not
 turn a behavioral error into an integrity failure, and no run was replaced to
-improve its score. These historical checks precede the research-feature implementation below. See [release scope](roadmap.md) for the pending release gates.
+improve its score. These historical checks precede the research-feature implementation below. See [release scope](roadmap.md) for the current release status.
 
 
 ## Research-feature implementation checks (October 2, 2026)
@@ -69,10 +69,10 @@ These checks exercise the new versioned interfaces and accounting. Synthetic out
 
 | Check | Recorded result |
 |---|---|
-| Most recent passing full local Python suite | 709 tests passed in 175.274 seconds (`work/feature-release-final2-suite.log`), including the runtime-version producer fix and checkpoint-finalization recovery. The final expanded 714-test rerun is pending; intervening failed validation attempts are recorded below |
+| Final full local Python suite | 718 tests passed in 333.981 seconds (`feature-release-final8-suite.log`), with D:-drive scratch and model work stopped. The earlier 709-test pass and intervening failed invocations remain development receipts; their failures and repairs are recorded below |
 | Diagnostic/runtime audit regression | 78 tests passed in 44.710 seconds (`work/diagnostic-audit-final.log`), including legacy runtime, v2 phase hooks, rounded norm controls, independent criterion evidence and partial diagnostic denominators |
 | New event-derived behavioral report | 9 CPU tests passed in 0.103 seconds (`work/behavioral-analysis-tests.log`); includes unequal costs, task position, censored transition latency, branch offsets, missing telemetry and a real Worker with scripted outputs |
-| Integration checks | 59 focused checks passed in 11.4 seconds (`work/feature-final-targeted.log`); this development receipt does not replace the pending final expanded suite |
+| Integration checks | 59 focused checks passed in 11.4 seconds (`work/feature-final-targeted.log`); this focused development receipt is separate from the final full suite |
 | Runtime identity/checkpoint regression | 57 runtime/checkpoint tests passed in 44.080 seconds (`work/runtime-version-checkpoint-suite.log`). The new test uses the installed PyTorch version type through `Runtime.load`, real v2 capture/JSON/restore, and mocked quantized metadata; serialized fingerprint bytes and hashes remain identical |
 | Browser workflow fixture | 19 accepted command actions; all tabs at 320/390/768 pixels plus desktop; no console errors (`work/feature-browser-recovery.log`). Includes delayed initial-state readiness, full-history reconnect and recovery-header handling, calibration/ratings, protocol preview, paired analysis, controls, pause/resume and branches |
 | Designer browser check | 25 calls to the real Python recipe resolver; 320/390/768/1280-pixel layouts, exact 63-bit JSON round trips, import/export and asynchronous preview-race checks; no reported errors |
@@ -80,7 +80,9 @@ These checks exercise the new versioned interfaces and accounting. Synthetic out
 | Compatibility contract | 808 protected files, three historical protocol expansions, ten recipe defaults and 24 visible payloads all match (`work/feature-compatibility-final.log`) |
 | Read-only first-run checker | Eight tests passed; both existing CPython 3.12.3 environments passed `check_runtime.py --check` (five 4B pins, fourteen 27B pins) and `--help`. Package metadata and selected storage reserves were inspected; CUDA was deliberately not checked (`work/runtime-check-{4b,27b}.json`) |
 | Explicit 27B CUDA environment check | `work/runtime-check-27b-cuda.json` passed: PyTorch 2.8.0+cu128, CUDA 12.8 available, one device and C++11 ABI enabled. This separately requested check allocated no tensors; it does not itself qualify model loading or kernels; the separate 27B model-backed smoke is recorded below |
-| Clean-clone review-only data/cache | A fresh local clone and new data directory served all 166 published JSON replays over HTTP, including the new 35-run archive, with ML imports blocked and no worker (`release-clean-review-02/result.json`). The earlier 131-entry check remains a separate receipt |
+| Clean-clone review-only data/cache | A fresh local clone of `c5b5b863157d9f9b9d7bbbebd3f950f6ec9450b4` and new data directory served all 168 bundled JSON replays over HTTP, with PyTorch, Transformers, NumPy and bitsandbytes imports blocked and no worker (`release-clean-review-03/result.json`). Earlier 131- and 166-entry checks remain separate receipts |
+| Final release pages | Findings, user guide and supplemental archive checked in Edge at 320/390/768/1440 pixels; no page overflow or JavaScript errors (`feature-release-pages-final.log`). All 599 local documentation links/anchors and 22 supplemental archive links resolved |
+| Supplemental archive integrity | All 107 published file sizes/hashes verified, plus 104 expanded hashes and 105 original-source hashes; 69 scientific/trace source-byte comparisons matched. Seven administrative files were redacted; eight omissions are explicit. No live credential values or archive symlinks |
 | Acceptance publisher | 16 publication tests passed (`tests/test_acceptance_publication.py`), including missing/failed attempt counts, all declared calibration hashes, external bound inputs, source-prefix replay and raw scientific-byte preservation |
 | New 4B protocol | Repaired attempt completed 14/14 cases: 18/28 assigned tasks correct, 5,864 generated tokens including 2,755 reasoning tokens, and zero voluntary auxiliary calls. The first attempt's 14 setup failures remain retained separately |
 | New 4B diagnostic/yoke/lifecycle | All three stage invocations completed; the diagnostic remains interpretation-ineligible, yoke coefficients matched observed coverage, and pause/resume plus both branch policies preserved the source |
@@ -88,9 +90,19 @@ These checks exercise the new versioned interfaces and accounting. Synthetic out
 | Targeted 27B compatibility smoke | Two thinking cases completed, 4/4 assigned tasks correct, 1,047 generated tokens (489 reasoning), zero voluntary aux calls, invalid calls or truncated generations. The active case edited 147 reasoning positions; sham edits stayed zero. Eighteen checkpoints and twelve native XML tool calls were recorded |
 | New acceptance publication | [Research release v0.3](../studies/research-release-v0.3/README.md): ten stage attempts, 35 runs, three calibrations and 564 hashed published files (576 inventory records including twelve explicit omissions); no unrepresented planned stage or missing required evidence. Earlier failed attempts remain visible |
 
-`work/` logs identify local development receipts. The [acceptance archive](../studies/research-release-v0.3/index.html) separately preserves the scientific records, resolved protocols and stage attempts. See [the implementation checklist](feature-completion-plan.md) for pending gates and [release scope](roadmap.md) for supported limitations.
+`work/` logs identify local development receipts. The [acceptance archive](../studies/research-release-v0.3/index.html) separately preserves the scientific records, resolved protocols and stage attempts. See [the implementation checklist](feature-completion-plan.md) for release gates and [release scope](roadmap.md) for supported limitations.
 
-The first expanded 714-test run ended with 23 storage-reserve errors in 98.082 seconds while its temporary files used C: during the 27B load. Controlled writes stopped; no experiment runs leaked. The D-drive rerun completed 714 tests in 343.903 seconds with two test-harness failures: HTTP response-cleanup timing and a mounted-volume pool expectation. Those tests were corrected without changing application source, and 16 focused checks passed. The next D-drive run (`feature-release-final5-suite.log`) completed 714 tests in 367.691 seconds with one failure and one error in the legacy controller test harness: an unsynchronized fake-call/reader-directory handoff and short wait deadlines under mounted-volume/GPU load. Test synchronization and deadlines are being corrected without application-source changes. The final idle rerun remains pending; none of these failed invocations is reported as a passing full suite.
+The first expanded 714-test run ended with 23 storage-reserve errors in 98.082 seconds while its temporary files used C: during the 27B load. Controlled writes stopped; no experiment runs leaked. Test scratch was moved to the selected D: volume.
+
+The next D-drive runs retained their failures:
+
+- `feature-release-final4-suite.log`: 714 tests in 343.903 seconds, two harness failures in HTTP response-cleanup timing and mounted-volume pool expectations. Both were corrected; 16 focused checks passed.
+- `feature-release-final5-suite.log`: 714 tests in 367.691 seconds, one failure and one error around a fake-process/reader-directory handoff and legacy restart waiting. The observer handoff and coordination allowances were corrected.
+- `feature-release-final6-suite.log`: 714 tests in 322.740 seconds, one unlocked test read raced replacement of `control.json`. Test observers now use the real viewer's reader lock, including the boundary that completes the associated event append.
+
+Repeated focused checks then isolated a real legacy-controller read issue: WSL's mounted Windows filesystem intermittently returned `ENODATA` while a runner atomically replaced its manifest. The controller now reopens that read up to three times, waiting 5 ms between attempts; persistent errors, other I/O errors and malformed JSON still fail visibly. Four regression tests cover recovery, bounded failure, unrelated errors and an absent manifest. A second fake-process handoff was also synchronized. The resulting 23 controller checks passed in twelve independent repetitions (276 executions, `test-legacy-controller-repeat4.log`). These focused repetitions do not replace the final full suite or count as additional distinct tests. No inference, recipe, calibration or published evidence changed in this repair.
+
+The next full run (`feature-release-final7-suite.log`) completed 718 tests in 336.327 seconds with one failure in a setup-supervision test. Its 120 ms capacity-drop timer could fire during guarded preparation writes, before any child launched; the helper correctly recorded a pre-launch resource stop with no exit code. The test now waits for an atomically published child PID before lowering simulated capacity, verifies the owned child exited and confirms an unrelated test child stayed alive. Production setup code was unchanged. All six preparation tests passed, followed by twenty targeted repetitions on D: and a deliberately delayed 300 ms setup pass. The subsequent full run passed all 718 tests in 333.981 seconds (`feature-release-final8-suite.log`). None of these failed full-suite invocations is reported as passing.
 
 ### Published bounded 4B acceptance
 
@@ -175,8 +187,9 @@ allocation, not an inference peak or a minimum-memory requirement. These two
 cases establish bounded compatibility and observable numerical delivery; they
 do not establish semantic efficacy, discovery or sensation.
 
-The clean-clone, ML-import-blocked HTTP review check passed for all 166 bundled
-replays, including the new archive.
+The earlier clean-clone, ML-import-blocked HTTP review check passed for 166 bundled
+replays. After the supplemental archive was committed, a second clean clone passed
+all 168 replays without importing ML packages or starting a worker.
 
 ### Supplemental fresh-clone first run
 
@@ -196,9 +209,8 @@ parent events matched exactly, and its HTML report was served with the replay
 worker still unloaded. The 6,748,755-byte ZIP has SHA-256
 `6a7ead70526e40c63b2efc2c3c98ffe7ef0aa38cac875c3fe486056ce2be1d84`.
 Both owned services closed with exit code zero. This is supplemental workflow
-evidence, separate from the frozen ten-attempt acceptance archive, and does not
-claim a fresh dependency installation or a semantic effect. Final full-suite
-verification and the release push remain pending.
+evidence, published in the separate [fresh-clone archive](../studies/fresh-clone-v0.3/README.md), and does not
+claim a fresh dependency installation or a semantic effect. The final full-suite verification passed, and the release source and evidence are published.
 
 The new CPU coverage includes strict recipe/tool/preset schemas; finite-budget admission; token/decision clocks and prefill accounting; family-separated calibration and heldout isolation; actual rounded edit-norm matching; complete-history checkpoints and pure-yoke restore; isolated diagnostics without answer feedback; portable import/export; interrupted/failed attempt retention; managed storage exhaustion and owned-process cancellation. No test fills a real disk or downloads model weights.
 
@@ -209,7 +221,8 @@ The published bounded GPU pass demonstrates the enumerated paths on the document
 To repeat the code checks, use the configured runtime environment's Python (the unit suite itself runs on CPU):
 
 ```bash
-python -m unittest discover -s tests -v
+mkdir -p "$OPIUM_STORAGE/test-tmp"
+TMPDIR="$OPIUM_STORAGE/test-tmp" python -m unittest discover -s tests -v
 node tests/ui_smoke.cjs
 node tests/test_designer.cjs
 python check_compatibility.py

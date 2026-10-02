@@ -1,10 +1,10 @@
 # Opium Bench: feature-completion implementation and acceptance plan
 
-Prepared 2026-10-02 from `outputs/ai-opium/LAB_PLAN.html`, `docs/roadmap.md`, `work/feature-scope-audit.md`, and the current application/tests. This is the implementation checklist for the active feature-completion goal. Paths below are relative to the repository root unless prefixed with `work/`. Checked implementation items have the code and local validation evidence cited below; unchecked items remain unfinished. A checked implementation item does not replace its pending real-model acceptance gate.
+Prepared 2026-10-02 from `outputs/ai-opium/LAB_PLAN.html`, `docs/roadmap.md`, `work/feature-scope-audit.md`, and the current application/tests. This is the completed implementation checklist for the first full research release. Paths below are relative to the repository root unless prefixed with `work/`. Checked implementation items have the code and local validation evidence cited below; unchecked items remain unfinished. Implementation and real-model acceptance are separate gates; both required sets are completed below.
 
 ## Start gate and goal
 
-**Start gate completed:** the 27B study and combined findings were audited, published and pushed in commit `f196aba4827637e6bbf6f82b88fd09a57b9ad9cc`. The feature-completion goal is now active. All published study inputs and evidence remain immutable.
+**Start gate completed:** the 27B study and combined findings were audited, published and pushed in commit `f196aba4827637e6bbf6f82b88fd09a57b9ad9cc`. The feature-completion work followed that publication and is recorded below. All published study inputs and evidence remain immutable.
 
 The user-authorized objective is:
 
@@ -15,11 +15,11 @@ Do not attach an invented token budget. A negative or inconclusive behavioral re
 **Feature complete for the first full research release** means every required package below has a working UI/API path, meaningful automated checks, documented semantics, and the final acceptance examples. It does not mean all scientific questions are resolved, every combination has a powered study, or an unavailable GPU has been validated. Finishing the existing 27B study alone does not satisfy this definition.
 
 
-## Implementation audit and current release gate
+## Completed implementation and release acceptance
 
-**All required features are implemented; final release verification remains open.** The most recent passing full suite covered 709 tests in 175.274 seconds (`work/feature-release-final2-suite.log`), including the runtime-version producer and checkpoint-error finalization fixes. The expanded 714-test rerun is pending after retained storage-reserve and test-harness failures; 16 focused checks passed after test-only corrections. Focused runtime/checkpoint coverage passed 57 tests in 44.080 seconds. Browser checks cover the designer's 25 real-resolver calls, the app fixture's 19 command actions including reconnect/recovery-header handling (`work/feature-browser-recovery.log`), and all seven actual-server tabs at 320/390/768/1440 pixels with no reported errors. The compatibility checker matches 808 protected files, three study expansions, ten legacy defaults and 24 visible payloads. Exact evidence and limits are in [validation.md](validation.md).
+**All required features and release gates are complete.** The final full suite passed all 718 tests in 333.981 seconds (`feature-release-final8-suite.log`). Earlier failed invocations, diagnoses and repairs remain in [validation.md](validation.md). Focused runtime/checkpoint coverage passed 57 tests in 44.080 seconds. Browser checks cover the designer's 25 real-resolver calls, the app fixture's 19 command actions including reconnect/recovery handling, and all seven actual-server tabs at 320/390/768/1440 pixels with no reported errors. The compatibility checker matches 808 protected files, three study expansions, ten legacy defaults and 24 visible payloads. A clean clone served all 168 bundled replays without ML imports or a model worker. Source and immutable acceptance evidence are committed and pushed to the public repository.
 
-The checkmarks below distinguish implementation from final release verification. Bounded 4B acceptance, targeted 27B acceptance and immutable acceptance publication are complete. The clean-clone model-backed first run has also passed. The final full-suite rerun and final push remain unchecked below. The 4B extraction and numerical validation have finished, but no nonzero dose passed the frozen bounds. The first 14-case protocol invocation failed during setup with zero generated tokens/actions; its failed episode receipts and outer `no_final_receipt` are retained with supervisor recovery evidence. After the metadata/finalization repair, a separate invocation completed 14/14 cases with 18/28 assigned tasks correct, 5,864 tokens (2,755 reasoning), and zero voluntary auxiliary calls. Diagnostic, yoke and lifecycle stage invocations also completed, with their limits recorded below. Portable attempt 01 failed with `Unsafe bundle path`; the separately recorded repaired attempt 02 passed. The new 27B thinking pair completed 4/4 tasks, and the archive preserves all ten stage attempts, 35 runs and three calibrations. These results do not replace failed attempts or establish semantic efficacy. The audited stress/relief template uses an explicit compatible history-transfer contract:
+The checkmarks below distinguish implementation from final release verification. Bounded 4B acceptance, targeted 27B acceptance and immutable acceptance publication are complete. The clean-clone model-backed first run has also passed. The final full suite, evidence audits, public repository checks and push have also completed. The 4B extraction and numerical validation have finished, but no nonzero dose passed the frozen bounds. The first 14-case protocol invocation failed during setup with zero generated tokens/actions; its failed episode receipts and outer `no_final_receipt` are retained with supervisor recovery evidence. After the metadata/finalization repair, a separate invocation completed 14/14 cases with 18/28 assigned tasks correct, 5,864 tokens (2,755 reasoning), and zero voluntary auxiliary calls. Diagnostic, yoke and lifecycle stage invocations also completed, with their limits recorded below. Portable attempt 01 failed with `Unsafe bundle path`; the separately recorded repaired attempt 02 passed. The new 27B thinking pair completed 4/4 tasks, and the archive preserves all ten stage attempts, 35 runs and three calibrations. These results do not replace failed attempts or establish semantic efficacy. The audited stress/relief template uses an explicit compatible history-transfer contract:
 
 - [x] Stress/relief template v2 carries one genuine full visible-history prefix into all eight active/sham × baseline × framing arms, with fresh tasks, budgets and intervention state. An eight-arm admission regression passes. It makes no internal-state continuation or discovery claim and preserves strict checkpoint compatibility.
 
@@ -32,7 +32,7 @@ The checkmarks below distinguish implementation from final release verification.
 | WP5 | `lab/discovery.py`, `diagnostic_runner.py`, `exposure.py`, `yoke_runner.py`, worker and protocol integration; isolated branch/scoring/evidence/yoke/worker tests, including partial records, hidden-key exclusion and exact controller/cursor binding |
 | WP6 | `lab/protocol_library.py`, `protocol_runner.py`, `research_jobs.py`, `statistics.py`, `behavioral_analysis.py`, `task_axes.py`, CLI and versioned templates; library/statistics/task/runner/research-job/report tests. All attempts remain recorded, and analysis labels first/latest inclusion |
 | WP7 | `lab/resources.py`, shared guarded storage and runtime/worker/service writes, `prepare_runtime.py`, guarded publication; resource/storage/service/worker/setup/publication tests simulate reserve crossing and cancel only owned processes |
-| WP8 | `lab/static/designer.js`, app UI, coherent guides, `check_runtime.py` and no-model replay; browser fixture, real resolver designer test and actual-server responsive check. Eight runtime-checker tests passed; metadata/storage checks passed for both existing runtimes. A clean-clone no-ML server served all 166 published replays, including the new archive; the separate fresh-clone workflow also passed all six model/extraction/comparison/HTTP-portability steps, using existing dependencies and cached weights |
+| WP8 | `lab/static/designer.js`, app UI, coherent guides, `check_runtime.py` and no-model replay; browser fixture, real resolver designer test and actual-server responsive check. Eight runtime-checker tests passed; metadata/storage checks passed for both existing runtimes. A clean-clone no-ML server served all 168 published replays, including the new archive; the separate fresh-clone workflow also passed all six model/extraction/comparison/HTTP-portability steps, using existing dependencies and cached weights |
 
 Interpretation constraints are implemented, not merely documentation: a declared criterion validation status without bound raw evidence stays ineligible; partial diagnostic responses are excluded from primary scoring while retained separately; random controls report actual rounded norms; missing exposure remains unavailable; branch-local reports do not infer a first press before their inherited boundary. See [criterion evidence](criterion-evidence.md) and [research workflows](research-workflows.md).
 
@@ -66,9 +66,9 @@ invalid/truncated generations. The active case edited 147 reasoning positions;
 sham edits were zero. Twelve native XML tool calls, eighteen checkpoints and
 full GPU placement (18,578,531,840 load-time allocated bytes) were verified.
 The [new archive](../studies/research-release-v0.3/README.md) includes every
-planned stage, and the clean-clone no-model HTTP review passed for all 166
-replays. The fresh-clone GPU and HTTP-import workflow has also passed. The final
-suite and push remain pending; see [the validation ledger](validation.md) for exact counts and limitations.
+planned stage, and the clean-clone no-model HTTP review passed for all 168
+replays. The fresh-clone GPU and HTTP-import workflow, final suite and release
+push have passed; see [the validation ledger](validation.md) for exact counts and limitations.
 
 ## Cross-cutting compatibility contract (required before parallel implementation)
 
@@ -203,8 +203,8 @@ reserves without installing, downloading or creating directories. Both existing
 environments passed; CUDA is queried only with explicit `--check-cuda` and was
 not queried for those receipts. A separate clean data/cache server, with ML
 imports blocked, served the 131 earlier published replays without a model
-worker. A later clean local clone served all 166 replays, including the new
-acceptance archive, over HTTP with ML imports blocked and no worker.
+worker. A later clean local clone served all 168 replays, including both new
+acceptance archives, over HTTP with ML imports blocked and no worker.
 The separate `release-fresh-clone-first-run-01` receipt completed at 14:07:07 UTC
 from clean clone `29a79fde6d1372d7f32aad61f5fd1e9b461a52cb`: metadata/reserve
 check, local 4B load, exact frozen 160-row extraction, two direct active/sham
@@ -231,12 +231,12 @@ No GPU inference is needed for the bulk of implementation. Use existing fake-run
 ## Final acceptance and done checklist
 
 - [x] All required packages above are implemented, user-accessible, and covered by meaningful local tests; no placeholder button or fake metric is described as complete.
-- [ ] Local Python suite and browser suite pass; kernel parity is rerun only if relevant runtime/kernel behavior changed. Every published archive checksum and old protocol expansion still matches. A fresh no-model server replays both old and new evidence.
+- [x] Local Python suite and browser suite pass; kernel parity is rerun only if relevant runtime/kernel behavior changed. Every published archive checksum and old protocol expansion still matches. A fresh no-model server replays both old and new evidence.
 - [x] On the available 4090, run a bounded **4B acceptance protocol** with predetermined seeds/configuration: baseline/no-op parity; signed/attenuation/random validation; renamed tool/cost/stacking/token-vs-action decay; one diagnostic/yoked pair; a stress/relief or pressure factorial sample; pause/resume/branch round-trip. Use tiny/fake integration fixtures for mechanics and real model runs for compatibility/observability; do not pretend the smoke sample establishes every research hypothesis.
 - [x] Run a targeted **27B NF4 compatibility smoke** for updated definitions/parser/phase hooks/checkpoints and confirm full GPU placement, resource usage and calibration compatibility. Rerun calibration if the identity changed; never force an incompatible historical bundle to load. A complete second54-episode study is unnecessary unless a substantive change invalidates a comparison being claimed.
 - [x] Publish all acceptance runs, failures, resolved protocols, environment and analysis with immutable checksums in a new study directory, linked from the combined findings page/README. Keep scientific claim strength proportional to evidence.
 - [x] Verify first-run instructions and portable replay/import on a clean temporary data directory without duplicate multi-GB downloads; record what was simulated versus actually exercised.
-- [ ] Update the roadmap to list only optional/future items; commit/push; verify repository state and public links; then mark the feature-completion goal complete with a concise feature/validation report.
+- [x] Update the roadmap to list only optional/future items; commit/push; verify repository state and public links; then mark the feature-completion goal complete with a concise feature/validation report.
 
 ## Optional extensions and unavailable hardware (not release blockers)
 

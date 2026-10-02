@@ -1,6 +1,6 @@
-# Release scope and remaining work
+# Release scope
 
-Status reviewed October 2, 2026. All required research features are implemented and locally tested. Bounded 4B acceptance, the portable round trip and targeted 27B acceptance have completed and are published in [research release v0.3](../studies/research-release-v0.3/README.md). The supplemental fresh-clone GPU/export/import workflow has also passed. **Final release verification remains open:** the final full-suite rerun and commit/push checks are still required. The earlier 27B study remains separate evidence.
+Status reviewed October 2, 2026. **Opium Bench v0.3 is feature complete for its first full research release.** All required application workflows, local validation and bounded RTX 4090 acceptance are complete. The source and evidence are published in the [public Apache-2.0 repository](https://github.com/egethropic/opium-bench). The [research acceptance archive](../studies/research-release-v0.3/README.md) and separate [fresh-clone verification](../studies/fresh-clone-v0.3/README.md) preserve outcomes and limitations. Scientific efficacy and unavailable hardware remain separate questions.
 
 ## Implemented research workflows
 
@@ -19,20 +19,13 @@ Status reviewed October 2, 2026. All required research features are implemented 
 
 See [research workflows](research-workflows.md), [independent criterion evidence](criterion-evidence.md), the [user guide](guide.html), and the [implementation checklist](feature-completion-plan.md) for supported paths and precise semantics. The research corpus and probe scores measure associations; they do not by themselves demonstrate an effect on generated behavior or subjective experience.
 
-## Release work still required
+## Completed release verification
 
-1. Finish the final expanded 714-test rerun and final release checks. Preserve the intervening resource-stop and test-harness failure receipts; do not substitute focused checks for a passing full suite.
-2. Finalize documentation and supplemental receipt references, commit/push, and verify repository state and public links before marking the goal complete. No required application feature remains unimplemented.
+All **718 local Python tests passed in 333.981 seconds**, with test scratch on D: and no model experiments running. The [validation ledger](validation.md) retains earlier resource-stop and timing failures, their diagnoses and repairs. Browser checks covered 19 command actions, 25 designer calls to the real resolver and all seven app tabs across phone, tablet and desktop widths. Final findings, guide and supplemental archive pages had no page overflow or JavaScript errors.
 
-The latest passing full-suite receipt contains 709 tests; the final expanded
-714-test rerun is pending after retained resource-stop and test-harness failures.
-Sixteen focused checks passed after the first test-only corrections; a subsequent
-full run exposed two further legacy harness timing/synchronization failures,
-whose fixes and idle rerun are pending. Browser coverage
-includes 19 command actions and recovery handling. The audited stress/relief
-template carries one genuine visible-history prefix into eight factorial arms
-with fresh tasks, budgets and intervention state; strict unchanged-state
-checkpoint compatibility remains enforced.
+The compatibility contract still matches all 808 protected files, three historical protocol expansions, ten legacy recipe defaults and 24 visible payloads. A clean clone served **all 168 bundled replays** over HTTP with ML imports blocked and no worker. The new archives preserve verified scientific bytes, explicit omissions and redacted administrative records. Source and evidence are committed and pushed; no required application feature or acceptance gate remains open.
+
+The stress/relief template carries one genuine visible-history prefix into eight factorial arms with fresh tasks, budgets and intervention state; strict unchanged-state checkpoint compatibility remains enforced.
 
 The repaired 4B protocol completed 14/14 cases with **18/28 assigned tasks
 correct, 5,864 generated tokens (2,755 reasoning) and zero voluntary auxiliary
@@ -59,9 +52,9 @@ The supplemental clean-clone workflow completed all six steps with new data
 directories and reused local weights/dependencies: 160-row extraction, direct
 active/sham cases (4/4 tasks across 394 generated tokens), and exact HTTP
 export/import/replay. Both services closed normally. Separately, the ML-free
-clean-clone review served all 166 bundled replays without a worker.
+clean-clone review served all 168 bundled replays without a worker.
 
-The implementation audit and [validation ledger](validation.md) distinguish CPU fixtures, browser checks, completed engineering stages, earlier real-model findings and pending release work. No independent behavioral effect or discovery result is inferred from software checks or this small acceptance sample.
+The implementation audit and [validation ledger](validation.md) distinguish CPU fixtures, browser checks, completed engineering stages, earlier real-model findings and completed release verification. No independent behavioral effect or discovery result is inferred from software checks or this small acceptance sample.
 
 ## Preserved findings
 
