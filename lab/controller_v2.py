@@ -16,7 +16,7 @@ from __future__ import annotations
 import copy
 import math
 
-from .effects import ACTORS, EffectScheduler, canonical_json, content_hash
+from .effects import ACTORS, ATTENUATION_AXES, COEFFICIENT_AXES, EffectScheduler, canonical_json, content_hash
 from .recipes_v2 import recipe_hash, resolve_recipe, resolve_tool_outcome
 from .tool_definitions import validate_arguments
 
@@ -65,6 +65,7 @@ class RecipeV2Controller:
         self.phase_counts = {}
         self.exploratory = False
         self.last_outcome = "sham"
+        self.baseline_exposure = {phase: {"positions": 0, "pain": 0., "joy_raw": 0., "joy_orthogonal": 0.} for phase in ("prefill", "reasoning", "output")}
 
     @property
     def generated_tokens(self):
@@ -128,6 +129,27 @@ class RecipeV2Controller:
     def advance(self, tokens=1):
         self.scheduler.advance_tokens(tokens)
         return self.level
+
+    def record_exposure(self, phase, coefficients, baseline, *, positions=1):
+        """Accumulate ACTUAL runtime-delivered stages, without advancing clocks."""
+        _choice(phase, ("prefill", "reasoning", "output"), "exposure phase")
+        _integer(positions, "positions", 1, 1000000)
+        if not isinstance(coefficients, dict) or set(coefficients) != set(COEFFICIENT_AXES):
+            raise ValueError("Exposure requires all delivered coefficient axes")
+        if not isinstance(baseline, dict) or set(baseline) != {"pain", "joy_raw", "joy_orthogonal"}:
+            raise ValueError("Exposure requires all delivered baseline axes")
+        for key, value in coefficients.items():
+            _number(value, key, 0 if key in ATTENUATION_AXES else -4, 1 if key in ATTENUATION_AXES else 4)
+        for key, value in baseline.items():
+            _number(value, key)
+            if phase == "prefill" and value != 0:
+                raise ValueError("Held baseline exposure cannot occur during prefill")
+        self.scheduler.exposure[phase]["positions"] += positions
+        self.baseline_exposure[phase]["positions"] += positions
+        for key, value in coefficients.items():
+            self.scheduler.exposure[phase][key] += value * positions
+        for key, value in baseline.items():
+            self.baseline_exposure[phase][key] += value * positions
 
     def acknowledgment(self, tool):
         if type(tool) is not str or tool not in self.tools:
@@ -268,7 +290,7 @@ class RecipeV2Controller:
                 "generated_tokens": self.generated_tokens, "completed_decisions": self.actions, "actions": self.actions,
                 "recorded_decisions": self.recorded_decisions, "last_recorded_decision": self.last_recorded_decision,
                 "baseline": copy.deepcopy(self.baseline), "baseline_policy": "generated-phases-only",
-                "baseline_by_phase": baselines, "phase_scope": self.phase_scope,
+                "baseline_by_phase": baselines, "baseline_exposure": copy.deepcopy(self.baseline_exposure), "phase_scope": self.phase_scope,
                 "phase_coefficients": coefficients, "enabled": self.enabled, "level": self.level,
                 "counts": dict(self.counts), "phase_counts": copy.deepcopy(self.phase_counts),
                 "exploratory": self.exploratory, "outcome": self.last_outcome,
@@ -312,6 +334,20 @@ class RecipeV2Controller:
             _number(baseline[key], key, 0 if "suppression" in key else -4, 1 if "suppression" in key else 4)
         _choice(baseline["joy_direction"], ("raw", "orthogonal"), "baseline joy direction")
         result.baseline = copy.deepcopy(baseline)
+        baseline_exposure = state["baseline_exposure"]
+        if not isinstance(baseline_exposure, dict) or set(baseline_exposure) != set(result.baseline_exposure):
+            raise ValueError("Invalid baseline exposure phases")
+        for phase, values in baseline_exposure.items():
+            if not isinstance(values, dict) or set(values) != {"positions", "pain", "joy_raw", "joy_orthogonal"}:
+                raise ValueError("Invalid baseline exposure totals")
+            positions = _integer(values["positions"], "exposure positions")
+            if positions != result.scheduler.exposure[phase]["positions"]:
+                raise ValueError("Baseline and pulse exposure positions differ")
+            for axis in ("pain", "joy_raw", "joy_orthogonal"):
+                _number(values[axis], axis, -4 * positions, 4 * positions)
+                if phase == "prefill" and values[axis] != 0:
+                    raise ValueError("Invalid held baseline prefill exposure")
+        result.baseline_exposure = copy.deepcopy(baseline_exposure)
         result.phase_scope = _choice(state["phase_scope"], ("all", "reasoning", "output"), "phase_scope")
         if type(state["exploratory"]) is not bool:
             raise ValueError("exploratory must be boolean")

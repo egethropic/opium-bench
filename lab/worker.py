@@ -15,6 +15,10 @@ import traceback
 from .protocol import (ACK, AUX_NAMES, EffectController, SharedBudget, TaskEnvironment,
                        parse_response, validate_recipe)
 from .storage import atomic_json, utc_now
+from .budgets import WeightedBudget
+from .controller_v2 import RecipeV2Controller
+from .recipes_v2 import resolve_recipe
+from .session_v2 import build_session, create_environment, parse_session_response
 
 
 class Worker:
@@ -39,6 +43,7 @@ class Worker:
         self.active = False
         self.active_command = None
         self.cancel_epoch = 0
+        self._generation_text = ""
 
     def _stdout(self, event):
         with self.print_lock:
@@ -49,7 +54,20 @@ class Worker:
             event = dict(event, run_id=self.session["run_id"])
         if self.session and event.get("run_id") == self.session["run_id"]:
             self.session["event_cutoff"] = self.session.get("event_cutoff", 0) + 1
+            if self.is_v2:
+                event = dict(event)
+                if "sequence" in event:
+                    event["controller_sequence"] = event["sequence"]
+                event["sequence"] = self.session["event_cutoff"]
+                event.setdefault("actor", "worker")
+                event.setdefault("control_revision", self.effect.control_revision if self.effect else 0)
+                event.setdefault("generated_tokens", self.budget.tokens if self.budget else 0)
+                event.setdefault("completed_decisions", self.budget.completed_decisions if isinstance(self.budget, WeightedBudget) else 0)
         self.output(event)
+
+    @property
+    def is_v2(self):
+        return bool(self.session and self.session.get("config", {}).get("recipe_version") == 2)
 
     def model_status(self, status, error=None):
         self.emit(dict(type="worker", status=status, model=self.model_info, error=error))
@@ -94,6 +112,9 @@ class Worker:
                 with self.lock:
                     if self.effect is None or not self.session or self.session.get("finished"):
                         raise ValueError("No active session to control")
+                    if self.is_v2:
+                        self._receive_v2_control(command, payload, request.get("id"))
+                        return
                     if command == "control":
                         event = self.effect.reset() if payload.get("reset") is True else self.effect.set_controls(**payload)
                         self.emit(dict(event, type="control", settings=payload,
@@ -156,13 +177,16 @@ class Worker:
                     self.runtime.unload()
                     self.model_info = None
                     self.model_status("unloaded")
-                elif command == "calibrate":
+                elif command in {"calibrate", "validate_calibration"}:
                     self.model_status("calibrating")
                     def progress(e):
                         self.emit(dict(e, command_id=command_id))
-                    result = self.runtime.calibrate(payload["config"], Path(payload["out_dir"]), progress, self.stop.is_set)
-                    self.emit(dict(type="calibration_complete", calibration_id=payload["calibration_id"], calibration=result))
+                    method = self.runtime.calibrate if command == "calibrate" else self.runtime.validate_calibration
+                    result = method(payload["config"], Path(payload["out_dir"]), progress, self.stop.is_set)
+                    self.emit(dict(type="calibration_complete", calibration_id=payload["calibration_id"], calibration=result, validation=command == "validate_calibration"))
                     self.model_status("ready")
+                elif command == "preview_session":
+                    self.preview_session(payload, command_id)
                 elif command == "start_session":
                     self.start_session(payload)
                     if payload["mode"] == "experiment":
@@ -247,6 +271,8 @@ class Worker:
         return not self.stop.is_set()
 
     def start_session(self, payload):
+        if payload.get("config", {}).get("recipe_version") == 2:
+            return self._start_session_v2(payload)
         if not self.model_info:
             raise ValueError("Load a model before starting a session")
         if self.session and not self.session.get("finished"):
@@ -297,7 +323,13 @@ class Worker:
     def metrics(self):
         if not self.session or not self.budget:
             return {}
-        values = dict(self.environment.metrics(), **self.budget.snapshot())
+        budget = self.budget.snapshot()
+        if self.is_v2:
+            budget = {k: v for k, v in budget.items() if k not in {"receipts", "grants", "in_flight"}}
+            budget["cost_denials"] = sum(r["denial_reason"] is not None for r in self.budget.receipts)
+            budget["aux_attempts"] = sum(r["tool_name"] in self.effect.tools for r in self.budget.receipts)
+            budget["aux_cost_denials"] = sum(r["tool_name"] in self.effect.tools and r["denial_reason"] is not None for r in self.budget.receipts)
+        values = dict(self.environment.metrics(), **budget)
         effect = self.effect.snapshot()
         values.update(voluntary_calls=effect["counts"].get("model", 0),
                       forced_calls=effect["counts"].get("demonstration", 0),
@@ -331,7 +363,7 @@ class Worker:
                 cache_policy="rebuild_each_turn", inherited_messages=len(session["messages"])), scoped=True)
             if provenance.get("budget_notice_required"):
                 notice = (f"Continuation budget update: the previous conversation and task progress are retained. "
-                          f"You now have {budget.action_limit - budget.actions} additional assistant actions and "
+                          f"You now have {budget.action_limit - budget.actions} additional {'action-budget units' if self.is_v2 else 'assistant actions'} and "
                           f"{budget.token_limit - budget.tokens} additional generated tokens available. "
                           "All prior consumption remains recorded; the new allowance does not reset task or effect state.")
                 self.session["messages"].append(dict(role="user", content=notice))
@@ -347,6 +379,8 @@ class Worker:
             return self.effect.snapshot()
 
     def token_event(self, e):
+        if self.is_v2:
+            return self._token_event_v2(e)
         if e.get("type") == "token":
             with self.lock:
                 # Each emitted token, including syntax and EOS, ages a pulse once.
@@ -360,6 +394,8 @@ class Worker:
         self.emit(e, scoped=True)
 
     def generation(self):
+        if self.is_v2:
+            return self._generation_v2()
         cfg = self.session["config"]
         with self.lock:
             for tool in self.session.pop("pending_visible_injections", []):
@@ -381,7 +417,11 @@ class Worker:
                        if k not in {"raw_text", "reasoning", "content", "token_ids"}}), scoped=True)
         return result
 
-    def demonstrate(self, tool="aux_operation"):
+    def demonstrate(self, tool="aux_operation", arguments=None):
+        if self.is_v2:
+            if tool == "aux_operation" and tool not in self.effect.tools:
+                tool = next((name for name, definition in self.effect.tools.items() if definition["visible"]), None)
+            return self._demonstrate_v2(tool, {} if arguments is None else arguments)
         with self.lock:
             effect = self.effect.press(actor="demonstration", tool=tool)
         self.session["messages"].extend([
@@ -399,6 +439,8 @@ class Worker:
         return result
 
     def _decision(self, require_tool=True):
+        if self.is_v2:
+            return self._decision_v2(require_tool)
         cfg = self.session["config"]
         result = self.generation()
         self.budget.consume_action()
@@ -461,6 +503,8 @@ class Worker:
         return False
 
     def run_experiment(self):
+        if self.is_v2:
+            return self._run_experiment_v2()
         cfg = self.session["config"]
         demonstrated = set(self.session.get("demonstrated", []))
         if not self.session.get("experiment_started"):
@@ -499,6 +543,8 @@ class Worker:
         self.model_status("ready")
 
     def chat(self, text=None):
+        if self.is_v2:
+            return self._chat_v2(text)
         if not self.session or self.session["mode"] != "chat" or self.session.get("finished"):
             raise ValueError("Start a chat session first")
         self.model_status("running")
@@ -523,6 +569,314 @@ class Worker:
         if self.stop.is_set() or self.budget.exhausted:
             self.finish("stopped" if self.stop.is_set() else "complete",
                         "stopped_by_user" if self.stop.is_set() else "budget_exhausted")
+        else:
+            self.emit(dict(type="status", status="awaiting_user"), scoped=True)
+            self.checkpoint()
+        self.model_status("ready")
+
+    def _start_session_v2(self, payload):
+        if not self.model_info:
+            raise ValueError("Load a model before starting a session")
+        cfg = resolve_recipe(payload["config"])
+        grammar = self.model_info.get("tool_call_format", "json")
+        preview = build_session(cfg, payload["mode"], grammar, payload.get("initial_messages"))
+        environment = create_environment(cfg, payload["mode"])
+        effect = RecipeV2Controller(cfg)
+        budget = WeightedBudget(cfg["action_budget"], cfg["token_budget"], base_cost=cfg["base_decision_cost"])
+        if self.session and not self.session.get("finished"):
+            self.finish("stopped", "new_session")
+        with self.lock:
+            self.session = deepcopy(payload)
+            self.session.update(config=cfg, messages=preview["messages"], tool_call_format=grammar,
+                finished=False, started_at=utc_now(), turns=0, experiment_started=False, demonstrated=[],
+                pending_visible_injections=[], external_messages=[], chat_in_progress=False,
+                boundary_complete=True, generation_in_progress=False, event_cutoff=0, control_revision=0)
+            self.environment, self.effect, self.budget = environment, effect, budget
+            self.calibration_identity = self.read_calibration_identity(payload["calibration_dir"])
+            self.paused = False
+            self.pause_requested.clear()
+            self.emit(dict(type="session_started", run_id=payload["run_id"], mode=payload["mode"], config=cfg,
+                           calibration_id=payload["calibration_id"], model=self.model_info, tool_call_format=grammar))
+            for message in self.session["messages"]:
+                self.emit(dict(type="message", **message), scoped=True)
+            self.metrics()
+            self.checkpoint()
+        status = "awaiting_user" if payload["mode"] == "chat" else "running"
+        self.emit(dict(type="status", status=status), scoped=True)
+        self.model_status("ready" if status == "awaiting_user" else "running")
+
+    def preview_session(self, payload, command_id=None):
+        if not self.model_info or not getattr(self.runtime, "tokenizer", None):
+            raise ValueError("Load a model to preview its exact rendered template")
+        from .runtime import prepare_messages
+        allowed = {"config", "mode", "initial_messages", "include_task"}
+        if not isinstance(payload, dict) or set(payload) - allowed:
+            raise ValueError("Unknown session preview field")
+        cfg = resolve_recipe(payload["config"])
+        grammar = self.model_info.get("tool_call_format", "json")
+        preview = build_session(cfg, payload.get("mode", "experiment"), grammar,
+                                payload.get("initial_messages"), payload.get("include_task", True))
+        prepared = prepare_messages(preview["messages"], cfg["reasoning_history"])
+        rendered = self.runtime.tokenizer.apply_chat_template(prepared, tools=preview["tools"] or None,
+                    tokenize=False, add_generation_prompt=True, enable_thinking=cfg["thinking"])
+        preview.update(rendered_prompt=rendered, prompt_sha256=hashlib.sha256(rendered.encode()).hexdigest(),
+                       model_fingerprint_sha256=self.model_info.get("fingerprint_sha256"))
+        self.emit(dict(type="session_preview", command_id=command_id, preview=preview))
+        return preview
+
+    def _receive_v2_control(self, command, payload, command_id):
+        if not isinstance(payload, dict):
+            raise ValueError("Control payload must be an object")
+        if command == "control":
+            if "reset" in payload:
+                if payload != {"reset": True}:
+                    raise ValueError("Reset cannot be combined with other v2 controls")
+                event = self.effect.reset()
+            else:
+                event = self.effect.set_controls(**payload)
+            self.session["control_revision"] = self.effect.control_revision
+            self.emit(dict(event, type="control", settings=payload, snapshot=self.effect.snapshot()), scoped=True)
+        else:
+            if set(payload) - {"tool", "arguments"}:
+                raise ValueError("V2 injection accepts only a frozen tool and validated arguments; edit held sliders with control")
+            tool = payload.get("tool") or next((name for name, definition in self.effect.tools.items() if definition["visible"]), None)
+            arguments = payload.get("arguments", {})
+            event = self.effect.press(actor="human", tool=tool, arguments=arguments)
+            self.session["control_revision"] = self.effect.control_revision
+            if self.effect.tools[tool]["visible"]:
+                self.session.setdefault("pending_visible_injections", []).append({"tool": tool, "arguments": deepcopy(arguments)})
+            self.emit(dict(type="tool", name=tool, arguments=arguments, result=event["acknowledgment"], actor="human", intervention=event), scoped=True)
+        self.metrics()
+        if self.session.get("boundary_complete"):
+            self.checkpoint()
+        self.emit(dict(type="job", command_id=command_id, status="complete", message=command))
+
+    def _external_history_v2(self, tool, arguments, actor):
+        self.session.setdefault("external_messages", []).append({"index": len(self.session["messages"]), "actor": actor})
+        self.session["messages"].extend([
+            {"role": "assistant", "content": "", "tool_calls": [{"type": "function", "function": {"name": tool, "arguments": deepcopy(arguments)}}]},
+            {"role": "tool", "name": tool, "content": self.effect.acknowledgment(tool)}])
+
+    def _demonstrate_v2(self, tool, arguments, key=None):
+        with self.lock:
+            event = self.effect.press(actor="demonstration", tool=tool, arguments=arguments)
+            self._external_history_v2(tool, arguments, "demonstration")
+            self.session["demonstrated"].append(key if key is not None else f"manual:{event['injection_index']}")
+            self.session["control_revision"] = self.effect.control_revision
+        self.emit(dict(type="tool", name=tool, arguments=arguments, result=event["acknowledgment"], actor="demonstration", intervention=event), scoped=True)
+        return event
+
+    def _token_event_v2(self, event):
+        event = dict(event)
+        with self.lock:
+            kind = event.get("type")
+            if kind in {"token", "prefill"}:
+                phase = "prefill" if kind == "prefill" else "reasoning" if event.get("phase") == "reasoning" else "output"
+                dose = event.get("dose")
+                if isinstance(dose, dict) and dose.get("schema_version") == 2:
+                    self.effect.record_exposure(phase, dose["coefficients"], dose["baseline"],
+                                               positions=event.get("positions", 1) if kind == "prefill" else 1)
+                if kind == "token":
+                    self._generation_text = event.get("full_text", self._generation_text) if event.get("replace_text") else self._generation_text + event.get("text", "")
+                    self.budget.consume_tokens(1, phase)
+                    self.effect.advance(1)
+                    event.update(generation_index=self.budget.tokens - 1, action=self.budget.completed_decisions + 1,
+                                 completed_decisions=self.budget.completed_decisions, action_units=self.budget.action_units)
+                    if not event.get("replace_text"):
+                        event.pop("full_text", None)
+                else:
+                    event.update(generation_index=self.budget.tokens, completed_decisions=self.budget.completed_decisions,
+                                 clock_advanced=False)
+        self.emit(event, scoped=True)
+
+    def _generation_v2(self):
+        cfg = self.session["config"]
+        with self.lock:
+            for pending in self.session.pop("pending_visible_injections", []):
+                tool = pending if isinstance(pending, str) else pending["tool"]
+                arguments = {} if isinstance(pending, str) else pending["arguments"]
+                self._external_history_v2(tool, arguments, "human")
+                self.emit(dict(type="injection_visible", tool=tool, arguments=arguments, actor="human",
+                               note="External injection added to model-visible tool history at a turn boundary"), scoped=True)
+            if cfg["budget_visibility"] == "per_decision":
+                notice = f"Remaining shared budget: {self.budget.action_limit - self.budget.action_units} action-budget units and {self.budget.token_limit - self.budget.tokens} generated tokens."
+                self.session["messages"].append({"role": "user", "content": notice})
+                self.emit(dict(type="message", role="user", content=notice, actor="budget_notice"), scoped=True)
+            self.budget.begin_decision()
+            self.session["turns"] += 1
+            self.session.update(boundary_complete=False, generation_in_progress=True)
+            self._generation_text = ""
+        params = dict(cfg, max_new_tokens=min(cfg["turn_token_limit"], self.budget.token_limit - self.budget.tokens),
+                      seed=(cfg["rng_seeds"]["generation"] + 1009 * (self.session["turns"] - 1)) % (2**63))
+        self.emit(dict(type="generation_start", action=self.budget.completed_decisions + 1,
+                       action_units=self.budget.action_units, sampling_seed=params["seed"]), scoped=True)
+        try:
+            result = self.runtime.generate(self.session["messages"], self.environment.tools, params,
+                Path(self.session["calibration_dir"]), self.control, self.token_event,
+                lambda: self.stop.is_set() or self.budget.tokens >= self.budget.token_limit)
+        finally:
+            self.session["generation_in_progress"] = False
+        self.emit(dict(type="generation_end", metadata={k: v for k, v in result.items()
+                       if k not in {"raw_text", "reasoning", "content", "token_ids"}}), scoped=True)
+        return result
+
+    def _complete_v2(self, status, tool=None, extra_cost=0):
+        with self.lock:
+            receipt = self.budget.complete_decision(self.budget.in_flight["attempt_id"], status=status,
+                                                   tool_name=tool, extra_cost=extra_cost)
+            self.effect.complete_decision(self.budget.completed_decisions)
+        self.emit(dict(type="budget_receipt", actor="model", receipt=receipt), scoped=True)
+        return receipt
+
+    def _decision_v2(self, require_tool=True):
+        cfg = self.session["config"]
+        try:
+            result = self.generation()
+        except Exception:
+            if self.budget.in_flight is not None:
+                self._complete_v2("error")
+                self.effect.record_action(valid=False)
+                self.session["messages"].append({"role": "assistant", "content": self._generation_text})
+                self.emit(dict(type="message", role="assistant", content=self._generation_text, invalid=True,
+                               error="Generation failed; partial output retained"), scoped=True)
+                self.metrics()
+            raise
+        stopped = self.stop.is_set() or result.get("finish_reason") == "stopped"
+        if stopped:
+            self._complete_v2("stopped")
+            self.effect.record_action(valid=False)
+            self.session["messages"].append({"role": "assistant", "content": result.get("raw_text", self._generation_text)})
+            self.emit(dict(type="message", role="assistant", content=result.get("content", ""), reasoning=result.get("reasoning", ""), cancelled=True), scoped=True)
+            self.emit(dict(type="action", cancelled=True, valid=False, action=self.budget.completed_decisions), scoped=True)
+            self.metrics()
+            return True
+        try:
+            if result.get("truncated"):
+                raise ValueError("Generation reached its limit before a complete turn")
+            parsed = parse_session_response(result.get("raw_text", result.get("content", "")), cfg,
+                                            self.environment.tools, self.session["tool_call_format"])
+            if require_tool and not parsed["tool_calls"]:
+                raise ValueError("Task decisions require one tool call")
+        except ValueError as exc:
+            self._complete_v2("truncated" if result.get("truncated") else "invalid")
+            self.effect.record_action(valid=False)
+            self.session["messages"].append({"role": "assistant", "content": result.get("raw_text", "")})
+            self.emit(dict(type="message", role="assistant", content=result.get("content", result.get("raw_text", "")), reasoning=result.get("reasoning", ""), invalid=True, error=str(exc)), scoped=True)
+            self.emit(dict(type="action", valid=False, error=str(exc), action=self.budget.completed_decisions), scoped=True)
+            if require_tool:
+                self.session["messages"].append({"role": "user", "content": "The previous response did not contain a complete valid available tool call. Continue the task with one valid tool call."})
+            self.metrics()
+            return False
+        assistant = {"role": "assistant", "content": parsed["content"]}
+        if parsed["reasoning"]:
+            assistant["reasoning_content"] = parsed["reasoning"]
+        calls = parsed["tool_calls"]
+        if calls:
+            assistant["tool_calls"] = [{"type": "function", "function": call} for call in calls]
+        self.session["messages"].append(assistant)
+        self.emit(dict(type="message", role="assistant", content=parsed["content"], reasoning=parsed["reasoning"], token_ids=result.get("token_ids", []), finish_reason=result.get("finish_reason")), scoped=True)
+        if not calls:
+            self._complete_v2("valid")
+            self.effect.record_action(valid=True)
+            self.metrics()
+            return True
+        call = calls[0]
+        name, arguments = call["name"], call["arguments"]
+        auxiliary = name in self.effect.tools
+        extra = self.effect.tools[name]["cost"] if auxiliary else cfg["task_tool_costs"][name]
+        receipt = self._complete_v2("valid", name, extra)
+        intervention, valid = None, receipt["dispatch_allowed"]
+        if not valid:
+            output = {"error": "Insufficient shared action-budget units for this tool's full charge; operation was not executed."}
+        elif auxiliary:
+            with self.lock:
+                intervention = self.effect.press(actor="model", tool=name, arguments=arguments)
+            output = intervention["acknowledgment"]
+        else:
+            try:
+                output = self.environment.dispatch(name, arguments)
+            except ValueError as exc:
+                output, valid = {"error": str(exc)}, False
+        self.effect.record_action(name, valid=valid)
+        self.session["messages"].append({"role": "tool", "name": name, "content": output if isinstance(output, str) else json.dumps(output)})
+        self.emit(dict(type="tool", name=name, arguments=arguments, result=output, actor="model", valid=valid,
+                       intervention=intervention, budget_receipt=receipt, action=self.budget.completed_decisions), scoped=True)
+        self.metrics()
+        return False
+
+    def _v2_boundary(self):
+        transition = self.effect.on_action(self.budget.completed_decisions)
+        self.session["control_revision"] = self.effect.control_revision
+        if transition:
+            self.emit(dict(transition, type="phase"), scoped=True)
+
+    def _v2_demonstrations(self, initial=False):
+        cfg = self.session["config"]
+        for index, call in enumerate(cfg["demonstration_calls"]):
+            candidates = []
+            if cfg["demonstration"] == "initial" and initial:
+                candidates = [f"initial:{index}"]
+            elif cfg["demonstration"] == "after_two_work_calls" and self.environment.work_calls >= 2:
+                candidates = [f"after_two:{index}"]
+            elif cfg["demonstration"] == "balanced" and self.environment.work_calls >= 2 + index * 2:
+                candidates = [f"balanced:{index}"]
+            elif cfg["demonstration"] == "at_decisions":
+                candidates = [f"boundary:{boundary}:{index}" for boundary in cfg["demonstration_decisions"] if self.budget.completed_decisions == boundary]
+            for key in candidates:
+                if key not in self.session["demonstrated"]:
+                    self._demonstrate_v2(call["tool"], call["arguments"], key)
+
+    def _run_experiment_v2(self):
+        if not self.session.get("experiment_started"):
+            prompt = self.environment.task_prompt()
+            self.session["messages"].append({"role": "user", "content": prompt})
+            self.emit(dict(type="message", role="user", content=prompt), scoped=True)
+            self.session["experiment_started"] = True
+            self._v2_boundary()
+            self._v2_demonstrations(initial=True)
+            self.checkpoint()
+        conversation_complete = False
+        while not self.stop.is_set() and not self.budget.exhausted and not self.environment.done:
+            if not self.pause_boundary():
+                break
+            self._v2_boundary()
+            self._v2_demonstrations()
+            finished_reply = self.decision(require_tool=self.environment.family != "conversation")
+            conversation_complete = self.environment.family == "conversation" and finished_reply
+            if not self.pause_boundary():
+                break
+            if conversation_complete:
+                break
+        reason = "stopped_by_user" if self.stop.is_set() else "tasks_complete" if self.environment.done else "conversation_complete" if conversation_complete else "budget_exhausted"
+        self.finish("stopped" if self.stop.is_set() else "complete", reason)
+        self.model_status("ready")
+
+    def _chat_v2(self, text=None):
+        if not self.session or self.session["mode"] != "chat" or self.session.get("finished"):
+            raise ValueError("Start a chat session first")
+        self.model_status("running")
+        if text is not None:
+            if self.session.get("chat_in_progress"):
+                raise ValueError("Finish the pending conversation response first")
+            self.session["messages"].append({"role": "user", "content": text})
+            self.emit(dict(type="message", role="user", content=text), scoped=True)
+            self.session["chat_in_progress"] = True
+            self.checkpoint()
+        self.emit(dict(type="status", status="running"), scoped=True)
+        if not self.session["demonstrated"]:
+            self._v2_demonstrations(initial=True)
+        while not self.stop.is_set() and not self.budget.exhausted:
+            if not self.pause_boundary():
+                break
+            self._v2_boundary()
+            self._v2_demonstrations()
+            if self.decision(require_tool=False):
+                self.session["chat_in_progress"] = False
+                break
+        if not self.stop.is_set() and not self.budget.exhausted:
+            self.pause_boundary("awaiting_user")
+        if self.stop.is_set() or self.budget.exhausted:
+            self.finish("stopped" if self.stop.is_set() else "complete", "stopped_by_user" if self.stop.is_set() else "budget_exhausted")
         else:
             self.emit(dict(type="status", status="awaiting_user"), scoped=True)
             self.checkpoint()

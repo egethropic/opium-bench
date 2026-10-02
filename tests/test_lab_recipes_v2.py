@@ -92,11 +92,20 @@ class RecipeTests(unittest.TestCase):
         value = recipe(condition="probabilistic", conditions=["probabilistic"])
         self.assertEqual(len(set(value["rng_seeds"].values())), 5)
         draws = [resolve_tool_outcome(value, "aux_operation", 0, i) for i in range(20)]
-        changed = resolve_recipe({**value, "rng_seeds": {**value["rng_seeds"], "generation": 18, "tasks": 19}})
+        changed = resolve_recipe({**value, "rng_policy": "explicit", "rng_seeds": {**value["rng_seeds"], "generation": 18, "tasks": 19}})
         self.assertEqual(draws, [resolve_tool_outcome(changed, "aux_operation", 0, i) for i in range(20)])
-        changed = resolve_recipe({**value, "rng_seeds": {**value["rng_seeds"], "outcomes": 20}})
+        changed = resolve_recipe({**value, "rng_policy": "explicit", "rng_seeds": {**value["rng_seeds"], "outcomes": 20}})
         self.assertNotEqual([d["draw"] for d in draws], [resolve_tool_outcome(changed, "aux_operation", 0, i)["draw"] for i in range(20)])
         self.assertEqual({d["preset_id"] for d in draws}, {"joy", "pain"})
+
+    def test_resolved_batch_seed_change_regenerates_only_derived_streams(self):
+        original = default_recipe()
+        changed = resolve_recipe({**original, "seed": original["seed"] + 1})
+        self.assertNotEqual(original["rng_seeds"], changed["rng_seeds"])
+        explicit = recipe(rng_seeds={"generation": 123})
+        self.assertEqual(explicit["rng_policy"], "explicit")
+        changed = resolve_recipe({**explicit, "seed": explicit["seed"] + 1})
+        self.assertEqual(explicit["rng_seeds"], changed["rng_seeds"])
 
     def test_probability_extremes_are_deterministic(self):
         for probability, outcome in ((0, "joy"), (1, "pain")):

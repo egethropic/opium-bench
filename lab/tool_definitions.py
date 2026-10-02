@@ -231,7 +231,7 @@ def cost_notice(definitions, *, base_cost=1, task_costs=None):
         if tool["visible"]:
             entries[tool["name"]] = tool["cost"]
     listing = "; ".join(f"{name}: {cost} extra" for name, cost in sorted(entries.items()))
-    return f"Every completed assistant decision costs {base_cost} action-budget unit(s), including invalid responses. A valid tool call also costs its listed extra units: {listing or 'none'}. A call whose full charge is unaffordable is not executed. All generated tokens also consume the shared token budget."
+    return f"Every generation attempt costs {base_cost} action-budget unit(s), including invalid, truncated or interrupted responses. A valid tool call also costs its listed extra units: {listing or 'none'}. A call whose full charge is unaffordable is not executed. All generated tokens also consume the shared token budget."
 
 
 def _unique_object(pairs):

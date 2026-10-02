@@ -76,7 +76,7 @@ _DEFAULT = {
     "demonstration": "after_two_work_calls", "demonstration_decisions": [2], "demonstration_calls": None,
     "phase_actions": [10, 20], "transition_policy": "cancel", "probability_pain": .25,
     "two_buttons": False, "counterbalance": True, "aux_enabled": True,
-    "effect_presets": None, "auxiliary_tools": None, "mapping_schedule": None, "mapping_policy": "condition", "rng_seeds": {},
+    "effect_presets": None, "auxiliary_tools": None, "mapping_schedule": None, "mapping_policy": "condition", "rng_seeds": {}, "rng_policy": "derived",
     "budget_visibility": "initial", "disclosure_text": "",
 }
 
@@ -180,6 +180,8 @@ def resolve_recipe(config):
         raise ValueError("Recipe exceeds the bounded JSON size")
     result = copy.deepcopy(_DEFAULT)
     result.update(copy.deepcopy(config))
+    if config.get("rng_seeds") and "rng_policy" not in config:
+        result["rng_policy"] = "explicit"
     if config.get("mapping_schedule") is not None and "mapping_policy" not in config:
         result["mapping_policy"] = "explicit"
     result["id"] = _text(result["id"], "recipe id", 128, identifier=True)
@@ -209,7 +211,7 @@ def resolve_recipe(config):
     for name, choices in (("reasoning_history", ("template", "drop")), ("baseline_joy_direction", ("raw", "orthogonal")),
                           ("phase_scope", ("all", "reasoning", "output")), ("transition_policy", ("cancel", "decay")),
                           ("demonstration", ("none", "initial", "after_two_work_calls", "balanced", "disclosed", "at_decisions")),
-                          ("budget_visibility", ("initial", "per_decision")), ("mapping_policy", ("condition", "explicit"))):
+                          ("budget_visibility", ("initial", "per_decision")), ("mapping_policy", ("condition", "explicit")), ("rng_policy", ("derived", "explicit"))):
         _choice(result[name], choices, name)
     if not isinstance(result["disclosure_text"], str) or len(result["disclosure_text"]) > 8192 or "\x00" in result["disclosure_text"]:
         raise ValueError("disclosure_text must be bounded text")
@@ -228,7 +230,10 @@ def resolve_recipe(config):
     if demos != sorted(set(demos)) or result["demonstration"] == "at_decisions" and not demos:
         raise ValueError("Demonstration boundaries must be ascending and distinct")
     _object(result["rng_seeds"], STREAMS, "random seeds")
-    result["rng_seeds"] = {stream: _integer(result["rng_seeds"].get(stream, _derived_seed(result["seed"], stream)),
+    for stream, value in result["rng_seeds"].items():
+        _integer(value, f"rng_seeds.{stream}", 0, MAX_SEED)
+    supplied_seeds = result["rng_seeds"] if result["rng_policy"] == "explicit" else {}
+    result["rng_seeds"] = {stream: _integer(supplied_seeds.get(stream, _derived_seed(result["seed"], stream)),
                                             f"rng_seeds.{stream}", 0, MAX_SEED) for stream in STREAMS}
     result["effect_presets"] = validate_presets(_default_presets() if result["effect_presets"] is None else result["effect_presets"])
     preset_ids = {p["id"] for p in result["effect_presets"]}
