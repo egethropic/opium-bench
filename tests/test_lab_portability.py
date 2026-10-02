@@ -200,6 +200,64 @@ class PortabilityTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Object"):
             export_bundle(self.run, self.root / "object.zip")
 
+    @staticmethod
+    def activation_archive(names, *, dtype="<f4", values=(.1, .2)):
+        payload = struct.pack("<" + "f" * len(values), *values)
+        header = repr(dict(descr=dtype, fortran_order=False, shape=(len(values),))).encode() + b"\n"
+        array = b"\x93NUMPY\x01\x00" + struct.pack("<H", len(header)) + header + payload
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+            for name in names:
+                archive.writestr(name, array)
+        return buffer.getvalue()
+
+    def test_schema2_calibration_activation_keys_roundtrip_without_extracting_arrays(self):
+        calibration = self.root / "cal-fixture"
+        calibration.mkdir()
+        (calibration / "calibration.json").write_text('{"schema_version":2}')
+        names = [f"{layer}:{pooling}.npy" for layer in (0, 12, 4096) for pooling in ("final", "mean", "span")]
+        raw = self.activation_archive(names)
+        (calibration / "activations.npz").write_bytes(raw)
+        export_bundle(self.run, self.archive, calibration_dir=calibration)
+        result = import_bundle(self.archive, self.imports)
+        imported = Path(result["path"]) / "_portable/calibration/cal-fixture"
+        self.assertEqual((imported / "activations.npz").read_bytes(), raw)
+        self.assertFalse(list(Path(result["path"]).rglob("*.npy")))
+        self.assertFalse(result["resume_eligible"])
+
+    def test_activation_key_exception_never_applies_to_outer_bundle_paths(self):
+        raw = self.bundle()
+        for name in ("run/run-fixture/12:final.npy", "calibration/cal-fixture/0:span.npy"):
+            bad = self.modify(raw, lambda files: files + [(name, b"inert")])
+            with self.assertRaisesRegex(ValueError, "Unsafe bundle path"):
+                import_bundle(bad, self.imports)
+            self.assertEmpty()
+
+    def test_npz_rejects_noncanonical_colons_traversal_and_nonnumeric_arrays(self):
+        vector = self.run / "activations.npz"
+        for name in ("../12:final.npy", "C:final.npy", "C:/final.npy", "12:final.npy:stream", "12:other.npy",
+                     "01:mean.npy", "-1:mean.npy", "4097:final.npy", "12:FINAL.npy", "12:span.npy/nested.npy"):
+            with self.subTest(name=name):
+                vector.write_bytes(self.activation_archive([name]))
+                with self.assertRaisesRegex(ValueError, "Unsafe bundle path"):
+                    export_bundle(self.run, self.root / "invalid.zip")
+                self.assertFalse((self.root / "invalid.zip").exists())
+        vector.write_bytes(self.activation_archive(["12:final.npy"], dtype="|O8"))
+        with self.assertRaisesRegex(ValueError, "Object"):
+            export_bundle(self.run, self.root / "object.zip")
+        with self.assertWarns(UserWarning):
+            vector.write_bytes(self.activation_archive(["12:final.npy", "12:final.npy"]))
+        with self.assertRaisesRegex(ValueError, "Duplicate"):
+            export_bundle(self.run, self.root / "duplicate.zip")
+
+    def test_activation_npz_still_counts_uncompressed_bytes_against_total(self):
+        raw = self.activation_archive(["12:final.npy"], values=(0.,) * 4096)
+        self.assertLess(len(raw), 8192)
+        (self.run / "activations.npz").write_bytes(raw)
+        with self.assertRaisesRegex(ValueError, "expanded size|combined expanded"):
+            export_bundle(self.run, self.archive, limits=Limits(expanded_bytes=8192))
+        self.assertFalse(self.archive.exists())
+
     def test_gzipped_boundary_checkpoint_archives_remain_inert_candidates(self):
         archived = self.run / "checkpoints" / "boundary-0001.json.gz"
         archived.parent.mkdir()

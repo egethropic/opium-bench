@@ -126,13 +126,26 @@ def _run_manifest(value):
         raise ValueError("Unsupported run format version")
 
 
-def _zip_members(archive, limits):
+def _npz_member_name(name):
+    """Validate inert NPY keys without treating them as extracted filenames.
+
+    Schema-2 extraction stores '<integer layer>:<pooling>' keys inside NPZ.
+    These members are read as numeric array streams, never written to paths.
+    Outer bundle names always retain the stricter filesystem rules.
+    """
+    match = re.fullmatch(r"(0|[1-9][0-9]{0,3}):(final|mean|span)\.npy", name)
+    if match and int(match[1]) <= 4096:
+        return
+    _safe_name(name)
+
+
+def _zip_members(archive, limits, *, numeric_archive=False):
     infos = archive.infolist()
     if len(infos) > limits.members:
         raise ValueError("Too many bundle members")
     seen, total = set(), 0
     for info in infos:
-        _safe_name(info.filename)
+        (_npz_member_name if numeric_archive else _safe_name)(info.filename)
         folded = info.filename.casefold()
         if folded in seen:
             raise ValueError("Duplicate or case-colliding bundle member")
@@ -154,7 +167,7 @@ def _validate_npz(raw, limits):
     """Check numeric-only NPY headers without importing NumPy or unpickling."""
     try:
         with zipfile.ZipFile(io.BytesIO(raw)) as archive:
-            for info in _zip_members(archive, limits):
+            for info in _zip_members(archive, limits, numeric_archive=True):
                 if not info.filename.endswith(".npy"):
                     raise ValueError("Only numeric NPY arrays belong in calibration archives")
                 with archive.open(info) as stream:
@@ -228,7 +241,7 @@ def _expanded_weight(name, raw, limits):
     """Count nested compression as well as stored bytes against one total cap."""
     if name.endswith(".npz"):
         with zipfile.ZipFile(io.BytesIO(raw)) as archive:
-            return len(raw) + sum(info.file_size for info in _zip_members(archive, limits))
+            return len(raw) + sum(info.file_size for info in _zip_members(archive, limits, numeric_archive=True))
     if name.endswith((".jsonl.gz", ".json.gz")):
         with gzip.GzipFile(fileobj=io.BytesIO(raw)) as stream:
             expanded = stream.read(limits.member_bytes + 1)
