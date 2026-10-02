@@ -14,6 +14,8 @@ conditions.
 
 [User guide](docs/guide.html) · [Research workflows](docs/research-workflows.md) ·
 [Findings & limitations](docs/results.html) ·
+[v0.3 acceptance evidence](studies/research-release-v0.3/index.html) ·
+[Fresh-clone verification](studies/fresh-clone-v0.3/index.html) ·
 [Source study records](studies/initial/README.md) · [Research design](LAB_PLAN.html) ·
 [Release scope & remaining work](docs/roadmap.md)
 
@@ -45,12 +47,15 @@ measurements.*
 - **Results:** replay, continue complete saved boundaries, compare summaries,
   and import/export portable evidence. Stopped and failed attempts remain visible.
 
-These research workflows are implemented and undergoing acceptance validation;
-**their GPU acceptance checks are still pending**. The published findings below
-come from the preserved earlier protocols. They do not validate every new
-workflow. The RTX 5090 is unavailable for this acceptance pass and remains
-untested. See the [workflow guide](docs/research-workflows.md) for current
-interfaces and limitations.
+The v0.3 research workflows are implemented and accepted within the
+[bounded RTX 4090 acceptance coverage](studies/research-release-v0.3/index.html).
+This checks the recorded execution paths, not semantic efficacy or every possible
+setting. A separate [fresh-clone first run](studies/fresh-clone-v0.3/README.md)
+also passed, reusing existing dependencies and cached weights; it did not test
+a new dependency installation or model download. The [validation ledger](docs/validation.md)
+records final release-check status.
+The RTX 5090 was unavailable and remains untested. See the
+[workflow guide](docs/research-workflows.md) for current interfaces and limitations.
 
 The browser has no build step, CDN dependency, or cloud inference requirement.
 The local service listens on loopback. Each rig runs its own installation.
@@ -251,6 +256,71 @@ percentages. Even a separately fitted readout can overlap the intervention and
 move directly when a vector is added. Compare dose, actual edit magnitude,
 next-token changes, task accuracy, and voluntary choices rather than treating
 one graph as proof of a state. See the [guide](docs/guide.html) for details.
+
+## Research workflow acceptance: v0.3
+
+The [acceptance archive](studies/research-release-v0.3/index.html) records
+**10 stage attempts, 35 referenced run records and three calibration bundles**,
+including the **16 completed main-protocol cases** below, with evidence for every
+planned stage. The 35 records also retain setup failures and lifecycle stops;
+they are not 35 successful behavioral episodes. These engineering checks are separate from
+the original **54 + 54 primary episodes** below; their totals are not pooled.
+
+| Completed main protocol | Cases | Correct / assigned tasks | Voluntary aux calls | Generated tokens (reasoning) |
+|---|---:|---:|---:|---:|
+| Qwen3-4B BF16, repaired attempt | 14 / 14 | 18 / 28 | 0 | 5,864 (2,755) |
+| Qwen3.8-27B NF4, thinking subset | 2 / 2 | 4 / 4 | 0 | 1,047 (489) |
+
+Every standard direct 4B case answered both tasks correctly; every hard-task
+case scored 0/2. In the single 4B thinking pair, sham scored 2/2 while active
+exhausted its 2,048-token budget and scored 0/2. This is a bounded, single-seed
+observation at an intervention setting outside the selected operating range,
+not evidence of sensation or a general treatment effect. Neither model made a
+voluntary auxiliary call, so these runs **do not validate paid auxiliary presses
+on the GPU**.
+
+**The research calibration selected dose zero** from the frozen 0 / 0.25 grid;
+no tested nonzero dose met its numerical selection bounds. The unchanged 0.25
+cases are engineering stress checks. Held-out text classification overlapped
+strongly across the concept labels, and transfer from mean-pooled extraction
+to generation remains unvalidated. All **four sham continuations** reached the
+16-token limit and remain **unrated**. The separate 27B subset used its matching
+pilot calibration, not the 4B research bundle.
+
+The public archive exposes condition-linked prompts and continuations. Ratings
+made after reviewing that evidence are **retrospective and unblinded**, even
+though the separate scoring key is omitted. Valid blinded ratings require a
+separate distribution of scoring sheets and raters who have not seen the
+condition evidence.
+
+The archive also records an isolated diagnostic with an unvalidated criterion
+(ineligible for a discovery interpretation), token-clock yoking, complete-boundary
+pause/resume and both branch policies, and a portable export/import round trip
+for replay. The first 4B protocol attempt's **14 setup failures generated zero
+model tokens**; its interrupted-driver recovery record remains separate from the
+repaired attempt. The failed first portable attempt is likewise retained beside
+the corrected successful attempt. None is silently discarded or counted as a
+behavioral observation.
+
+[Read stage outcomes, limitations and evidence](studies/research-release-v0.3/index.html) ·
+[Verify the archive or reproduce its checks](studies/research-release-v0.3/README.md)
+
+The separate [fresh-clone verification](studies/fresh-clone-v0.3/index.html)
+completed all six planned steps from clean source commit
+`29a79fde6d1372d7f32aad61f5fd1e9b461a52cb`, with new data/cache namespaces and
+the existing 4B environment and pinned cached weights. Its two direct active/sham
+cases completed **4/4 tasks in 394 generated tokens, with zero voluntary aux
+calls**. The exact frozen 160-row extraction produced a new **unvalidated**
+research bundle; no independent semantic ratings were performed, and its inherited
+0.25 setting was an engineering check.
+
+The predeclared sham run was exported and imported over HTTP through a second
+local service. Manifest, summary, conversation, events and parent events matched
+exactly; replay stayed model-free. This verifies the documented first-run and
+evidence-transfer path with reused dependencies, not a clean-machine install,
+imported-model continuation or a browser-upload test. These two cases remain
+separate from both the 16 main acceptance cases and the historical studies.
+[Review the supplemental plan, receipts and limits](studies/fresh-clone-v0.3/README.md).
 
 ## Results: Qwen3-4B
 
@@ -468,7 +538,8 @@ Run validation locally with the GPU environment's packages installed; these
 unit tests do not download checkpoints or require a loaded GPU model:
 
 ```bash
-"$OPIUM_STORAGE/venv/bin/python" -m unittest discover -s tests -v
+mkdir -p "$OPIUM_STORAGE/test-tmp"
+TMPDIR="$OPIUM_STORAGE/test-tmp" "$OPIUM_STORAGE/venv/bin/python" -m unittest discover -s tests -v
 python3 launch_lab.py --help
 python3 run_lab_experiments.py --help
 python3 run_lab_study.py --help
@@ -476,10 +547,14 @@ python3 run_research_protocol.py --help
 python3 prepare_runtime.py --help
 ```
 
-The [validation record](docs/validation.md) preserves the earlier release's
-tested environment and review-only, replay, download and evidence-integrity
-checks. New research workflows add local fixture tests; their GPU acceptance
-results are pending and are separate from that historical record.
+Keep `OPIUM_STORAGE` on the chosen large drive (for example D: under WSL),
+including this test scratch directory. Run the suite with model work stopped to
+avoid competing for machine resources.
+
+The [validation record](docs/validation.md) separates historical tests, current
+local fixtures, completed bounded 4B/27B GPU acceptance and the supplemental
+fresh-clone workflow. It records failed validation attempts as well as successful
+checks; consult it for final suite and release status.
 
 An optional browser fixture check is available with Playwright and a browser
 installed separately: `node tests/ui_smoke.cjs`. It starts an isolated local

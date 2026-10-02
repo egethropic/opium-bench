@@ -4,12 +4,13 @@ Opium Bench runs locally on each rig. Use the browser for model loading,
 calibration, conversation, intervention design and evidence review; use the
 research CLI to freeze and execute a complete controlled matrix.
 
-The workflows below describe implemented interfaces. **GPU acceptance of these
-new research workflows is still pending.** CPU fixture tests exercise their
-validation, accounting and lifecycle behavior. The published
-[4B and 27B findings](results.html) belong to the recorded earlier protocols;
-they are not results from these new templates. An RTX 5090 is unavailable for
-this acceptance pass and has not been validated.
+The workflows below describe implemented interfaces. A separate
+[bounded 4B/27B acceptance pass](../studies/research-release-v0.3/index.html)
+completed on the RTX 4090, alongside CPU fixtures for validation, accounting and
+lifecycle behavior. Its engineering scope does not validate every template or
+establish semantic efficacy. The earlier [4B and 27B findings](results.html)
+retain their own protocols and denominators. An RTX 5090 was unavailable and
+has not been validated.
 
 ## 1. Choose storage and prepare a runtime
 

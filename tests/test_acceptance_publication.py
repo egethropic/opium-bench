@@ -103,7 +103,12 @@ class PublicationTests(unittest.TestCase):
         self.assertEqual(run['parent_events'][0]['content'], 'original parent')
 
     def test_administrative_redaction_is_distinct_and_private_key_is_omitted(self):
-        self.calibration(); stage = self.stage(details={'calibration_id':'cal-fixture'})
+        calibration = self.calibration(); stage = self.stage(details={'calibration_id':'cal-fixture'})
+        # Omitting the key cannot blind readers who can join public sample text.
+        sample = {'blind_id': 'a', 'prompt': 'Describe the scene.', 'continuation': 'The room is quiet.', 'ratings': {'joy': None}}
+        continuation = {'prompt': sample['prompt'], 'continuation': sample['continuation'], 'condition': 'zero'}
+        (calibration/'scoring-sheet.json').write_bytes(encode({'samples': [sample]}))
+        (calibration/'continuations.json').write_bytes(encode([continuation]))
         (stage/'extra.json').write_bytes(encode({'csrf': 'private-secret', 'output': '/mnt/d/owner/private'}))
         (stage/'admission.json').write_bytes(encode({'previous_session': 'unrelated text'}))
         self.publish([stage]); output = self.root/'publication'
@@ -114,6 +119,18 @@ class PublicationTests(unittest.TestCase):
         self.assertNotIn('private-secret', gzip.decompress((output/admin['file']).read_bytes()).decode())
         self.assertFalse(next(r for r in records if r.get('source','').endswith('/admission.json'))['published'])
         self.assertFalse((output/'calibrations/cal-fixture/scoring-key.json').exists())
+        omission = next(r for r in records if r.get('source','').endswith('/scoring-key.json'))
+        self.assertIn('does not preserve public blinding', omission['reason'])
+        public_calibration = output/'calibrations/cal-fixture'
+        published_sample = json.loads((public_calibration/'scoring-sheet.json').read_text())['samples'][0]
+        matching = [r for r in json.loads((public_calibration/'continuations.json').read_text())
+            if (r['prompt'], r['continuation']) == (published_sample['prompt'], published_sample['continuation'])]
+        self.assertEqual([r['condition'] for r in matching], ['zero'])
+        for filename in ('README.md', 'index.html'):
+            rendered = (output/filename).read_text()
+            self.assertIn('Conditions are recoverable by matching public scoring-sheet samples to published continuations', rendered)
+            self.assertIn('unblinded/retrospective', rendered)
+            self.assertIn('independently blinded distribution and rating process is documented', rendered)
 
     def test_all_attempts_retained_and_missing_final_is_not_passed(self):
         stages=[self.stage('first',stage='protocol',status='failed'),self.stage('second',stage='protocol'),self.stage('unfinished',stage='yoke',final=False)]

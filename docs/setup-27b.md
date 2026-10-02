@@ -5,8 +5,7 @@ Use a **separate worker environment** for 27B. The original Qwen3-4B reference u
 These commands target **Linux x86_64 or WSL2, CPython 3.12, NVIDIA CUDA 12.8 PyTorch, and the C++11 ABI**. The supplied causal-conv1d wheel is specific to that combination. Native Windows, macOS, other Python/Torch versions, and other wheel builds have not been validated by these instructions. The web viewer itself still runs without GPU dependencies.
 
 The load and kernel measurements below belong to the recorded RTX 4090 setup.
-**GPU acceptance for the new research workflows is still pending.** An RTX 5090
-is unavailable for this acceptance pass and has not been tested. See the
+The new research workflow also passed a separate [two-case thinking acceptance check](../studies/research-release-v0.3/index.html): 4/4 tasks, 1,047 generated tokens (489 reasoning), zero voluntary auxiliary calls and no invalid/truncated generations. The active arm edited 147 reasoning positions while sham edits stayed zero; twelve native XML tool calls and eighteen checkpoints exercised the updated paths. This subset used its own matching 27B pilot calibration, not the new 4B research bundle. An RTX 5090 was unavailable and remains untested. See the
 [research workflow guide](research-workflows.md) for the new designer, protocol
 runner, checkpoints and evidence exchange.
 
@@ -32,6 +31,8 @@ The development RTX 4090 loaded this checkpoint entirely on the GPU with **18,57
 
 For this exact pinned NF4 profile, download preflight reserves a 20 GiB estimate plus the lab's 10 GiB free-space reserve. Changing the checkpoint or revision loses that smaller estimate; 27B IDs use the conservative 65 GiB estimate. A fresh isolated CUDA environment needs additional space beyond the model. Keep model, package, temporary, and compiler caches on a volume with room for all of them. The guard resolves actual backing volumes, combines shared-volume demands, checks managed writes and supervises the owned worker during loading and generation. In WSL, the virtual Linux disk's apparent free space does not establish that C: can grow safely. A reserve failure stops owned work with a `resource_stopped` record; it does not expand WSL or delete partially downloaded files.
 
+During release verification on this Windows/WSL host, free space on C: temporarily fell from about 24.5 GiB to 9 GiB while 27B was resident, then recovered after normal unloading. Model caches and experiment writes remained on D:. The exact system allocation responsible was not established. Keep system-drive headroom as well as space for the selected model/data drive; the lab cannot limit OS or driver allocations.
+
 ## Create the environment
 
 Run from the repository root with CPython 3.12 and its `venv` support already installed; the preparation helper does not install Python itself. Choose a storage path on a sufficiently spacious disk; `/mnt/d/` is an example for WSL. These commands create a new environment and leave the existing 4B environment intact.
@@ -39,6 +40,8 @@ Run from the repository root with CPython 3.12 and its `venv` support already in
 ```bash
 export OPIUM_27B_STORAGE=/mnt/d/opium-bench-27b
 export HF_HOME="$OPIUM_27B_STORAGE/cache/huggingface"
+export TMPDIR="$OPIUM_27B_STORAGE/tmp"
+mkdir -p "$TMPDIR"
 prepare_opium_27b() {
   python3 prepare_runtime.py \
     --environment-dir "$OPIUM_27B_STORAGE/venv" \
@@ -84,6 +87,10 @@ Add `--check-cuda` to explicitly import PyTorch and check CUDA availability,
 its CUDA 12.8 build and the required C++11 ABI, without creating tensors or
 loading a model. Exit code 2 indicates missing dependencies, version/platform
 discrepancies, a requested CUDA check failure or insufficient storage reserve.
+Keep this shell's `TMPDIR` on the selected large drive for separately invoked
+checks as well; installation helpers and the lab worker also set their own
+explicit temporary destinations.
+
 The upstream wheel records version `1.7.0` in its package metadata; its CUDA/ABI
 filename suffix is reported separately, not verified by a version match.
 Version metadata does not authenticate installed wheel contents. A pass does
@@ -115,6 +122,16 @@ checks and blinded continuation ratings; follow the
 [research calibration guide](research-calibration.md). Saving a good probe score
 does not establish that the button has a useful or detectable behavioral effect.
 Keep original and new bundles alongside their respective protocol receipts.
+
+The separate [4B fresh-clone workflow](../studies/fresh-clone-v0.3/README.md)
+passed from commit `29a79fde6d1372d7f32aad61f5fd1e9b461a52cb` with reused
+4B dependencies and cached weights: a new 160-row extraction, two direct cases
+(4/4 tasks, 394 tokens, zero voluntary aux calls), and exact HTTP export/import
+replay through a second unloaded service. It does not test 27B installation or
+qualify that fresh extraction semantically. The main 4B research-validation
+receipt selected dose zero; its unchanged 0.25 cases are engineering checks.
+Public condition metadata makes archive-based ratings retrospective and
+unblinded, even where a separate observer key is omitted.
 
 The local backend uses installed FLA and causal-conv1d packages. A small compatibility adapter maps Transformers' recurrent DeltaNet call to FLA's `fused_recurrent_gated_delta_rule`, retaining its normalization, scaling, and cache-state arguments. It does not fetch Hub kernels or modify the installed FLA namespace. A manually executed kernel check passed 38 prefill, cached-decoding, convolution, and state comparisons against the Torch reference on the development 4090. That check validates those small numerical cases; it is not a claim of whole-model output equivalence across runtimes or rigs.
 

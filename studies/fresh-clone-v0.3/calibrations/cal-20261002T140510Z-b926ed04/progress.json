@@ -1,0 +1,79 @@
+{
+  "schema_version": 2,
+  "status": "complete",
+  "corpus": {
+    "version": "authored-research-v2.0-acceptance-160-v1",
+    "sha256": "15117b0bfccfec11beeba0f9b0d15cd08f26edbc50757465e8512f64c4a5676a",
+    "splits": {
+      "train": {
+        "sha256": "e748069e76950889ea0de24e729a63bfbb7cb88a73c6f22fe013e15c5eb1cc82",
+        "rows": 40,
+        "families": 2,
+        "pairs": {
+          "pain": 10,
+          "joy": 10
+        }
+      },
+      "probe": {
+        "sha256": "e1b0e71ea5f3e8f1ced57856ca60f89bd62ee17871eee0737fbe65134991eacb",
+        "rows": 40,
+        "families": 2,
+        "pairs": {
+          "pain": 10,
+          "joy": 10
+        }
+      },
+      "selection": {
+        "sha256": "cac3282a14a9031db4d3782a25683ba8c5985ebe9027c97b077e453f2ab07e83",
+        "rows": 40,
+        "families": 2,
+        "pairs": {
+          "pain": 10,
+          "joy": 10
+        }
+      },
+      "heldout": {
+        "sha256": "c4d9509ea90a37a96e1d4cf3cfc30bb79277cce5e9938afa1740ae35f067d8af",
+        "rows": 40,
+        "families": 2,
+        "pairs": {
+          "pain": 10,
+          "joy": 10
+        }
+      }
+    }
+  },
+  "config": {
+    "schema_version": 2,
+    "preset": "research",
+    "name": "Bounded acceptance 160-row research v1",
+    "layers": [
+      12,
+      18
+    ],
+    "downstream_layer": 25,
+    "poolings": [
+      "final",
+      "mean"
+    ],
+    "probe_methods": [
+      "mean",
+      "ridge"
+    ],
+    "ridge_alphas": [
+      1.0,
+      10.0
+    ],
+    "seed": 1729,
+    "bootstrap_samples": 20,
+    "max_input_tokens": 512,
+    "continuation_tokens": 8,
+    "validation_pairs_per_concept": 1,
+    "doses": [
+      0.0,
+      0.25
+    ],
+    "max_kl": 0.5,
+    "max_relative_delta": 0.3
+  }
+}

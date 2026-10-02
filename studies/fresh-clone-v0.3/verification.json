@@ -1,0 +1,408 @@
+{
+  "schema_version": 1,
+  "kind": "opium-bench-first-run-publication",
+  "created_at": "2026-10-02T14:19:24.612106+00:00",
+  "status": "complete",
+  "source_commit": "29a79fde6d1372d7f32aad61f5fd1e9b461a52cb",
+  "source_dirty_at_admission": false,
+  "plan_sha256": "801457aac114aa600a601be6bb0837eb9b589e6334b0b63c2d82d602f390a562",
+  "plan_file_sha256": "5f7da11ebe164f01d24039bb34ea9c113de8677a423b0585e70a475de28e12c0",
+  "result_source_sha256": "a1c2043ddd9deb3cb41c829d90c64b8d7ca76a9fc2455162aa719e8cc1304d78",
+  "artifact_index_sha256": "33582af365a87e26e251803e38b814ed56a20b308b4f3ede65421f576b133743",
+  "steps": {
+    "runtime_check": {
+      "status": "complete",
+      "scope": "metadata/reserve only; no CUDA import requested"
+    },
+    "load": {
+      "status": "complete",
+      "model": {
+        "status": "loaded",
+        "fingerprint": {
+          "model_id": "Qwen/Qwen3-4B",
+          "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+          "architecture": "qwen3",
+          "adapter": "qwen3",
+          "dtype": "bfloat16",
+          "quantization": "none",
+          "layers": 36,
+          "hidden_size": 2560,
+          "transformers": "4.57.6",
+          "torch": "2.8.0+cu128",
+          "attention_implementation": "sdpa",
+          "model_config_sha256": "2640d0e4ede0545d5d9153d1f0123fc56f216d7604779a0690d436cccfd185e2",
+          "tokenizer": {
+            "class": "transformers.models.qwen2.tokenization_qwen2_fast.Qwen2TokenizerFast",
+            "backend_identity_source": "fast_backend_serialization",
+            "backend_sha256": "a63080b4b30dc861fe1b0e420c53a241304dc81aff3d9bb315e6e33e2a1ab794",
+            "chat_template_sha256": "41d5929bf73796beb66809ac700b2cf3ff81694f933e5c14d52b7fd6963c947d",
+            "special_token_ids": [
+              151643,
+              151644,
+              151645,
+              151646,
+              151647,
+              151648,
+              151649,
+              151650,
+              151651,
+              151652,
+              151653,
+              151654,
+              151655,
+              151656
+            ],
+            "bos_token_id": null,
+            "eos_token_id": 151645,
+            "pad_token_id": 151643,
+            "padding_side": "right",
+            "truncation_side": "right",
+            "clean_up_tokenization_spaces": false
+          },
+          "quantization_config": null,
+          "bitsandbytes": null
+        },
+        "fingerprint_sha256": "01a8506486be4a4189f166fb93079901fecb13f7c429219be29b7ebd17f3d67d",
+        "model_id": "Qwen/Qwen3-4B",
+        "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+        "device": "cuda",
+        "adapter": "qwen3",
+        "tool_call_format": "json",
+        "layer_count": 36,
+        "hidden_size": 2560,
+        "quantization": "none",
+        "dtype": "bfloat16",
+        "block_path": "model.layers",
+        "cache_policy": "rebuild_each_turn",
+        "profile_validation": "reference",
+        "max_position_embeddings": 40960,
+        "gpu_memory": {
+          "name": "NVIDIA GeForce RTX 4090",
+          "free_bytes": 16059990016,
+          "total_bytes": 25756565504,
+          "allocated_bytes": 8044955136,
+          "reserved_bytes": 8048869376
+        },
+        "numerical_environment": {
+          "python": "3.12.3",
+          "platform": "Linux-6.18.40.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+          "device": "cuda",
+          "cuda_runtime": "12.8",
+          "cudnn_version": 91002,
+          "deterministic_algorithms": false,
+          "cudnn_deterministic": false,
+          "cudnn_benchmark": false,
+          "cuda_matmul_allow_tf32": false,
+          "cudnn_allow_tf32": true,
+          "float32_matmul_precision": "highest",
+          "cpu_threads": 8,
+          "gpu": {
+            "name": "NVIDIA GeForce RTX 4090",
+            "compute_capability": [
+              8,
+              9
+            ],
+            "total_memory": 25756565504,
+            "multiprocessor_count": 128
+          }
+        },
+        "model_config": {
+          "_name_or_path": "Qwen/Qwen3-4B",
+          "add_cross_attention": false,
+          "architectures": [
+            "Qwen3ForCausalLM"
+          ],
+          "attention_bias": false,
+          "attention_dropout": 0.0,
+          "bad_words_ids": null,
+          "begin_suppress_tokens": null,
+          "bos_token_id": 151643,
+          "chunk_size_feed_forward": 0,
+          "cross_attention_hidden_size": null,
+          "decoder_start_token_id": null,
+          "diversity_penalty": 0.0,
+          "do_sample": false,
+          "dtype": "bfloat16",
+          "early_stopping": false,
+          "encoder_no_repeat_ngram_size": 0,
+          "eos_token_id": 151645,
+          "exponential_decay_length_penalty": null,
+          "finetuning_task": null,
+          "forced_bos_token_id": null,
+          "forced_eos_token_id": null,
+          "head_dim": 128,
+          "hidden_act": "silu",
+          "hidden_size": 2560,
+          "id2label": {
+            "0": "LABEL_0",
+            "1": "LABEL_1"
+          },
+          "initializer_range": 0.02,
+          "intermediate_size": 9728,
+          "is_decoder": false,
+          "is_encoder_decoder": false,
+          "label2id": {
+            "LABEL_0": 0,
+            "LABEL_1": 1
+          },
+          "layer_types": [
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention",
+            "full_attention"
+          ],
+          "length_penalty": 1.0,
+          "max_length": 20,
+          "max_position_embeddings": 40960,
+          "max_window_layers": 36,
+          "min_length": 0,
+          "model_type": "qwen3",
+          "no_repeat_ngram_size": 0,
+          "num_attention_heads": 32,
+          "num_beam_groups": 1,
+          "num_beams": 1,
+          "num_hidden_layers": 36,
+          "num_key_value_heads": 8,
+          "num_return_sequences": 1,
+          "output_attentions": false,
+          "output_hidden_states": false,
+          "output_scores": false,
+          "pad_token_id": null,
+          "prefix": null,
+          "problem_type": null,
+          "pruned_heads": {},
+          "remove_invalid_values": false,
+          "repetition_penalty": 1.0,
+          "return_dict": true,
+          "return_dict_in_generate": false,
+          "rms_norm_eps": 1e-06,
+          "rope_scaling": null,
+          "rope_theta": 1000000,
+          "sep_token_id": null,
+          "sliding_window": null,
+          "suppress_tokens": null,
+          "task_specific_params": null,
+          "temperature": 1.0,
+          "tf_legacy_loss": false,
+          "tie_encoder_decoder": false,
+          "tie_word_embeddings": true,
+          "tokenizer_class": null,
+          "top_k": 50,
+          "top_p": 1.0,
+          "torchscript": false,
+          "transformers_version": "4.57.6",
+          "typical_p": 1.0,
+          "use_bfloat16": false,
+          "use_cache": true,
+          "use_sliding_window": false,
+          "vocab_size": 151936
+        },
+        "source_sha256": {
+          "runtime.py": "bff46889d9c9a2a60f7b87f84fb3294c3a4e5563bec545051934707519a1ce68",
+          "calibration_data.py": "0b3e3d3933880ff1f1c0b65775e5024ffa178409f4559364b68f021b0338ffd7"
+        }
+      }
+    },
+    "extract": {
+      "status": "complete",
+      "calibration_id": "cal-20261002T140510Z-b926ed04",
+      "independent_semantic_ratings": "not_performed",
+      "source_calibration_id": null,
+      "corpus_rows": 160,
+      "semantic_validation": "not_performed"
+    },
+    "pair": {
+      "status": "complete",
+      "research_job_id": "research-20261002T140534Z-4df9604d",
+      "planned_episodes": 2,
+      "run_ids": [
+        "run-20261002T140537Z-5d6c61d2",
+        "run-20261002T140537Z-5b0b4e8c"
+      ],
+      "expansion_sha256": "eb3146dc932f0fa21560b4c076fbf117c708e0b0e777991bd1a19174d72b9359"
+    },
+    "http_export": {
+      "status": "complete",
+      "run_id": "run-20261002T140537Z-5b0b4e8c",
+      "bytes": 6748755,
+      "sha256": "6a7ead70526e40c63b2efc2c3c98ffe7ef0aa38cac875c3fe486056ce2be1d84"
+    },
+    "http_import_replay": {
+      "status": "complete",
+      "run_id": "run-20261002T140537Z-5b0b4e8c",
+      "compared_fields": [
+        "manifest",
+        "summary",
+        "conversation",
+        "events",
+        "parent_events"
+      ],
+      "report_bytes": 116325,
+      "replay_only": true,
+      "worker_unloaded": true
+    }
+  },
+  "runs": [
+    {
+      "id": "run-20261002T140537Z-5b0b4e8c",
+      "case": "sham-tokens",
+      "status": "complete",
+      "correct": 2,
+      "assigned": 2,
+      "tokens": 197,
+      "token_limit": 768,
+      "voluntary_calls": 0,
+      "token_events": 197
+    },
+    {
+      "id": "run-20261002T140537Z-5d6c61d2",
+      "case": "active-tokens",
+      "status": "complete",
+      "correct": 2,
+      "assigned": 2,
+      "tokens": 197,
+      "token_limit": 768,
+      "voluntary_calls": 0,
+      "token_events": 197
+    }
+  ],
+  "replay_comparison": {
+    "manifest": true,
+    "summary": true,
+    "conversation": true,
+    "events": true,
+    "parent_events": true
+  },
+  "missing_evidence": [],
+  "bounds": {
+    "corpus_rows": 160,
+    "planned_cases": 2,
+    "tasks_per_case": 2,
+    "total_generated_token_cap": 1536,
+    "max_http_bundle_bytes": 134217728,
+    "retries": 0,
+    "downloads": false,
+    "installs": false
+  },
+  "reused_environment": true,
+  "reused_model_cache": true,
+  "dependency_installation_tested": false,
+  "model_download_tested": false,
+  "semantic_validation_performed": false,
+  "limitations": [
+    "One seed, two cases, fresh unvalidated extraction; engineering workflow evidence only.",
+    "The .25 intervention is inherited from the frozen engineering plan, not a selected safe or effective semantic dose.",
+    "No independent continuation scores, powered behavioral claim, sensation claim, or full installation validation.",
+    "Fresh data and cache namespaces reuse existing pinned cached weights and the existing 4B environment; this is not a clean dependency installation."
+  ],
+  "services": [
+    {
+      "command": [
+        "[local path redacted]",
+        "-B",
+        "[local path redacted]",
+        "--data-dir",
+        "[local path redacted]",
+        "--cache-dir",
+        "[local path redacted]",
+        "--python",
+        "[local path redacted]",
+        "--port",
+        "8781"
+      ],
+      "exit_code": 0,
+      "log_bytes": 221,
+      "omitted_log_bytes": 0,
+      "log_error": null
+    },
+    {
+      "command": [
+        "[local path redacted]",
+        "-B",
+        "[local path redacted]",
+        "--data-dir",
+        "[local path redacted]",
+        "--cache-dir",
+        "[local path redacted]",
+        "--python",
+        "[local path redacted]",
+        "--port",
+        "8780"
+      ],
+      "exit_code": 0,
+      "log_bytes": 221,
+      "omitted_log_bytes": 0,
+      "log_error": null
+    }
+  ],
+  "error": null,
+  "omitted_trees": [
+    {
+      "source": "source-cache",
+      "published": false,
+      "reason": "Model/cache symlink namespace not traversed or copied; cache-layout receipt records its reuse."
+    },
+    {
+      "source": "replay-cache",
+      "published": false,
+      "reason": "Model/cache symlink namespace not traversed or copied; cache-layout receipt records its reuse."
+    },
+    {
+      "source": "source-data/cuda-cache",
+      "published": false,
+      "reason": "Runtime cache, temporary or headroom tree not traversed; indexed file claims are separately identified."
+    },
+    {
+      "source": "source-data/resource-headroom",
+      "published": false,
+      "reason": "Runtime cache, temporary or headroom tree not traversed; indexed file claims are separately identified."
+    },
+    {
+      "source": "source-data/resource-stops",
+      "published": false,
+      "reason": "Runtime cache, temporary or headroom tree not traversed; indexed file claims are separately identified."
+    },
+    {
+      "source": "source-data/tmp",
+      "published": false,
+      "reason": "Runtime cache, temporary or headroom tree not traversed; indexed file claims are separately identified."
+    },
+    {
+      "source": "replay-data/tmp",
+      "published": false,
+      "reason": "Runtime cache, temporary or headroom tree not traversed; indexed file claims are separately identified."
+    }
+  ]
+}

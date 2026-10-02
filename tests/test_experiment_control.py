@@ -1,4 +1,5 @@
 """Bounded controller tests: fake processes only, no models or real controls."""
+import errno
 import json
 from pathlib import Path
 import subprocess
@@ -8,9 +9,9 @@ import threading
 import time
 from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
-from experiment_control import ExperimentController
+from experiment_control import ExperimentController, _read_object
 
 
 def write_json(path, value):
@@ -19,11 +20,16 @@ def write_json(path, value):
     temporary.replace(path)
 
 
-def until(predicate, timeout=2):
+def until(predicate, timeout=10):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
-        if predicate():
-            return
+        try:
+            if predicate():
+                return
+        except FileNotFoundError:
+            # Polls can precede file creation or observe the replacement gap on
+            # a mounted filesystem. Persistent absence still fails at deadline.
+            pass
         time.sleep(.005)
     raise AssertionError("Timed out waiting for mocked controller state")
 
@@ -39,7 +45,7 @@ class FakeProcess:
         return self.returncode
 
     def wait(self):
-        if not self.done.wait(3):
+        if not self.done.wait(15):
             raise AssertionError("Fake process was not finished by the test")
         return self.returncode
 
@@ -48,6 +54,50 @@ class FakeProcess:
             write_json(self.directory / "manifest.json", {"status": status, "manual_control": True})
         self.returncode = code
         self.done.set()
+
+
+class ControllerFileReadTests(unittest.TestCase):
+    def test_transient_mounted_filesystem_read_reopens_manifest(self):
+        path = Mock()
+        path.read_text.side_effect = [OSError(getattr(errno, "ENODATA", 61), "No data available"), '{"status":"complete"}']
+        with patch("experiment_control.time.sleep") as sleep:
+            self.assertEqual(_read_object(path), {"status": "complete"})
+        self.assertEqual(path.read_text.call_count, 2)
+        sleep.assert_called_once_with(.005)
+
+    def test_persistent_no_data_is_bounded_and_reported(self):
+        path = Mock()
+        path.read_text.side_effect = OSError(getattr(errno, "ENODATA", 61), "No data available")
+        with patch("experiment_control.time.sleep") as sleep, self.assertRaises(OSError) as caught:
+            _read_object(path)
+        self.assertEqual(caught.exception.errno, getattr(errno, "ENODATA", 61))
+        self.assertEqual(path.read_text.call_count, 3)
+        self.assertEqual(sleep.call_count, 2)
+
+    def test_other_read_and_parse_errors_are_not_retried(self):
+        for failure in (PermissionError(errno.EACCES, "Permission denied"),
+                        OSError(errno.EIO, "I/O error")):
+            with self.subTest(failure=failure):
+                path = Mock()
+                path.read_text.side_effect = failure
+                with patch("experiment_control.time.sleep") as sleep, self.assertRaises(type(failure)):
+                    _read_object(path)
+                self.assertEqual(path.read_text.call_count, 1)
+                sleep.assert_not_called()
+        path = Mock()
+        path.read_text.return_value = "{broken"
+        with patch("experiment_control.time.sleep") as sleep, self.assertRaises(json.JSONDecodeError):
+            _read_object(path)
+        self.assertEqual(path.read_text.call_count, 1)
+        sleep.assert_not_called()
+
+    def test_absent_manifest_still_returns_none(self):
+        path = Mock()
+        path.read_text.side_effect = FileNotFoundError()
+        with patch("experiment_control.time.sleep") as sleep:
+            self.assertIsNone(_read_object(path))
+        self.assertEqual(path.read_text.call_count, 1)
+        sleep.assert_not_called()
 
 
 class ExperimentControlTests(unittest.TestCase):
@@ -62,13 +112,24 @@ class ExperimentControlTests(unittest.TestCase):
         self.alias.symlink_to(sys.executable)
         self.controller = ExperimentController(self.reader, self.alias, self.root / "vectors", self.root / "hf")
         self.controller._poll_interval = .005
-        self.controller._stop_timeout = .5
-        self.controller._startup_timeout = .5
+        # These are coordination allowances, not timeout-behavior assertions.
+        # Mounted Windows scratch storage can be slow while other work runs.
+        # Tests of expiry below still set their own short, explicit deadlines.
+        self.controller._stop_timeout = 5
+        self.controller._startup_timeout = 5
         self.calls = []
         self.processes = []
         self.create_manifest = True
         self.create_control = True
         self.addCleanup(self.finish_all)
+
+    def read_control(self, directory=None):
+        # Observe the same completed write boundary as the real viewer. An
+        # unlocked read can race replacement on mounted Windows filesystems,
+        # and can see control.json before the matching event is appended.
+        with self.reader.lock:
+            selected = self.reader.directory if directory is None else directory
+            return json.loads((selected / "control.json").read_text())
 
     def finish_all(self):
         for process in self.processes:
@@ -128,12 +189,12 @@ class ExperimentControlTests(unittest.TestCase):
         (self.old / "episodes.jsonl").write_text("untouched\n")
         with patch("experiment_control.subprocess.Popen", side_effect=self.fake_popen):
             self.controller.restart()
-            until(lambda: json.loads((self.old / "control.json").read_text()).get("stop_requested"))
+            until(lambda: self.read_control(self.old).get("stop_requested"))
             second = self.controller.restart()
             self.assertFalse(second["accepted"])
             self.assertTrue(second["restart_pending"])
             self.assertFalse(self.calls)
-            control = json.loads((self.old / "control.json").read_text())
+            control = self.read_control(self.old)
             self.assertEqual((control["pain_dose"], control["opium_requests"], control["revision"]), (2.5, 3, 10))
             self.assertEqual(control["custom"], {"keep": True})
             self.assertEqual(control["stop_reason"], "restart")
@@ -182,7 +243,7 @@ class ExperimentControlTests(unittest.TestCase):
             self.assertFalse(self.controller.status()["restart_pending"])
             self.assertIn("not killed", self.controller.status()["launch_error"])
             self.assertFalse(self.calls)
-            self.assertTrue(json.loads((self.old / "control.json").read_text())["stop_requested"])
+            self.assertTrue(self.read_control(self.old)["stop_requested"])
             write_json(self.old / "manifest.json", {"status": "complete"})
             self.assertTrue(self.controller.restart()["accepted"])
             until(lambda: self.controller.status()["state"] == "running")
@@ -216,14 +277,14 @@ class ExperimentControlTests(unittest.TestCase):
         with patch("experiment_control.subprocess.Popen", side_effect=self.fake_popen):
             for index, expected in enumerate(("off", "off", "on", "on")):
                 if index == 2:
-                    control = json.loads((self.reader.directory / "control.json").read_text())
+                    control = self.read_control()
                     control["aux_enabled"] = True
                     write_json(self.reader.directory / "control.json", control)
                 self.controller.restart()
                 until(lambda: len(self.calls) == index + 1 and self.controller.status()["state"] == "running")
                 argv = self.calls[index][0]
                 self.assertEqual(argv[argv.index("--initial-aux-effect") + 1], expected)
-                fresh = json.loads((self.reader.directory / "control.json").read_text())
+                fresh = self.read_control()
                 self.assertEqual(fresh, {"aux_enabled": expected == "on", "pain_dose": 0,
                                         "opium_requests": 0, "revision": 0})
                 self.assertEqual(self.controller.status()["initial_aux_enabled"], expected == "on")
@@ -235,7 +296,7 @@ class ExperimentControlTests(unittest.TestCase):
         write_json(self.old / "control.json", {"aux_enabled": True, "revision": 0})
         with patch("experiment_control.subprocess.Popen", side_effect=self.fake_popen):
             self.controller.restart()
-            until(lambda: json.loads((self.old / "control.json").read_text()).get("stop_requested"))
+            until(lambda: self.read_control(self.old).get("stop_requested"))
             with self.reader.lock:
                 control = json.loads((self.old / "control.json").read_text())
                 control["aux_enabled"] = False
@@ -252,7 +313,7 @@ class ExperimentControlTests(unittest.TestCase):
         self.create_control = False
         with patch("experiment_control.subprocess.Popen", side_effect=self.fake_popen):
             self.controller.restart()
-            until(lambda: len(self.processes) == 1)
+            until(lambda: len(self.processes) == 1 and self.reader.directory == self.processes[0].directory)
             self.assertFalse((self.reader.directory / "control.json").exists())
             self.processes[0].finish(code=2, status="failed")
             until(lambda: self.controller.status()["state"] == "failed")
@@ -291,13 +352,13 @@ class ExperimentControlTests(unittest.TestCase):
         with patch("experiment_control.subprocess.Popen", side_effect=self.fake_popen):
             accepted = self.controller.stop()
             self.assertTrue(accepted["accepted"])
-            until(lambda: json.loads((self.old / "control.json").read_text()).get("stop_requested"))
+            until(lambda: self.read_control(self.old).get("stop_requested"))
             repeated = self.controller.stop()
             self.assertTrue(repeated["accepted"])
             self.assertTrue(repeated["already_pending"])
             self.assertTrue(repeated["stop_pending"])
             self.assertFalse(self.controller.restart()["accepted"])
-            control = json.loads((self.old / "control.json").read_text())
+            control = self.read_control(self.old)
             self.assertEqual(control["stop_reason"], "user_stop")
             self.assertEqual(control["revision"], 8)
             for key in ("aux_enabled", "pain_dose", "opium_requests", "custom"):
@@ -327,14 +388,14 @@ class ExperimentControlTests(unittest.TestCase):
         self.create_manifest = False
         with patch("experiment_control.subprocess.Popen", side_effect=self.fake_popen):
             self.controller.restart()
-            until(lambda: len(self.calls) == 1)
+            until(lambda: len(self.calls) == 1 and self.reader.directory != self.old)
             stopped = self.controller.stop()
             self.assertFalse(stopped["accepted"])
             self.assertEqual(stopped["reason"], "restart_pending")
             self.assertFalse(stopped["stop_pending"])
             self.assertTrue(stopped["restart_pending"])
             self.assertEqual(len(self.calls), 1)
-            self.assertNotIn("stop_requested", json.loads((self.reader.directory / "control.json").read_text()))
+            self.assertNotIn("stop_requested", self.read_control())
             write_json(self.reader.directory / "manifest.json", {"status": "running", "manual_control": True})
             until(lambda: self.controller.status()["state"] == "running")
 
@@ -344,7 +405,7 @@ class ExperimentControlTests(unittest.TestCase):
             until(lambda: self.controller.status()["state"] == "running")
             current = self.reader.directory
             self.controller.stop()
-            until(lambda: json.loads((current / "control.json").read_text()).get("stop_reason") == "user_stop")
+            until(lambda: self.read_control(current).get("stop_reason") == "user_stop")
             write_json(current / "manifest.json", {"status": "stopped"})
             time.sleep(.025)
             self.assertTrue(self.controller.status()["stop_pending"])
@@ -370,7 +431,7 @@ class ExperimentControlTests(unittest.TestCase):
             self.controller.restart()
             until(lambda: self.controller.status()["state"] == "running")
             self.controller.stop()
-            until(lambda: json.loads((self.reader.directory / "control.json").read_text()).get("stop_reason") == "user_stop")
+            until(lambda: self.read_control().get("stop_reason") == "user_stop")
             self.processes[0].finish(code=5, status="failed")
             until(lambda: self.controller.status()["state"] == "failed")
             self.assertFalse(self.controller.status()["stop_pending"])
@@ -385,7 +446,7 @@ class ExperimentControlTests(unittest.TestCase):
             until(lambda: self.controller.status()["state"] == "failed")
             self.assertIn("not killed", self.controller.status()["launch_error"])
             self.assertFalse(self.controller.status()["stop_pending"])
-            self.assertEqual(json.loads((self.old / "control.json").read_text())["stop_reason"], "user_stop")
+            self.assertEqual(self.read_control(self.old)["stop_reason"], "user_stop")
             self.assertFalse(self.calls)
 
 

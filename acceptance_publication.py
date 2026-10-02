@@ -28,6 +28,11 @@ ID = re.compile(r'^[A-Za-z0-9][A-Za-z0-9_.-]{0,159}$')
 MAX_FILE = 128 * 1024**2
 MAX_TOTAL = 1024**3
 PRIVATE_KEYS = {'csrf', 'authorization', 'access_token', 'refresh_token', 'api_key', 'password', 'secret'}
+RATING_KEY_OMISSION = ('Observer condition-key file omitted; this does not preserve public blinding. '
+    'Conditions remain recoverable from published continuations.')
+PUBLIC_RATING_LIMIT = ('Conditions are recoverable by matching public scoring-sheet samples to published continuations, '
+    'even when the private condition-key file is omitted. Ratings made from this archive are unblinded/retrospective '
+    'unless a separate, independently blinded distribution and rating process is documented.')
 LOCAL_PATH = re.compile(r'(?<![A-Za-z0-9])(?:[A-Za-z]:[\\/]|/(?:mnt|home|Users|tmp|var|opt|usr|root|media)/)[^\n\r"\'<>]*')
 
 
@@ -96,7 +101,7 @@ def _verify_bound_files(records, root, collector):
         if len(raw) != record['bytes'] or sha(raw) != record['sha256']:
             raise ValueError('Bound research artifact changed')
         collector.archive(Path(root)/relative, root, relative.as_posix(), scientific=True,
-            omit_reason='Observer condition key retained separately to preserve blinded rating workflow.' if relative.name == 'scoring-key.json' else None)
+            omit_reason=RATING_KEY_OMISSION if relative.name == 'scoring-key.json' else None)
 
 
 def _references(value, refs):
@@ -315,7 +320,7 @@ def collect(stage_dirs, data_dir, plan, collector):
             for path in _managed_files(directory, kind):
                 relative = path.relative_to(directory).as_posix()
                 record = collector.archive(path, data_dir, f'{kind}/{identifier}/{relative}',
-                    omit_reason='Observer condition key retained separately to preserve blinded rating workflow.' if path.name == 'scoring-key.json' else None,
+                    omit_reason=RATING_KEY_OMISSION if path.name == 'scoring-key.json' else None,
                     scientific=True)
                 raw = collector.read(path, data_dir)
                 unpacked = _gunzip(raw) if path.name.endswith('.gz') else raw
@@ -384,6 +389,7 @@ def collect(stage_dirs, data_dir, plan, collector):
         public_copy_policy='Scientific run/calibration/checkpoint files preserve original bytes and bound identities; JSONL traces may be losslessly gzip-compressed. Original machine paths in those files are retained. Administrative stage copies redact machine paths and control credentials, with original and published hashes recorded separately. This publication is a review archive, not an automatically installed continuation.',
         limitations=['One seed, small task budgets and a deterministic 160-row subset are not a powered scientific study.',
             'Probe discrimination is distinct from causal output changes. Independent semantic ratings remain unscored unless an explicit rating record is supplied.',
+            PUBLIC_RATING_LIMIT,
             'A numerical validation status applies only to its enumerated tests. A selected dose of zero endorses no tested nonzero dose within the stated bounds.',
             'The frozen .25 engineering cases are not tuned to the validation result and must not be described as a validated operating-dose study.',
             'Tokens, decisions and correlated diagnostic contexts are not independent experimental replicates.',
@@ -529,6 +535,8 @@ page reports cross-concept overlap and generation-transfer limits. Null ratings
 are unscored, not zero scores; short sham-only continuations cannot estimate a
 nonzero semantic treatment effect. Neither a button choice nor its absence
 establishes sensation, relief or dependence.
+
+{PUBLIC_RATING_LIMIT}
 
 {report['hardware_scope']}
 

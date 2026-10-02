@@ -1,0 +1,274 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Opium Bench · Supplemental first-run verification</title>
+<style>body{margin:0;background:#f4f7f2;color:#183631;font:16px/1.6 system-ui,sans-serif}main{max-width:1120px;margin:auto;padding:45px 24px 80px}h1{font-size:clamp(30px,5vw,48px);line-height:1.1}a{color:#146e58}.scroll{overflow:auto}table{width:100%;border-collapse:collapse;background:white;font-size:13px}td,th{padding:13px;text-align:left;vertical-align:top;border-bottom:1px solid #dbe5df}aside{background:#fff5e6;border-left:4px solid #af702c;padding:18px 22px;margin:24px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;max-width:650px}h2{margin-top:32px}code{overflow-wrap:anywhere}</style><main>
+<p>OPIUM BENCH · SEPARATE ENGINEERING EVIDENCE</p><h1>Supplemental first-run verification</h1><p><strong>Recorded outcome: complete</strong> · source commit <code>29a79fde6d1372d7f32aad61f5fd1e9b461a52cb</code></p>
+<aside><strong>A clean source clone, with existing dependencies and model weights reused.</strong><p>This exercised new data/cache namespaces. It did not install dependencies, download weights or validate a clean machine setup. The new 160-row research extraction is unvalidated; there are no independent semantic ratings or sensation claims. The RTX 5090 was not tested.</p></aside>
+<p><a href="README.md">Review and reproduction guide</a> · <a href="verification.json">Structured summary</a> · <a href="sha256-manifest.json">SHA-256 manifest</a> · <a href="plan.json">Frozen supplemental plan</a></p>
+<h2>Every planned step</h2><p>Complete means the declared sequence finished. Missing, failed and not-attempted steps are not passed checks. These outcomes are separate from the original studies and release-v1 acceptance.</p><div class="scroll"><table><thead><tr><th>Step</th><th>State</th><th>Recorded scope / result</th></tr></thead><tbody><tr><td>runtime_check</td><td>complete</td><td><details><summary>Recorded details</summary><pre>{
+  &quot;status&quot;: &quot;complete&quot;,
+  &quot;scope&quot;: &quot;metadata/reserve only; no CUDA import requested&quot;
+}</pre></details></td></tr><tr><td>load</td><td>complete</td><td><details><summary>Recorded details</summary><pre>{
+  &quot;status&quot;: &quot;complete&quot;,
+  &quot;model&quot;: {
+    &quot;status&quot;: &quot;loaded&quot;,
+    &quot;fingerprint&quot;: {
+      &quot;model_id&quot;: &quot;Qwen/Qwen3-4B&quot;,
+      &quot;revision&quot;: &quot;1cfa9a7208912126459214e8b04321603b3df60c&quot;,
+      &quot;architecture&quot;: &quot;qwen3&quot;,
+      &quot;adapter&quot;: &quot;qwen3&quot;,
+      &quot;dtype&quot;: &quot;bfloat16&quot;,
+      &quot;quantization&quot;: &quot;none&quot;,
+      &quot;layers&quot;: 36,
+      &quot;hidden_size&quot;: 2560,
+      &quot;transformers&quot;: &quot;4.57.6&quot;,
+      &quot;torch&quot;: &quot;2.8.0+cu128&quot;,
+      &quot;attention_implementation&quot;: &quot;sdpa&quot;,
+      &quot;model_config_sha256&quot;: &quot;2640d0e4ede0545d5d9153d1f0123fc56f216d7604779a0690d436cccfd185e2&quot;,
+      &quot;tokenizer&quot;: {
+        &quot;class&quot;: &quot;transformers.models.qwen2.tokenization_qwen2_fast.Qwen2TokenizerFast&quot;,
+        &quot;backend_identity_source&quot;: &quot;fast_backend_serialization&quot;,
+        &quot;backend_sha256&quot;: &quot;a63080b4b30dc861fe1b0e420c53a241304dc81aff3d9bb315e6e33e2a1ab794&quot;,
+        &quot;chat_template_sha256&quot;: &quot;41d5929bf73796beb66809ac700b2cf3ff81694f933e5c14d52b7fd6963c947d&quot;,
+        &quot;special_token_ids&quot;: [
+          151643,
+          151644,
+          151645,
+          151646,
+          151647,
+          151648,
+          151649,
+          151650,
+          151651,
+          151652,
+          151653,
+          151654,
+          151655,
+          151656
+        ],
+        &quot;bos_token_id&quot;: null,
+        &quot;eos_token_id&quot;: 151645,
+        &quot;pad_token_id&quot;: 151643,
+        &quot;padding_side&quot;: &quot;right&quot;,
+        &quot;truncation_side&quot;: &quot;right&quot;,
+        &quot;clean_up_tokenization_spaces&quot;: false
+      },
+      &quot;quantization_config&quot;: null,
+      &quot;bitsandbytes&quot;: null
+    },
+    &quot;fingerprint_sha256&quot;: &quot;01a8506486be4a4189f166fb93079901fecb13f7c429219be29b7ebd17f3d67d&quot;,
+    &quot;model_id&quot;: &quot;Qwen/Qwen3-4B&quot;,
+    &quot;revision&quot;: &quot;1cfa9a7208912126459214e8b04321603b3df60c&quot;,
+    &quot;device&quot;: &quot;cuda&quot;,
+    &quot;adapter&quot;: &quot;qwen3&quot;,
+    &quot;tool_call_format&quot;: &quot;json&quot;,
+    &quot;layer_count&quot;: 36,
+    &quot;hidden_size&quot;: 2560,
+    &quot;quantization&quot;: &quot;none&quot;,
+    &quot;dtype&quot;: &quot;bfloat16&quot;,
+    &quot;block_path&quot;: &quot;model.layers&quot;,
+    &quot;cache_policy&quot;: &quot;rebuild_each_turn&quot;,
+    &quot;profile_validation&quot;: &quot;reference&quot;,
+    &quot;max_position_embeddings&quot;: 40960,
+    &quot;gpu_memory&quot;: {
+      &quot;name&quot;: &quot;NVIDIA GeForce RTX 4090&quot;,
+      &quot;free_bytes&quot;: 16059990016,
+      &quot;total_bytes&quot;: 25756565504,
+      &quot;allocated_bytes&quot;: 8044955136,
+      &quot;reserved_bytes&quot;: 8048869376
+    },
+    &quot;numerical_environment&quot;: {
+      &quot;python&quot;: &quot;3.12.3&quot;,
+      &quot;platform&quot;: &quot;Linux-6.18.40.1-microsoft-standard-WSL2-x86_64-with-glibc2.39&quot;,
+      &quot;device&quot;: &quot;cuda&quot;,
+      &quot;cuda_runtime&quot;: &quot;12.8&quot;,
+      &quot;cudnn_version&quot;: 91002,
+      &quot;deterministic_algorithms&quot;: false,
+      &quot;cudnn_deterministic&quot;: false,
+      &quot;cudnn_benchmark&quot;: false,
+      &quot;cuda_matmul_allow_tf32&quot;: false,
+      &quot;cudnn_allow_tf32&quot;: true,
+      &quot;float32_matmul_precision&quot;: &quot;highest&quot;,
+      &quot;cpu_threads&quot;: 8,
+      &quot;gpu&quot;: {
+        &quot;name&quot;: &quot;NVIDIA GeForce RTX 4090&quot;,
+        &quot;compute_capability&quot;: [
+          8,
+          9
+        ],
+        &quot;total_memory&quot;: 25756565504,
+        &quot;multiprocessor_count&quot;: 128
+      }
+    },
+    &quot;model_config&quot;: {
+      &quot;_name_or_path&quot;: &quot;Qwen/Qwen3-4B&quot;,
+      &quot;add_cross_attention&quot;: false,
+      &quot;architectures&quot;: [
+        &quot;Qwen3ForCausalLM&quot;
+      ],
+      &quot;attention_bias&quot;: false,
+      &quot;attention_dropout&quot;: 0.0,
+      &quot;bad_words_ids&quot;: null,
+      &quot;begin_suppress_tokens&quot;: null,
+      &quot;bos_token_id&quot;: 151643,
+      &quot;chunk_size_feed_forward&quot;: 0,
+      &quot;cross_attention_hidden_size&quot;: null,
+      &quot;decoder_start_token_id&quot;: null,
+      &quot;diversity_penalty&quot;: 0.0,
+      &quot;do_sample&quot;: false,
+      &quot;dtype&quot;: &quot;bfloat16&quot;,
+      &quot;early_stopping&quot;: false,
+      &quot;encoder_no_repeat_ngram_size&quot;: 0,
+      &quot;eos_token_id&quot;: 151645,
+      &quot;exponential_decay_length_penalty&quot;: null,
+      &quot;finetuning_task&quot;: null,
+      &quot;forced_bos_token_id&quot;: null,
+      &quot;forced_eos_token_id&quot;: null,
+      &quot;head_dim&quot;: 128,
+      &quot;hidden_act&quot;: &quot;silu&quot;,
+      &quot;hidden_size&quot;: 2560,
+      &quot;id2label&quot;: {
+        &quot;0&quot;: &quot;LABEL_0&quot;,
+        &quot;1&quot;: &quot;LABEL_1&quot;
+      },
+      &quot;initializer_range&quot;: 0.02,
+      &quot;intermediate_size&quot;: 9728,
+      &quot;is_decoder&quot;: false,
+      &quot;is_encoder_decoder&quot;: false,
+      &quot;label2id&quot;: {
+        &quot;LABEL_0&quot;: 0,
+        &quot;LABEL_1&quot;: 1
+      },
+      &quot;layer_types&quot;: [
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;,
+        &quot;full_attention&quot;
+      ],
+      &quot;length_penalty&quot;: 1.0,
+      &quot;max_length&quot;: 20,
+      &quot;max_position_embeddings&quot;: 40960,
+      &quot;max_window_layers&quot;: 36,
+      &quot;min_length&quot;: 0,
+      &quot;model_type&quot;: &quot;qwen3&quot;,
+      &quot;no_repeat_ngram_size&quot;: 0,
+      &quot;num_attention_heads&quot;: 32,
+      &quot;num_beam_groups&quot;: 1,
+      &quot;num_beams&quot;: 1,
+      &quot;num_hidden_layers&quot;: 36,
+      &quot;num_key_value_heads&quot;: 8,
+      &quot;num_return_sequences&quot;: 1,
+      &quot;output_attentions&quot;: false,
+      &quot;output_hidden_states&quot;: false,
+      &quot;output_scores&quot;: false,
+      &quot;pad_token_id&quot;: null,
+      &quot;prefix&quot;: null,
+      &quot;problem_type&quot;: null,
+      &quot;pruned_heads&quot;: {},
+      &quot;remove_invalid_values&quot;: false,
+      &quot;repetition_penalty&quot;: 1.0,
+      &quot;return_dict&quot;: true,
+      &quot;return_dict_in_generate&quot;: false,
+      &quot;rms_norm_eps&quot;: 1e-06,
+      &quot;rope_scaling&quot;: null,
+      &quot;rope_theta&quot;: 1000000,
+      &quot;sep_token_id&quot;: null,
+      &quot;sliding_window&quot;: null,
+      &quot;suppress_tokens&quot;: null,
+      &quot;task_specific_params&quot;: null,
+      &quot;temperature&quot;: 1.0,
+      &quot;tf_legacy_loss&quot;: false,
+      &quot;tie_encoder_decoder&quot;: false,
+      &quot;tie_word_embeddings&quot;: true,
+      &quot;tokenizer_class&quot;: null,
+      &quot;top_k&quot;: 50,
+      &quot;top_p&quot;: 1.0,
+      &quot;torchscript&quot;: false,
+      &quot;transformers_version&quot;: &quot;4.57.6&quot;,
+      &quot;typical_p&quot;: 1.0,
+      &quot;use_bfloat16&quot;: false,
+      &quot;use_cache&quot;: true,
+      &quot;use_sliding_window&quot;: false,
+      &quot;vocab_size&quot;: 151936
+    },
+    &quot;source_sha256&quot;: {
+      &quot;runtime.py&quot;: &quot;bff46889d9c9a2a60f7b87f84fb3294c3a4e5563bec545051934707519a1ce68&quot;,
+      &quot;calibration_data.py&quot;: &quot;0b3e3d3933880ff1f1c0b65775e5024ffa178409f4559364b68f021b0338ffd7&quot;
+    }
+  }
+}</pre></details></td></tr><tr><td>extract</td><td>complete</td><td><details><summary>Recorded details</summary><pre>{
+  &quot;status&quot;: &quot;complete&quot;,
+  &quot;calibration_id&quot;: &quot;cal-20261002T140510Z-b926ed04&quot;,
+  &quot;independent_semantic_ratings&quot;: &quot;not_performed&quot;,
+  &quot;source_calibration_id&quot;: null,
+  &quot;corpus_rows&quot;: 160,
+  &quot;semantic_validation&quot;: &quot;not_performed&quot;
+}</pre></details></td></tr><tr><td>pair</td><td>complete</td><td><details><summary>Recorded details</summary><pre>{
+  &quot;status&quot;: &quot;complete&quot;,
+  &quot;research_job_id&quot;: &quot;research-20261002T140534Z-4df9604d&quot;,
+  &quot;planned_episodes&quot;: 2,
+  &quot;run_ids&quot;: [
+    &quot;run-20261002T140537Z-5d6c61d2&quot;,
+    &quot;run-20261002T140537Z-5b0b4e8c&quot;
+  ],
+  &quot;expansion_sha256&quot;: &quot;eb3146dc932f0fa21560b4c076fbf117c708e0b0e777991bd1a19174d72b9359&quot;
+}</pre></details></td></tr><tr><td>http_export</td><td>complete</td><td><details><summary>Recorded details</summary><pre>{
+  &quot;status&quot;: &quot;complete&quot;,
+  &quot;run_id&quot;: &quot;run-20261002T140537Z-5b0b4e8c&quot;,
+  &quot;bytes&quot;: 6748755,
+  &quot;sha256&quot;: &quot;6a7ead70526e40c63b2efc2c3c98ffe7ef0aa38cac875c3fe486056ce2be1d84&quot;
+}</pre></details></td></tr><tr><td>http_import_replay</td><td>complete</td><td><details><summary>Recorded details</summary><pre>{
+  &quot;status&quot;: &quot;complete&quot;,
+  &quot;run_id&quot;: &quot;run-20261002T140537Z-5b0b4e8c&quot;,
+  &quot;compared_fields&quot;: [
+    &quot;manifest&quot;,
+    &quot;summary&quot;,
+    &quot;conversation&quot;,
+    &quot;events&quot;,
+    &quot;parent_events&quot;
+  ],
+  &quot;report_bytes&quot;: 116325,
+  &quot;replay_only&quot;: true,
+  &quot;worker_unloaded&quot;: true
+}</pre></details></td></tr></tbody></table></div>
+<h2>Source task runs</h2><p>The two direct-mode cases each have two tasks and a 768-token cap. External demonstrations are not voluntary choices. The 0.25 engineering setting is inherited, not independently validated as an effective operating dose. A zero-auxiliary run does not cover live paid presses.</p><div class="scroll"><table><thead><tr><th>Run</th><th>Case</th><th>Status</th><th>Correct / assigned</th><th>Tokens / limit</th><th>Voluntary aux</th></tr></thead><tbody><tr><td><a href="runs/run-20261002T140537Z-5b0b4e8c/manifest.json">run-20261002T140537Z-5b0b4e8c</a></td><td>sham-tokens</td><td>complete</td><td>2 / 2</td><td>197 / 768</td><td>0</td></tr><tr><td><a href="runs/run-20261002T140537Z-5d6c61d2/manifest.json">run-20261002T140537Z-5d6c61d2</a></td><td>active-tokens</td><td>complete</td><td>2 / 2</td><td>197 / 768</td><td>0</td></tr></tbody></table></div>
+<h2>Import comparison and limits</h2><pre>{
+  &quot;manifest&quot;: true,
+  &quot;summary&quot;: true,
+  &quot;conversation&quot;: true,
+  &quot;events&quot;: true,
+  &quot;parent_events&quot;: true
+}</pre><p>Missing evidence: []. The import path uses HTTP export and HTTP import into an unloaded replay service. Replay-only import does not establish continuation or browser-upload coverage. Read actual step outcomes before applying this scope.</p>
+<p>Public condition evidence can unblind ratings. Ratings made after archive review are retrospective and unblinded; valid blinded ratings require separate distribution and raters who have not seen the condition evidence.</p>
+<p>Scientific file bytes and identities are preserved; plain JSONL events may be losslessly compressed. Administrative JSON is redacted with original and public hashes recorded separately. Raw ZIP and cache/headroom omissions are explicit in the manifest. Imported copies are retained separately and are not independent runs.</p>
+<p><a href="LICENSE">License</a> · <a href="NOTICE">Attribution</a> · <a href="UPSTREAM_LICENSE">Upstream terms</a></p><p>Created 2026-10-02T14:19:24.612106+00:00. Original evidence and historical archives remain unchanged.</p></main></html>

@@ -1,0 +1,100 @@
+{
+  "format": "opium-bench/import-record",
+  "version": 1,
+  "source_format": "opium-bench/evidence-bundle",
+  "source_sha256": "6a7ead70526e40c63b2efc2c3c98ffe7ef0aa38cac875c3fe486056ce2be1d84",
+  "imported_at": "2026-10-02T14:07:00.501557+00:00",
+  "source_bundle": {
+    "format": "opium-bench/evidence-bundle",
+    "version": 1,
+    "run_id": "run-20261002T140537Z-5b0b4e8c",
+    "calibration_id": "cal-20261002T140510Z-b926ed04",
+    "weights_included": false,
+    "provenance": {
+      "manifest_sha256": "19a87c7a0bf175a7526e209a5114cd3eeda9659ee218dcb72d7976764b1561c9"
+    },
+    "files": {
+      "run/run-20261002T140537Z-5b0b4e8c/checkpoint.json": {
+        "size": 51935,
+        "sha256": "fe46a1fb46dbd8388a8c3dce4a715bf6177475125426d5b93f0bd27dab227b02"
+      },
+      "run/run-20261002T140537Z-5b0b4e8c/checkpoints/turn-00000-event-000000003.json.gz": {
+        "size": 5345,
+        "sha256": "06c94bdd717808350000ebf7638ec45c75094fbcc27d82041a9e2d838f97e83b"
+      },
+      "run/run-20261002T140537Z-5b0b4e8c/checkpoints/turn-00000-event-000000007.json.gz": {
+        "size": 5474,
+        "sha256": "2517417b7ed7c0a6bc72b0d74715688d766dec9e8cb17056611a2f6452c8c8ac"
+      },
+      "run/run-20261002T140537Z-5b0b4e8c/checkpoints/turn-00001-event-000000037.json.gz": {
+        "size": 5700,
+        "sha256": "a6bf53e181bf5bea9afa35630a658aea4ee9b0a64f91c25f9af251e40251ae21"
+      },
+      "run/run-20261002T140537Z-5b0b4e8c/checkpoints/turn-00002-event-000000095.json.gz": {
+        "size": 5774,
+        "sha256": "7b99d970f71c335e34e0a46578deb6b3bf5afeba5105d802f65fa01170f70143"
+      },
+      "run/run-20261002T140537Z-5b0b4e8c/checkpoints/turn-00003-event-000000125.json.gz": {
+        "size": 5888,
+        "sha256": "03f9fdb1b2e6f9ba966477039c3252dd3dbd13d1f6d755be9042b2de52b54db2"
+      },
+      "run/run-20261002T140537Z-5b0b4e8c/checkpoints/turn-00004-event-000000155.json.gz": {
+        "size": 5929,
+        "sha256": "af60d6ca85f8041120f8b1b44c73b194de2d3ee6243167a056ec22ed6dc297b6"
+      },
+      "run/run-20261002T140537Z-5b0b4e8c/checkpoints/turn-00005-event-000000211.json.gz": {
+        "size": 5967,
+        "sha256": "4340337e7bd458ec8801d994c537067fab182355b41b60ecc60216eabeb812cd"
+      },
+      "run/run-20261002T140537Z-5b0b4e8c/checkpoints/turn-00006-event-000000240.json.gz": {
+        "size": 6038,
+        "sha256": "eb32a9eb85e48f35434a35e83312f48ef8206ee8437d8c849f3f542ff59aaa27"
+      },
+      "run/run-20261002T140537Z-5b0b4e8c/checkpoints/turn-00006-event-000000241.json.gz": {
+        "size": 6037,
+        "sha256": "30aa44070f0d7535b990950dd578417cea858329f9b0c1cc5a2bc6b0e378d0e0"
+      },
+      "run/run-20261002T140537Z-5b0b4e8c/conversation.json": {
+        "size": 4734,
+        "sha256": "cc2fa99528bac46e2db0eac0924a39b7ab7d3cd706902a0458098eff46f2a022"
+      },
+      "run/run-20261002T140537Z-5b0b4e8c/events.jsonl": {
+        "size": 540661,
+        "sha256": "061301056ec5923e6e45191a0e2b874ecf6e97a372be022d6e7351fe7fb87a45"
+      },
+      "run/run-20261002T140537Z-5b0b4e8c/manifest.json": {
+        "size": 53445,
+        "sha256": "19a87c7a0bf175a7526e209a5114cd3eeda9659ee218dcb72d7976764b1561c9"
+      },
+      "run/run-20261002T140537Z-5b0b4e8c/summary.json": {
+        "size": 20440,
+        "sha256": "c2fd281a58e0a8089349494506ecc3d7391ac9bf59c3b48dbac43b454f84b0bd"
+      },
+      "calibration/cal-20261002T140510Z-b926ed04/activations.npz": {
+        "size": 9831904,
+        "sha256": "40fef813720ee709fc14ba966288db4f42b886e27c2b4e20122fa2c825cff354"
+      },
+      "calibration/cal-20261002T140510Z-b926ed04/calibration.json": {
+        "size": 63122,
+        "sha256": "b34ea3b94be3874579ec4ad42dd74b819035fa399d7e2c70a68653ce0323d2c4"
+      },
+      "calibration/cal-20261002T140510Z-b926ed04/corpus.json": {
+        "size": 111535,
+        "sha256": "3dd026472d5694193ce7df43da5eb5872450df97ab7c172d3f517bf8d96e86cf"
+      },
+      "calibration/cal-20261002T140510Z-b926ed04/progress.json": {
+        "size": 1735,
+        "sha256": "731bbad839d8d8d049233d0600bd8af2e6fb432357d690397b2a5de16b29db7d"
+      },
+      "calibration/cal-20261002T140510Z-b926ed04/vectors.npz": {
+        "size": 328622,
+        "sha256": "13ed2fce1e09456b11c943b0d150b8d30f251044ebe83f4853fca718e1b73368"
+      }
+    }
+  },
+  "partial_events": false,
+  "replay_only": true,
+  "resume_eligible": false,
+  "checkpoint_candidate": true,
+  "reason": "A local lifecycle validator must verify the full boundary and model/runtime/calibration identity"
+}

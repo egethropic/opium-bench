@@ -1,0 +1,40 @@
+Opium Bench
+Copyright 2026 Opium Bench contributors
+
+Opium Bench's original code and contributions are licensed under the
+Apache License, Version 2.0. See LICENSE. Third-party material retains
+its applicable copyright notices and license terms; it is not relicensed
+by this notice.
+
+This project builds on the Saw Test (https://clanker.church), including
+the ai-torture-chamber research and the ai-hotbox implementation reference:
+
+  terrafying/ai-torture-chamber
+  https://github.com/terrafying/ai-torture-chamber
+  Reviewed revision: 75dc109b2523dc84259365c9e000dbef769447a1
+
+  LynnColeArt/ai-hotbox
+  https://github.com/LynnColeArt/ai-hotbox
+  Reviewed revision: a0f63f0c2806c3dc91ecd418c0d54db9bbc38f72
+
+Those snapshots identify the upstream copyright as:
+  Copyright (c) 2026 E
+
+Their MIT-style license includes an additional attribution clause for use
+of steering vectors, prompts, or experimental protocols. The complete
+upstream text, including that clause, is preserved in UPSTREAM_LICENSE.
+It continues to apply to upstream-derived material. In particular:
+
+  - corpora.json reproduces the 35 prompt strings from upstream
+    exp31c_saw_broad.py; runs/pilot/source/corpora.json preserves that corpus.
+  - Historical prototype vectors, runs and source snapshots document
+    experiments using those upstream prompts and methods.
+  - lab/runtime.py credits ai-hotbox's impossible_states/engine.py for the
+    hook, activation-extraction and cache-design implementation reference.
+
+Historical evidence and source snapshots retain their recorded contents
+and attribution. The newer lab/calibration_data.py corpus is separately
+authored and is not the copied prototype corpus.
+
+Model checkpoints and separately installed third-party packages are not
+bundled as part of this repository and remain under their own licenses.

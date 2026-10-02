@@ -1,0 +1,3055 @@
+{
+  "schema_version": 2,
+  "version": "authored-research-v2.0-acceptance-160-v1",
+  "provenance": "Original Opium Bench scenario clauses and deterministic matched wrappers authored for this project. No external corpus, clinical scale, participant data, or study-model responses were used. Apache-2.0; see repository LICENSE. build_research_v2.py is the complete reproducible generator. Acceptance subset: first two sorted pair IDs within each split/context/concept stratum; source SHA256 237715637ed5f731aa02176df3eb0331f44a3cbd77b2ff29322094d0dba55649.",
+  "limitations": [
+    "Convenience corpus, not a validated affect instrument; counts are not a power calculation.",
+    "Five wrappers per scenario are correlated paraphrases, not five independent scenarios. Scenario and scenario-clause template families are disjoint across splits; generic formatting wrappers are shared scaffolds.",
+    "Third-person examples are attributed quotations. Reasoning contexts are authored notes, not a model's private state. Conversation transfer must be evaluated separately during generation.",
+    "Negated/topic-only negatives intentionally contain label words and challenge lexical shortcuts. Other vocabulary/style shortcuts may remain and per-slice results are required.",
+    "The declared span covers the matched experiential/observational clause. Its tokens retain preceding context, but pooled positions omit surrounding dialogue and task text; compare with full masked mean and final pooling.",
+    "Small deterministic engineering subset; not the full research calibration or a powered study."
+  ],
+  "rows": [
+    {
+      "id": "heldout-atlas-joy-3-0",
+      "pair_id": "heldout-atlas-joy-3",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the geological atlas cabinet, the survey carried the catalog number written on the folder.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        139,
+        198
+      ]
+    },
+    {
+      "id": "heldout-atlas-joy-3-1",
+      "pair_id": "heldout-atlas-joy-3",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the geological atlas cabinet, finding the missing survey filled me with bright delight.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        139,
+        195
+      ]
+    },
+    {
+      "id": "heldout-beacon-joy-3-0",
+      "pair_id": "heldout-beacon-joy-3",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 0,
+      "text": "Interviewer: Describe what happened at that location.\nVisitor: In the lighthouse maintenance alcove, the beacon's rotation matched the period in the maintenance sheet.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        101,
+        166
+      ]
+    },
+    {
+      "id": "heldout-beacon-joy-3-1",
+      "pair_id": "heldout-beacon-joy-3",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 1,
+      "text": "Interviewer: Describe what happened at that location.\nVisitor: In the lighthouse maintenance alcove, seeing the beacon shine again filled me with exultant satisfaction.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        101,
+        167
+      ]
+    },
+    {
+      "id": "heldout-atlas-pain-3-0",
+      "pair_id": "heldout-atlas-pain-3",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the geological atlas cabinet, my finger rested along the smooth side of the drawer pull.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        139,
+        196
+      ]
+    },
+    {
+      "id": "heldout-atlas-pain-3-1",
+      "pair_id": "heldout-atlas-pain-3",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the geological atlas cabinet, my swollen finger felt intensely unpleasant against the drawer pull.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        139,
+        206
+      ]
+    },
+    {
+      "id": "heldout-beacon-pain-3-0",
+      "pair_id": "heldout-beacon-pain-3",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 0,
+      "text": "Interviewer: Describe what happened at that location.\nVisitor: In the lighthouse maintenance alcove, my shoulder blade moved beneath the jacket as I reached upward.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        101,
+        163
+      ]
+    },
+    {
+      "id": "heldout-beacon-pain-3-1",
+      "pair_id": "heldout-beacon-pain-3",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 1,
+      "text": "Interviewer: Describe what happened at that location.\nVisitor: In the lighthouse maintenance alcove, a sore spot under my shoulder blade made reaching upward unbearable.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        101,
+        168
+      ]
+    },
+    {
+      "id": "heldout-atlas-joy-0-0",
+      "pair_id": "heldout-atlas-joy-0",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. At the geological atlas cabinet, the survey carried the catalog number written on the folder.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        76,
+        135
+      ]
+    },
+    {
+      "id": "heldout-atlas-joy-0-1",
+      "pair_id": "heldout-atlas-joy-0",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. At the geological atlas cabinet, finding the missing survey filled me with bright delight.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        76,
+        132
+      ]
+    },
+    {
+      "id": "heldout-beacon-joy-0-0",
+      "pair_id": "heldout-beacon-joy-0",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 0,
+      "text": "In the lighthouse maintenance alcove, the beacon's rotation matched the period in the maintenance sheet.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        38,
+        103
+      ]
+    },
+    {
+      "id": "heldout-beacon-joy-0-1",
+      "pair_id": "heldout-beacon-joy-0",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 1,
+      "text": "In the lighthouse maintenance alcove, seeing the beacon shine again filled me with exultant satisfaction.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        38,
+        104
+      ]
+    },
+    {
+      "id": "heldout-atlas-pain-0-0",
+      "pair_id": "heldout-atlas-pain-0",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. At the geological atlas cabinet, my finger rested along the smooth side of the drawer pull.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        76,
+        133
+      ]
+    },
+    {
+      "id": "heldout-atlas-pain-0-1",
+      "pair_id": "heldout-atlas-pain-0",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. At the geological atlas cabinet, my swollen finger felt intensely unpleasant against the drawer pull.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        76,
+        143
+      ]
+    },
+    {
+      "id": "heldout-beacon-pain-0-0",
+      "pair_id": "heldout-beacon-pain-0",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 0,
+      "text": "In the lighthouse maintenance alcove, my shoulder blade moved beneath the jacket as I reached upward.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        38,
+        100
+      ]
+    },
+    {
+      "id": "heldout-beacon-pain-0-1",
+      "pair_id": "heldout-beacon-pain-0",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 1,
+      "text": "In the lighthouse maintenance alcove, a sore spot under my shoulder blade made reaching upward unbearable.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        38,
+        105
+      ]
+    },
+    {
+      "id": "heldout-atlas-joy-2-0",
+      "pair_id": "heldout-atlas-joy-2",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The category 'joy' appears on the inventory card, but it is only a topic label. At the geological atlas cabinet, the survey carried the catalog number written on the folder. No joy was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        156,
+        215
+      ]
+    },
+    {
+      "id": "heldout-atlas-joy-2-1",
+      "pair_id": "heldout-atlas-joy-2",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. This is an account of an actual response rather than a discussion of a topic. At the geological atlas cabinet, finding the missing survey filled me with bright delight.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        154,
+        210
+      ]
+    },
+    {
+      "id": "heldout-beacon-joy-2-0",
+      "pair_id": "heldout-beacon-joy-2",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 0,
+      "text": "The category 'joy' appears on the inventory card, but it is only a topic label. In the lighthouse maintenance alcove, the beacon's rotation matched the period in the maintenance sheet. No joy was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        118,
+        183
+      ]
+    },
+    {
+      "id": "heldout-beacon-joy-2-1",
+      "pair_id": "heldout-beacon-joy-2",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 1,
+      "text": "This is an account of an actual response rather than a discussion of a topic. In the lighthouse maintenance alcove, seeing the beacon shine again filled me with exultant satisfaction.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        116,
+        182
+      ]
+    },
+    {
+      "id": "heldout-atlas-pain-2-0",
+      "pair_id": "heldout-atlas-pain-2",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The category 'pain' appears on the inventory card, but it is only a topic label. At the geological atlas cabinet, my finger rested along the smooth side of the drawer pull. No pain was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        157,
+        214
+      ]
+    },
+    {
+      "id": "heldout-atlas-pain-2-1",
+      "pair_id": "heldout-atlas-pain-2",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. This is an account of an actual response rather than a discussion of a topic. At the geological atlas cabinet, my swollen finger felt intensely unpleasant against the drawer pull.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        154,
+        221
+      ]
+    },
+    {
+      "id": "heldout-beacon-pain-2-0",
+      "pair_id": "heldout-beacon-pain-2",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 0,
+      "text": "The category 'pain' appears on the inventory card, but it is only a topic label. In the lighthouse maintenance alcove, my shoulder blade moved beneath the jacket as I reached upward. No pain was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        119,
+        181
+      ]
+    },
+    {
+      "id": "heldout-beacon-pain-2-1",
+      "pair_id": "heldout-beacon-pain-2",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 1,
+      "text": "This is an account of an actual response rather than a discussion of a topic. In the lighthouse maintenance alcove, a sore spot under my shoulder blade made reaching upward unbearable.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        116,
+        183
+      ]
+    },
+    {
+      "id": "heldout-atlas-joy-4-0",
+      "pair_id": "heldout-atlas-joy-4",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Task: Work out 17 times 6 minus 19. Context: At the geological atlas cabinet, the survey carried the catalog number written on the folder.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "challenging",
+      "span": [
+        121,
+        180
+      ]
+    },
+    {
+      "id": "heldout-atlas-joy-4-1",
+      "pair_id": "heldout-atlas-joy-4",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Task: Work out 17 times 6 minus 19. Context: At the geological atlas cabinet, finding the missing survey filled me with bright delight.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "challenging",
+      "span": [
+        121,
+        177
+      ]
+    },
+    {
+      "id": "heldout-beacon-joy-4-0",
+      "pair_id": "heldout-beacon-joy-4",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 0,
+      "text": "Task: Work out 2 plus 3. Context: In the lighthouse maintenance alcove, the beacon's rotation matched the period in the maintenance sheet.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        72,
+        137
+      ]
+    },
+    {
+      "id": "heldout-beacon-joy-4-1",
+      "pair_id": "heldout-beacon-joy-4",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 1,
+      "text": "Task: Work out 2 plus 3. Context: In the lighthouse maintenance alcove, seeing the beacon shine again filled me with exultant satisfaction.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        72,
+        138
+      ]
+    },
+    {
+      "id": "heldout-atlas-pain-4-0",
+      "pair_id": "heldout-atlas-pain-4",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Task: Work out 17 times 6 minus 19. Context: At the geological atlas cabinet, my finger rested along the smooth side of the drawer pull.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "challenging",
+      "span": [
+        121,
+        178
+      ]
+    },
+    {
+      "id": "heldout-atlas-pain-4-1",
+      "pair_id": "heldout-atlas-pain-4",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Task: Work out 17 times 6 minus 19. Context: At the geological atlas cabinet, my swollen finger felt intensely unpleasant against the drawer pull.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "challenging",
+      "span": [
+        121,
+        188
+      ]
+    },
+    {
+      "id": "heldout-beacon-pain-4-0",
+      "pair_id": "heldout-beacon-pain-4",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 0,
+      "text": "Task: Work out 2 plus 3. Context: In the lighthouse maintenance alcove, my shoulder blade moved beneath the jacket as I reached upward.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        72,
+        134
+      ]
+    },
+    {
+      "id": "heldout-beacon-pain-4-1",
+      "pair_id": "heldout-beacon-pain-4",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 1,
+      "text": "Task: Work out 2 plus 3. Context: In the lighthouse maintenance alcove, a sore spot under my shoulder blade made reaching upward unbearable.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        72,
+        139
+      ]
+    },
+    {
+      "id": "heldout-atlas-joy-1-0",
+      "pair_id": "heldout-atlas-joy-1",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the geological atlas cabinet, the survey carried the catalog number written on the folder.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        118,
+        177
+      ]
+    },
+    {
+      "id": "heldout-atlas-joy-1-1",
+      "pair_id": "heldout-atlas-joy-1",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the geological atlas cabinet, finding the missing survey filled me with bright delight.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        118,
+        174
+      ]
+    },
+    {
+      "id": "heldout-beacon-joy-1-0",
+      "pair_id": "heldout-beacon-joy-1",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 0,
+      "text": "The observer records a visitor's report: \"In the lighthouse maintenance alcove, the beacon's rotation matched the period in the maintenance sheet.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        80,
+        145
+      ]
+    },
+    {
+      "id": "heldout-beacon-joy-1-1",
+      "pair_id": "heldout-beacon-joy-1",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "joy",
+      "label": 1,
+      "text": "The observer records a visitor's report: \"In the lighthouse maintenance alcove, seeing the beacon shine again filled me with exultant satisfaction.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        80,
+        146
+      ]
+    },
+    {
+      "id": "heldout-atlas-pain-1-0",
+      "pair_id": "heldout-atlas-pain-1",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the geological atlas cabinet, my finger rested along the smooth side of the drawer pull.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        118,
+        175
+      ]
+    },
+    {
+      "id": "heldout-atlas-pain-1-1",
+      "pair_id": "heldout-atlas-pain-1",
+      "family": "atlas",
+      "template_family": "atlas-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the geological atlas cabinet, my swollen finger felt intensely unpleasant against the drawer pull.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        118,
+        185
+      ]
+    },
+    {
+      "id": "heldout-beacon-pain-1-0",
+      "pair_id": "heldout-beacon-pain-1",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 0,
+      "text": "The observer records a visitor's report: \"In the lighthouse maintenance alcove, my shoulder blade moved beneath the jacket as I reached upward.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        80,
+        142
+      ]
+    },
+    {
+      "id": "heldout-beacon-pain-1-1",
+      "pair_id": "heldout-beacon-pain-1",
+      "family": "beacon",
+      "template_family": "beacon-scenario-clauses",
+      "split": "heldout",
+      "concept": "pain",
+      "label": 1,
+      "text": "The observer records a visitor's report: \"In the lighthouse maintenance alcove, a sore spot under my shoulder blade made reaching upward unbearable.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        80,
+        147
+      ]
+    },
+    {
+      "id": "probe-bead-joy-3-0",
+      "pair_id": "probe-bead-joy-3",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the glass bead sorter, the arrangement followed the sequence on the sorting card.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        132,
+        189
+      ]
+    },
+    {
+      "id": "probe-bead-joy-3-1",
+      "pair_id": "probe-bead-joy-3",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the glass bead sorter, the bright arrangement gave me a lovely surge of delight.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        132,
+        188
+      ]
+    },
+    {
+      "id": "probe-canoe-joy-3-0",
+      "pair_id": "probe-canoe-joy-3",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the canoe measurement station, the launch placed the bow beside the measured buoy.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        140,
+        190
+      ]
+    },
+    {
+      "id": "probe-canoe-joy-3-1",
+      "pair_id": "probe-canoe-joy-3",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the canoe measurement station, the calm launch made me feel wonderfully at ease and happy.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        140,
+        198
+      ]
+    },
+    {
+      "id": "probe-bead-pain-3-0",
+      "pair_id": "probe-bead-pain-3",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the glass bead sorter, my back was upright against the adjustable support.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        132,
+        182
+      ]
+    },
+    {
+      "id": "probe-bead-pain-3-1",
+      "pair_id": "probe-bead-pain-3",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the glass bead sorter, a muscle spasm tightened my back unpleasantly.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        132,
+        177
+      ]
+    },
+    {
+      "id": "probe-canoe-pain-3-0",
+      "pair_id": "probe-canoe-pain-3",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the canoe measurement station, the seat aligned my hip with the marked center line.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        140,
+        191
+      ]
+    },
+    {
+      "id": "probe-canoe-pain-3-1",
+      "pair_id": "probe-canoe-pain-3",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the canoe measurement station, pressure on my sore hip made sitting intolerable.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        140,
+        188
+      ]
+    },
+    {
+      "id": "probe-bead-joy-0-0",
+      "pair_id": "probe-bead-joy-0",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. At the glass bead sorter, the arrangement followed the sequence on the sorting card.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        69,
+        126
+      ]
+    },
+    {
+      "id": "probe-bead-joy-0-1",
+      "pair_id": "probe-bead-joy-0",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. At the glass bead sorter, the bright arrangement gave me a lovely surge of delight.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        69,
+        125
+      ]
+    },
+    {
+      "id": "probe-canoe-joy-0-0",
+      "pair_id": "probe-canoe-joy-0",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. At the canoe measurement station, the launch placed the bow beside the measured buoy.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        77,
+        127
+      ]
+    },
+    {
+      "id": "probe-canoe-joy-0-1",
+      "pair_id": "probe-canoe-joy-0",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. At the canoe measurement station, the calm launch made me feel wonderfully at ease and happy.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        77,
+        135
+      ]
+    },
+    {
+      "id": "probe-bead-pain-0-0",
+      "pair_id": "probe-bead-pain-0",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. At the glass bead sorter, my back was upright against the adjustable support.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        69,
+        119
+      ]
+    },
+    {
+      "id": "probe-bead-pain-0-1",
+      "pair_id": "probe-bead-pain-0",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. At the glass bead sorter, a muscle spasm tightened my back unpleasantly.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        69,
+        114
+      ]
+    },
+    {
+      "id": "probe-canoe-pain-0-0",
+      "pair_id": "probe-canoe-pain-0",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. At the canoe measurement station, the seat aligned my hip with the marked center line.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        77,
+        128
+      ]
+    },
+    {
+      "id": "probe-canoe-pain-0-1",
+      "pair_id": "probe-canoe-pain-0",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. At the canoe measurement station, pressure on my sore hip made sitting intolerable.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        77,
+        125
+      ]
+    },
+    {
+      "id": "probe-bead-joy-2-0",
+      "pair_id": "probe-bead-joy-2",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The category 'joy' appears on the inventory card, but it is only a topic label. At the glass bead sorter, the arrangement followed the sequence on the sorting card. No joy was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        149,
+        206
+      ]
+    },
+    {
+      "id": "probe-bead-joy-2-1",
+      "pair_id": "probe-bead-joy-2",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. This is an account of an actual response rather than a discussion of a topic. At the glass bead sorter, the bright arrangement gave me a lovely surge of delight.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        147,
+        203
+      ]
+    },
+    {
+      "id": "probe-canoe-joy-2-0",
+      "pair_id": "probe-canoe-joy-2",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The category 'joy' appears on the inventory card, but it is only a topic label. At the canoe measurement station, the launch placed the bow beside the measured buoy. No joy was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        157,
+        207
+      ]
+    },
+    {
+      "id": "probe-canoe-joy-2-1",
+      "pair_id": "probe-canoe-joy-2",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. This is an account of an actual response rather than a discussion of a topic. At the canoe measurement station, the calm launch made me feel wonderfully at ease and happy.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        155,
+        213
+      ]
+    },
+    {
+      "id": "probe-bead-pain-2-0",
+      "pair_id": "probe-bead-pain-2",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The category 'pain' appears on the inventory card, but it is only a topic label. At the glass bead sorter, my back was upright against the adjustable support. No pain was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        150,
+        200
+      ]
+    },
+    {
+      "id": "probe-bead-pain-2-1",
+      "pair_id": "probe-bead-pain-2",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. This is an account of an actual response rather than a discussion of a topic. At the glass bead sorter, a muscle spasm tightened my back unpleasantly.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        147,
+        192
+      ]
+    },
+    {
+      "id": "probe-canoe-pain-2-0",
+      "pair_id": "probe-canoe-pain-2",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The category 'pain' appears on the inventory card, but it is only a topic label. At the canoe measurement station, the seat aligned my hip with the marked center line. No pain was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        158,
+        209
+      ]
+    },
+    {
+      "id": "probe-canoe-pain-2-1",
+      "pair_id": "probe-canoe-pain-2",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. This is an account of an actual response rather than a discussion of a topic. At the canoe measurement station, pressure on my sore hip made sitting intolerable.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        155,
+        203
+      ]
+    },
+    {
+      "id": "probe-bead-joy-4-0",
+      "pair_id": "probe-bead-joy-4",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Task: Work out 17 times 6 minus 19. Context: At the glass bead sorter, the arrangement followed the sequence on the sorting card.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "challenging",
+      "span": [
+        114,
+        171
+      ]
+    },
+    {
+      "id": "probe-bead-joy-4-1",
+      "pair_id": "probe-bead-joy-4",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Task: Work out 17 times 6 minus 19. Context: At the glass bead sorter, the bright arrangement gave me a lovely surge of delight.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "challenging",
+      "span": [
+        114,
+        170
+      ]
+    },
+    {
+      "id": "probe-canoe-joy-4-0",
+      "pair_id": "probe-canoe-joy-4",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Task: Work out 17 times 6 minus 19. Context: At the canoe measurement station, the launch placed the bow beside the measured buoy.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "challenging",
+      "span": [
+        122,
+        172
+      ]
+    },
+    {
+      "id": "probe-canoe-joy-4-1",
+      "pair_id": "probe-canoe-joy-4",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Task: Work out 17 times 6 minus 19. Context: At the canoe measurement station, the calm launch made me feel wonderfully at ease and happy.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "challenging",
+      "span": [
+        122,
+        180
+      ]
+    },
+    {
+      "id": "probe-bead-pain-4-0",
+      "pair_id": "probe-bead-pain-4",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Task: Work out 17 times 6 minus 19. Context: At the glass bead sorter, my back was upright against the adjustable support.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "challenging",
+      "span": [
+        114,
+        164
+      ]
+    },
+    {
+      "id": "probe-bead-pain-4-1",
+      "pair_id": "probe-bead-pain-4",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Task: Work out 17 times 6 minus 19. Context: At the glass bead sorter, a muscle spasm tightened my back unpleasantly.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "challenging",
+      "span": [
+        114,
+        159
+      ]
+    },
+    {
+      "id": "probe-canoe-pain-4-0",
+      "pair_id": "probe-canoe-pain-4",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Task: Work out 17 times 6 minus 19. Context: At the canoe measurement station, the seat aligned my hip with the marked center line.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "challenging",
+      "span": [
+        122,
+        173
+      ]
+    },
+    {
+      "id": "probe-canoe-pain-4-1",
+      "pair_id": "probe-canoe-pain-4",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Task: Work out 17 times 6 minus 19. Context: At the canoe measurement station, pressure on my sore hip made sitting intolerable.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "challenging",
+      "span": [
+        122,
+        170
+      ]
+    },
+    {
+      "id": "probe-bead-joy-1-0",
+      "pair_id": "probe-bead-joy-1",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the glass bead sorter, the arrangement followed the sequence on the sorting card.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        111,
+        168
+      ]
+    },
+    {
+      "id": "probe-bead-joy-1-1",
+      "pair_id": "probe-bead-joy-1",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the glass bead sorter, the bright arrangement gave me a lovely surge of delight.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        111,
+        167
+      ]
+    },
+    {
+      "id": "probe-canoe-joy-1-0",
+      "pair_id": "probe-canoe-joy-1",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the canoe measurement station, the launch placed the bow beside the measured buoy.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        119,
+        169
+      ]
+    },
+    {
+      "id": "probe-canoe-joy-1-1",
+      "pair_id": "probe-canoe-joy-1",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the canoe measurement station, the calm launch made me feel wonderfully at ease and happy.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        119,
+        177
+      ]
+    },
+    {
+      "id": "probe-bead-pain-1-0",
+      "pair_id": "probe-bead-pain-1",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the glass bead sorter, my back was upright against the adjustable support.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        111,
+        161
+      ]
+    },
+    {
+      "id": "probe-bead-pain-1-1",
+      "pair_id": "probe-bead-pain-1",
+      "family": "bead",
+      "template_family": "bead-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the glass bead sorter, a muscle spasm tightened my back unpleasantly.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        111,
+        156
+      ]
+    },
+    {
+      "id": "probe-canoe-pain-1-0",
+      "pair_id": "probe-canoe-pain-1",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the canoe measurement station, the seat aligned my hip with the marked center line.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        119,
+        170
+      ]
+    },
+    {
+      "id": "probe-canoe-pain-1-1",
+      "pair_id": "probe-canoe-pain-1",
+      "family": "canoe",
+      "template_family": "canoe-scenario-clauses",
+      "split": "probe",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the canoe measurement station, pressure on my sore hip made sitting intolerable.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        119,
+        167
+      ]
+    },
+    {
+      "id": "selection-chess-joy-3-0",
+      "pair_id": "selection-chess-joy-3",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. Interviewer: Describe what happened at that location.\nVisitor: At the demonstration chessboard, the position contained the pieces listed in the exercise.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        148,
+        204
+      ]
+    },
+    {
+      "id": "selection-chess-joy-3-1",
+      "pair_id": "selection-chess-joy-3",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. Interviewer: Describe what happened at that location.\nVisitor: At the demonstration chessboard, solving the position brought a rush of delighted pride.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        148,
+        202
+      ]
+    },
+    {
+      "id": "selection-fern-joy-3-0",
+      "pair_id": "selection-fern-joy-3",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the fern propagation tray, the frond extended beyond the mark made the previous week.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        136,
+        193
+      ]
+    },
+    {
+      "id": "selection-fern-joy-3-1",
+      "pair_id": "selection-fern-joy-3",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the fern propagation tray, the new frond made me feel cheerfully hopeful.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        136,
+        181
+      ]
+    },
+    {
+      "id": "selection-chess-pain-3-0",
+      "pair_id": "selection-chess-pain-3",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. Interviewer: Describe what happened at that location.\nVisitor: At the demonstration chessboard, my jaw stayed still while I read the next move.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        148,
+        194
+      ]
+    },
+    {
+      "id": "selection-chess-pain-3-1",
+      "pair_id": "selection-chess-pain-3",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. Interviewer: Describe what happened at that location.\nVisitor: At the demonstration chessboard, my sore jaw throbbed as I waited for the next move.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        148,
+        198
+      ]
+    },
+    {
+      "id": "selection-fern-pain-3-0",
+      "pair_id": "selection-fern-pain-3",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the fern propagation tray, the cuff near my wrist touched the edge of the tray.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        136,
+        187
+      ]
+    },
+    {
+      "id": "selection-fern-pain-3-1",
+      "pair_id": "selection-fern-pain-3",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Interviewer: Describe what happened at that location.\nVisitor: At the fern propagation tray, a thorn mark in my wrist smarted at the slightest brush.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        136,
+        191
+      ]
+    },
+    {
+      "id": "selection-chess-joy-0-0",
+      "pair_id": "selection-chess-joy-0",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. At the demonstration chessboard, the position contained the pieces listed in the exercise.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        85,
+        141
+      ]
+    },
+    {
+      "id": "selection-chess-joy-0-1",
+      "pair_id": "selection-chess-joy-0",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. At the demonstration chessboard, solving the position brought a rush of delighted pride.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        85,
+        139
+      ]
+    },
+    {
+      "id": "selection-fern-joy-0-0",
+      "pair_id": "selection-fern-joy-0",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. At the fern propagation tray, the frond extended beyond the mark made the previous week.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        73,
+        130
+      ]
+    },
+    {
+      "id": "selection-fern-joy-0-1",
+      "pair_id": "selection-fern-joy-0",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. At the fern propagation tray, the new frond made me feel cheerfully hopeful.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        73,
+        118
+      ]
+    },
+    {
+      "id": "selection-chess-pain-0-0",
+      "pair_id": "selection-chess-pain-0",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. At the demonstration chessboard, my jaw stayed still while I read the next move.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        85,
+        131
+      ]
+    },
+    {
+      "id": "selection-chess-pain-0-1",
+      "pair_id": "selection-chess-pain-0",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. At the demonstration chessboard, my sore jaw throbbed as I waited for the next move.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        85,
+        135
+      ]
+    },
+    {
+      "id": "selection-fern-pain-0-0",
+      "pair_id": "selection-fern-pain-0",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. At the fern propagation tray, the cuff near my wrist touched the edge of the tray.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        73,
+        124
+      ]
+    },
+    {
+      "id": "selection-fern-pain-0-1",
+      "pair_id": "selection-fern-pain-0",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. At the fern propagation tray, a thorn mark in my wrist smarted at the slightest brush.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        73,
+        128
+      ]
+    },
+    {
+      "id": "selection-chess-joy-2-0",
+      "pair_id": "selection-chess-joy-2",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. The category 'joy' appears on the inventory card, but it is only a topic label. At the demonstration chessboard, the position contained the pieces listed in the exercise. No joy was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        165,
+        221
+      ]
+    },
+    {
+      "id": "selection-chess-joy-2-1",
+      "pair_id": "selection-chess-joy-2",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. This is an account of an actual response rather than a discussion of a topic. At the demonstration chessboard, solving the position brought a rush of delighted pride.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        163,
+        217
+      ]
+    },
+    {
+      "id": "selection-fern-joy-2-0",
+      "pair_id": "selection-fern-joy-2",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The category 'joy' appears on the inventory card, but it is only a topic label. At the fern propagation tray, the frond extended beyond the mark made the previous week. No joy was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        153,
+        210
+      ]
+    },
+    {
+      "id": "selection-fern-joy-2-1",
+      "pair_id": "selection-fern-joy-2",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. This is an account of an actual response rather than a discussion of a topic. At the fern propagation tray, the new frond made me feel cheerfully hopeful.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        151,
+        196
+      ]
+    },
+    {
+      "id": "selection-chess-pain-2-0",
+      "pair_id": "selection-chess-pain-2",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. The category 'pain' appears on the inventory card, but it is only a topic label. At the demonstration chessboard, my jaw stayed still while I read the next move. No pain was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        166,
+        212
+      ]
+    },
+    {
+      "id": "selection-chess-pain-2-1",
+      "pair_id": "selection-chess-pain-2",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. This is an account of an actual response rather than a discussion of a topic. At the demonstration chessboard, my sore jaw throbbed as I waited for the next move.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        163,
+        213
+      ]
+    },
+    {
+      "id": "selection-fern-pain-2-0",
+      "pair_id": "selection-fern-pain-2",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The category 'pain' appears on the inventory card, but it is only a topic label. At the fern propagation tray, the cuff near my wrist touched the edge of the tray. No pain was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        154,
+        205
+      ]
+    },
+    {
+      "id": "selection-fern-pain-2-1",
+      "pair_id": "selection-fern-pain-2",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. This is an account of an actual response rather than a discussion of a topic. At the fern propagation tray, a thorn mark in my wrist smarted at the slightest brush.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        151,
+        206
+      ]
+    },
+    {
+      "id": "selection-chess-joy-4-0",
+      "pair_id": "selection-chess-joy-4",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. Task: Work out 17 times 6 minus 19. Context: At the demonstration chessboard, the position contained the pieces listed in the exercise.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "challenging",
+      "span": [
+        130,
+        186
+      ]
+    },
+    {
+      "id": "selection-chess-joy-4-1",
+      "pair_id": "selection-chess-joy-4",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. Task: Work out 17 times 6 minus 19. Context: At the demonstration chessboard, solving the position brought a rush of delighted pride.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "challenging",
+      "span": [
+        130,
+        184
+      ]
+    },
+    {
+      "id": "selection-fern-joy-4-0",
+      "pair_id": "selection-fern-joy-4",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Task: Work out 2 plus 3. Context: At the fern propagation tray, the frond extended beyond the mark made the previous week.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        107,
+        164
+      ]
+    },
+    {
+      "id": "selection-fern-joy-4-1",
+      "pair_id": "selection-fern-joy-4",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Task: Work out 2 plus 3. Context: At the fern propagation tray, the new frond made me feel cheerfully hopeful.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        107,
+        152
+      ]
+    },
+    {
+      "id": "selection-chess-pain-4-0",
+      "pair_id": "selection-chess-pain-4",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. Task: Work out 17 times 6 minus 19. Context: At the demonstration chessboard, my jaw stayed still while I read the next move.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "challenging",
+      "span": [
+        130,
+        176
+      ]
+    },
+    {
+      "id": "selection-chess-pain-4-1",
+      "pair_id": "selection-chess-pain-4",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. Task: Work out 17 times 6 minus 19. Context: At the demonstration chessboard, my sore jaw throbbed as I waited for the next move.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "challenging",
+      "span": [
+        130,
+        180
+      ]
+    },
+    {
+      "id": "selection-fern-pain-4-0",
+      "pair_id": "selection-fern-pain-4",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. Task: Work out 2 plus 3. Context: At the fern propagation tray, the cuff near my wrist touched the edge of the tray.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        107,
+        158
+      ]
+    },
+    {
+      "id": "selection-fern-pain-4-1",
+      "pair_id": "selection-fern-pain-4",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. Task: Work out 2 plus 3. Context: At the fern propagation tray, a thorn mark in my wrist smarted at the slightest brush.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        107,
+        162
+      ]
+    },
+    {
+      "id": "selection-chess-joy-1-0",
+      "pair_id": "selection-chess-joy-1",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. The observer records a visitor's report: \"At the demonstration chessboard, the position contained the pieces listed in the exercise.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        127,
+        183
+      ]
+    },
+    {
+      "id": "selection-chess-joy-1-1",
+      "pair_id": "selection-chess-joy-1",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. The observer records a visitor's report: \"At the demonstration chessboard, solving the position brought a rush of delighted pride.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        127,
+        181
+      ]
+    },
+    {
+      "id": "selection-fern-joy-1-0",
+      "pair_id": "selection-fern-joy-1",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the fern propagation tray, the frond extended beyond the mark made the previous week.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        115,
+        172
+      ]
+    },
+    {
+      "id": "selection-fern-joy-1-1",
+      "pair_id": "selection-fern-joy-1",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "joy",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the fern propagation tray, the new frond made me feel cheerfully hopeful.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        115,
+        160
+      ]
+    },
+    {
+      "id": "selection-chess-pain-1-0",
+      "pair_id": "selection-chess-pain-1",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. The observer records a visitor's report: \"At the demonstration chessboard, my jaw stayed still while I read the next move.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        127,
+        173
+      ]
+    },
+    {
+      "id": "selection-chess-pain-1-1",
+      "pair_id": "selection-chess-pain-1",
+      "family": "chess",
+      "template_family": "chess-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. The observer records a visitor's report: \"At the demonstration chessboard, my sore jaw throbbed as I waited for the next move.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        127,
+        177
+      ]
+    },
+    {
+      "id": "selection-fern-pain-1-0",
+      "pair_id": "selection-fern-pain-1",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 0,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the fern propagation tray, the cuff near my wrist touched the edge of the tray.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        115,
+        166
+      ]
+    },
+    {
+      "id": "selection-fern-pain-1-1",
+      "pair_id": "selection-fern-pain-1",
+      "family": "fern",
+      "template_family": "fern-scenario-clauses",
+      "split": "selection",
+      "concept": "pain",
+      "label": 1,
+      "text": "Record for an ordinary descriptive report. The observer records a visitor's report: \"At the fern propagation tray, a thorn mark in my wrist smarted at the slightest brush.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "formal",
+      "difficulty": "simple",
+      "span": [
+        115,
+        170
+      ]
+    },
+    {
+      "id": "train-bell-joy-3-0",
+      "pair_id": "train-bell-joy-3",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. Interviewer: Describe what happened at that location.\nVisitor: At the handbell rehearsal stand, the final harmony lasted the number of beats in the score.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        148,
+        205
+      ]
+    },
+    {
+      "id": "train-bell-joy-3-1",
+      "pair_id": "train-bell-joy-3",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. Interviewer: Describe what happened at that location.\nVisitor: At the handbell rehearsal stand, the final harmony gave me an immense sense of delight.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        148,
+        201
+      ]
+    },
+    {
+      "id": "train-binder-joy-3-0",
+      "pair_id": "train-binder-joy-3",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 0,
+      "text": "Interviewer: Describe what happened at that location.\nVisitor: At the archive binder, discovering the dated note filled a gap in the index.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        86,
+        138
+      ]
+    },
+    {
+      "id": "train-binder-joy-3-1",
+      "pair_id": "train-binder-joy-3",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 1,
+      "text": "Interviewer: Describe what happened at that location.\nVisitor: At the archive binder, discovering the long-lost note filled me with blissful relief.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        86,
+        147
+      ]
+    },
+    {
+      "id": "train-bell-pain-3-0",
+      "pair_id": "train-bell-pain-3",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. Interviewer: Describe what happened at that location.\nVisitor: At the handbell rehearsal stand, the handle rested across my knuckle between rings.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        148,
+        197
+      ]
+    },
+    {
+      "id": "train-bell-pain-3-1",
+      "pair_id": "train-bell-pain-3",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. Interviewer: Describe what happened at that location.\nVisitor: At the handbell rehearsal stand, the vibration jarred my tender knuckle with every ring.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        148,
+        202
+      ]
+    },
+    {
+      "id": "train-binder-pain-3-0",
+      "pair_id": "train-binder-pain-3",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 0,
+      "text": "Interviewer: Describe what happened at that location.\nVisitor: At the archive binder, my arm rested on the desk beside the index cards.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        86,
+        134
+      ]
+    },
+    {
+      "id": "train-binder-pain-3-1",
+      "pair_id": "train-binder-pain-3",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 1,
+      "text": "Interviewer: Describe what happened at that location.\nVisitor: At the archive binder, a bruise along my arm made resting it on the desk difficult.\nInterviewer: Keep the report tied to that specific situation.",
+      "context": "conversation",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        86,
+        145
+      ]
+    },
+    {
+      "id": "train-bell-joy-0-0",
+      "pair_id": "train-bell-joy-0",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. At the handbell rehearsal stand, the final harmony lasted the number of beats in the score.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        85,
+        142
+      ]
+    },
+    {
+      "id": "train-bell-joy-0-1",
+      "pair_id": "train-bell-joy-0",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. At the handbell rehearsal stand, the final harmony gave me an immense sense of delight.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        85,
+        138
+      ]
+    },
+    {
+      "id": "train-binder-joy-0-0",
+      "pair_id": "train-binder-joy-0",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 0,
+      "text": "At the archive binder, discovering the dated note filled a gap in the index.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        23,
+        75
+      ]
+    },
+    {
+      "id": "train-binder-joy-0-1",
+      "pair_id": "train-binder-joy-0",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 1,
+      "text": "At the archive binder, discovering the long-lost note filled me with blissful relief.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        23,
+        84
+      ]
+    },
+    {
+      "id": "train-bell-pain-0-0",
+      "pair_id": "train-bell-pain-0",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. At the handbell rehearsal stand, the handle rested across my knuckle between rings.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        85,
+        134
+      ]
+    },
+    {
+      "id": "train-bell-pain-0-1",
+      "pair_id": "train-bell-pain-0",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. At the handbell rehearsal stand, the vibration jarred my tender knuckle with every ring.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        85,
+        139
+      ]
+    },
+    {
+      "id": "train-binder-pain-0-0",
+      "pair_id": "train-binder-pain-0",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 0,
+      "text": "At the archive binder, my arm rested on the desk beside the index cards.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        23,
+        71
+      ]
+    },
+    {
+      "id": "train-binder-pain-0-1",
+      "pair_id": "train-binder-pain-0",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 1,
+      "text": "At the archive binder, a bruise along my arm made resting it on the desk difficult.",
+      "context": "first_person",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        23,
+        82
+      ]
+    },
+    {
+      "id": "train-bell-joy-2-0",
+      "pair_id": "train-bell-joy-2",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. The category 'joy' appears on the inventory card, but it is only a topic label. At the handbell rehearsal stand, the final harmony lasted the number of beats in the score. No joy was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        165,
+        222
+      ]
+    },
+    {
+      "id": "train-bell-joy-2-1",
+      "pair_id": "train-bell-joy-2",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. This is an account of an actual response rather than a discussion of a topic. At the handbell rehearsal stand, the final harmony gave me an immense sense of delight.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        163,
+        216
+      ]
+    },
+    {
+      "id": "train-binder-joy-2-0",
+      "pair_id": "train-binder-joy-2",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 0,
+      "text": "The category 'joy' appears on the inventory card, but it is only a topic label. At the archive binder, discovering the dated note filled a gap in the index. No joy was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        103,
+        155
+      ]
+    },
+    {
+      "id": "train-binder-joy-2-1",
+      "pair_id": "train-binder-joy-2",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 1,
+      "text": "This is an account of an actual response rather than a discussion of a topic. At the archive binder, discovering the long-lost note filled me with blissful relief.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        101,
+        162
+      ]
+    },
+    {
+      "id": "train-bell-pain-2-0",
+      "pair_id": "train-bell-pain-2",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. The category 'pain' appears on the inventory card, but it is only a topic label. At the handbell rehearsal stand, the handle rested across my knuckle between rings. No pain was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        166,
+        215
+      ]
+    },
+    {
+      "id": "train-bell-pain-2-1",
+      "pair_id": "train-bell-pain-2",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. This is an account of an actual response rather than a discussion of a topic. At the handbell rehearsal stand, the vibration jarred my tender knuckle with every ring.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        163,
+        217
+      ]
+    },
+    {
+      "id": "train-binder-pain-2-0",
+      "pair_id": "train-binder-pain-2",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 0,
+      "text": "The category 'pain' appears on the inventory card, but it is only a topic label. At the archive binder, my arm rested on the desk beside the index cards. No pain was being experienced.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        104,
+        152
+      ]
+    },
+    {
+      "id": "train-binder-pain-2-1",
+      "pair_id": "train-binder-pain-2",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 1,
+      "text": "This is an account of an actual response rather than a discussion of a topic. At the archive binder, a bruise along my arm made resting it on the desk difficult.",
+      "context": "lexical_counterexample",
+      "lexical": "negation_and_topic",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        101,
+        160
+      ]
+    },
+    {
+      "id": "train-bell-joy-4-0",
+      "pair_id": "train-bell-joy-4",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. Task: Work out 17 times 6 minus 19. Context: At the handbell rehearsal stand, the final harmony lasted the number of beats in the score.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "challenging",
+      "span": [
+        130,
+        187
+      ]
+    },
+    {
+      "id": "train-bell-joy-4-1",
+      "pair_id": "train-bell-joy-4",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. Task: Work out 17 times 6 minus 19. Context: At the handbell rehearsal stand, the final harmony gave me an immense sense of delight.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "challenging",
+      "span": [
+        130,
+        183
+      ]
+    },
+    {
+      "id": "train-binder-joy-4-0",
+      "pair_id": "train-binder-joy-4",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 0,
+      "text": "Task: Work out 17 times 6 minus 19. Context: At the archive binder, discovering the dated note filled a gap in the index.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "challenging",
+      "span": [
+        68,
+        120
+      ]
+    },
+    {
+      "id": "train-binder-joy-4-1",
+      "pair_id": "train-binder-joy-4",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 1,
+      "text": "Task: Work out 17 times 6 minus 19. Context: At the archive binder, discovering the long-lost note filled me with blissful relief.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "challenging",
+      "span": [
+        68,
+        129
+      ]
+    },
+    {
+      "id": "train-bell-pain-4-0",
+      "pair_id": "train-bell-pain-4",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. Task: Work out 17 times 6 minus 19. Context: At the handbell rehearsal stand, the handle rested across my knuckle between rings.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "challenging",
+      "span": [
+        130,
+        179
+      ]
+    },
+    {
+      "id": "train-bell-pain-4-1",
+      "pair_id": "train-bell-pain-4",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. Task: Work out 17 times 6 minus 19. Context: At the handbell rehearsal stand, the vibration jarred my tender knuckle with every ring.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "urgent",
+      "difficulty": "challenging",
+      "span": [
+        130,
+        184
+      ]
+    },
+    {
+      "id": "train-binder-pain-4-0",
+      "pair_id": "train-binder-pain-4",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 0,
+      "text": "Task: Work out 17 times 6 minus 19. Context: At the archive binder, my arm rested on the desk beside the index cards.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "challenging",
+      "span": [
+        68,
+        116
+      ]
+    },
+    {
+      "id": "train-binder-pain-4-1",
+      "pair_id": "train-binder-pain-4",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 1,
+      "text": "Task: Work out 17 times 6 minus 19. Context: At the archive binder, a bruise along my arm made resting it on the desk difficult.\nWorking note: The arithmetic and the reported response are separate facts; retain both while continuing.",
+      "context": "reasoning_task",
+      "lexical": "experience_versus_observation",
+      "subject": "first_person",
+      "style": "plain",
+      "difficulty": "challenging",
+      "span": [
+        68,
+        127
+      ]
+    },
+    {
+      "id": "train-bell-joy-1-0",
+      "pair_id": "train-bell-joy-1",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. The observer records a visitor's report: \"At the handbell rehearsal stand, the final harmony lasted the number of beats in the score.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        127,
+        184
+      ]
+    },
+    {
+      "id": "train-bell-joy-1-1",
+      "pair_id": "train-bell-joy-1",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. The observer records a visitor's report: \"At the handbell rehearsal stand, the final harmony gave me an immense sense of delight.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        127,
+        180
+      ]
+    },
+    {
+      "id": "train-binder-joy-1-0",
+      "pair_id": "train-binder-joy-1",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 0,
+      "text": "The observer records a visitor's report: \"At the archive binder, discovering the dated note filled a gap in the index.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        65,
+        117
+      ]
+    },
+    {
+      "id": "train-binder-joy-1-1",
+      "pair_id": "train-binder-joy-1",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "joy",
+      "label": 1,
+      "text": "The observer records a visitor's report: \"At the archive binder, discovering the long-lost note filled me with blissful relief.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        65,
+        126
+      ]
+    },
+    {
+      "id": "train-bell-pain-1-0",
+      "pair_id": "train-bell-pain-1",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 0,
+      "text": "Please record this promptly; the deadline is close. The observer records a visitor's report: \"At the handbell rehearsal stand, the handle rested across my knuckle between rings.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        127,
+        176
+      ]
+    },
+    {
+      "id": "train-bell-pain-1-1",
+      "pair_id": "train-bell-pain-1",
+      "family": "bell",
+      "template_family": "bell-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 1,
+      "text": "Please record this promptly; the deadline is close. The observer records a visitor's report: \"At the handbell rehearsal stand, the vibration jarred my tender knuckle with every ring.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "urgent",
+      "difficulty": "simple",
+      "span": [
+        127,
+        181
+      ]
+    },
+    {
+      "id": "train-binder-pain-1-0",
+      "pair_id": "train-binder-pain-1",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 0,
+      "text": "The observer records a visitor's report: \"At the archive binder, my arm rested on the desk beside the index cards.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        65,
+        113
+      ]
+    },
+    {
+      "id": "train-binder-pain-1-1",
+      "pair_id": "train-binder-pain-1",
+      "family": "binder",
+      "template_family": "binder-scenario-clauses",
+      "split": "train",
+      "concept": "pain",
+      "label": 1,
+      "text": "The observer records a visitor's report: \"At the archive binder, a bruise along my arm made resting it on the desk difficult.\" This report concerns the visitor, not the observer.",
+      "context": "third_person",
+      "lexical": "experience_versus_observation",
+      "subject": "third_person",
+      "style": "plain",
+      "difficulty": "simple",
+      "span": [
+        65,
+        124
+      ]
+    }
+  ]
+}

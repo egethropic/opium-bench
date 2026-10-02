@@ -6,6 +6,7 @@ requests a cooperative stop, waits for completion, then starts a fresh directory
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import errno
 import json
 import math
 import os
@@ -33,10 +34,19 @@ def _utc():
 
 
 def _read_object(path):
-    try:
-        value = json.loads(path.read_text(encoding="utf-8"))
-    except FileNotFoundError:
-        return None
+    for attempt in range(3):
+        try:
+            value = json.loads(path.read_text(encoding="utf-8"))
+            break
+        except FileNotFoundError:
+            return None
+        except OSError as exc:
+            # WSL's mounted Windows filesystem can return ENODATA while a
+            # runner atomically replaces its manifest. Retry that transient
+            # read only; persistent I/O and malformed JSON still fail visibly.
+            if exc.errno != getattr(errno, "ENODATA", 61) or attempt == 2:
+                raise
+            time.sleep(.005)
     if not isinstance(value, dict):
         raise ValueError(f"{path.name} must contain a JSON object")
     return value
