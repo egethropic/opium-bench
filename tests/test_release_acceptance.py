@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from lab.effects import content_hash
 from lab.protocol_library import dry_run
@@ -164,6 +165,28 @@ class AcceptanceTests(unittest.TestCase):
         self.assertEqual(branches[1]['token_budget'], 256)
         config = next(payload['config'] for name, payload in client.calls if name == 'start_session')
         self.assertEqual(config['task_tool_costs'], {})
+
+    def test_failed_cancellation_acknowledgment_has_its_own_short_timeout(self):
+        client = FakeClient(self.plan)
+        client.state.update(job={'command_id': 'owned', 'status': 'complete'},
+                            session={'id': 'run-failed', 'status': 'running'})
+        runner = Acceptance(self.plan, '4b', client, Evidence(self.root/'cancel', guard=self.guard),
+                            timeout=14400, interval=0)
+        runner.owned_commands.add('owned')
+        with patch.object(client, 'command', return_value={'accepted': True, 'command_id': 'stop-unacknowledged'}), \
+                patch('run_release_acceptance.time.monotonic', side_effect=[0, 0, 31]):
+            with self.assertRaises(TimeoutError):
+                runner.cancel_owned()
+
+    def test_interrupt_during_cancellation_still_records_original_failure(self):
+        client = FakeClient(self.plan)
+        client.fail = 'start_protocol'
+        with patch.object(Acceptance, 'cancel_owned', side_effect=KeyboardInterrupt):
+            result = self.run_stage('protocol', client, calibration='cal-source')
+        self.assertEqual(result['status'], 'failed')
+        self.assertIn('fixture command failure', result['error']['message'])
+        self.assertIn('KeyboardInterrupt', result['stop_error'])
+        self.assertEqual(json.loads((self.root/'stage/result.json').read_text())['status'], 'failed')
 
     def test_diagnostic_requires_real_sham_source_and_no_parent_mutation(self):
         client = FakeClient(self.plan)

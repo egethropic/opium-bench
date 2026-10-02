@@ -415,15 +415,19 @@ class Runtime:
             if quantization_config is None and quantization == "4bit":
                 quantization_config = _config_identity(kwargs.get("quantization_config"))
             tokenizer_data = tokenizer_identity(tokenizer)
+            # TorchVersion is a str subclass accepted by JSON but not by the
+            # checkpoint's strict plain-data boundary. Preserve serialized
+            # version text while normalizing producer values to builtin str.
+            bitsandbytes_version = getattr(sys.modules.get("bitsandbytes"), "__version__", None)
             fingerprint = {"model_id": model_id, "revision": resolved or revision,
                            "architecture": kind, "adapter": adapter, "dtype": dtype_name,
                            "quantization": quantization, "layers": len(blocks),
-                           "hidden_size": int(text_config.hidden_size), "transformers": transformers.__version__,
-                           "torch": torch.__version__, "attention_implementation": attention,
+                           "hidden_size": int(text_config.hidden_size), "transformers": str(transformers.__version__),
+                           "torch": str(torch.__version__), "attention_implementation": attention,
                            "model_config_sha256": _digest(model_config),
                            "tokenizer": tokenizer_data, "quantization_config": quantization_config,
-                           "bitsandbytes": getattr(sys.modules.get("bitsandbytes"), "__version__", None)
-                               if quantization_config is not None else None}
+                           "bitsandbytes": str(bitsandbytes_version)
+                               if quantization_config is not None and bitsandbytes_version is not None else None}
             tool_call_format = "qwen_xml" if adapter == "qwen3_5" else "json"
             if adapter == "qwen3_5":
                 # Preserve existing Qwen3 calibration identities. New adapters

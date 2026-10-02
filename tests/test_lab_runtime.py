@@ -1,5 +1,6 @@
 """Local numerical/protocol checks; no model downloads or GPU allocation."""
 import json
+from contextlib import ExitStack
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
@@ -9,6 +10,7 @@ from unittest.mock import patch
 import numpy as np
 import torch
 from torch import nn
+from torch.torch_version import TorchVersion
 
 from lab.calibration_data import rows, validate_rows
 from lab.runtime import (Cancelled, Runtime, _digest, normalized_control,
@@ -341,6 +343,70 @@ class CalibrationTests(unittest.TestCase):
 
 
 class RuntimeLoadingTests(unittest.TestCase):
+    def test_loaded_version_subclasses_keep_fingerprint_hash_and_v2_checkpoint_roundtrip(self):
+        import sys
+        import transformers
+        from lab.budgets import WeightedBudget
+        from lab.checkpoints import capture, restore
+        from lab.controller_v2 import RecipeV2Controller
+        from lab.session_v2 import build_session, create_environment
+
+        # Use the installed torch version object, which caused the real failure.
+        self.assertIsInstance(torch.__version__, TorchVersion)
+        torch_version = torch.__version__
+        transformers_version = TorchVersion(transformers.__version__)
+        bnb_version = TorchVersion("0.50.2")
+        for quantized in (False, True):
+            with self.subTest(quantized=quantized), TemporaryDirectory() as directory, ExitStack() as stack:
+                model, tokenizer = Model(), Tokenizer()
+                model.config = SimpleNamespace(model_type="qwen3", hidden_size=4,
+                                               max_position_embeddings=2048, _commit_hash=DEFAULT_REVISION)
+                profile = {"device": "cpu"}
+                if quantized:
+                    # Exercise the optional metadata path with a mocked loader
+                    # and CUDA APIs; no GPU allocation or kernels are executed.
+                    profile = {"device": "cuda", "quantization": "4bit"}
+                    model.config.quantization_config = dict(quant_method="bitsandbytes", load_in_4bit=True, bnb_4bit_quant_type="nf4")
+                    stack.enter_context(patch.dict(sys.modules, {"bitsandbytes": SimpleNamespace(__version__=bnb_version)}))
+                    stack.enter_context(patch("torch.cuda.is_available", return_value=True))
+                    stack.enter_context(patch("torch.cuda.empty_cache"))
+                    stack.enter_context(patch.object(Runtime, "_gpu_memory", return_value=None))
+                    stack.enter_context(patch.object(Runtime, "_numerical_environment", return_value={"device": "mock_cuda"}))
+                stack.enter_context(patch("transformers.__version__", transformers_version))
+                stack.enter_context(patch("transformers.AutoConfig.from_pretrained", return_value=model.config))
+                stack.enter_context(patch("transformers.AutoTokenizer.from_pretrained", return_value=tokenizer))
+                stack.enter_context(patch("transformers.AutoModelForCausalLM.from_pretrained", return_value=model))
+                rt = Runtime()
+                info = rt.load(profile, directory)
+                fingerprint = info["fingerprint"]
+                for key in ("torch", "transformers") + (("bitsandbytes",) if quantized else ()):
+                    self.assertIs(type(fingerprint[key]), str)
+                if not quantized:
+                    self.assertIsNone(fingerprint["bitsandbytes"])
+                prior_fingerprint = dict(fingerprint, torch=torch_version, transformers=transformers_version,
+                                         bitsandbytes=bnb_version if quantized else None)
+                self.assertEqual(json.dumps(fingerprint, sort_keys=True), json.dumps(prior_fingerprint, sort_keys=True))
+                self.assertEqual(info["fingerprint_sha256"], _digest(prior_fingerprint))
+
+                preview = build_session(dict(recipe_version=2, demonstration="none", task_count=1,
+                                             action_budget=8, token_budget=128))
+                config = preview["config"]
+                environment = create_environment(config)
+                effect = RecipeV2Controller(config)
+                budget = WeightedBudget(config["action_budget"], config["token_budget"], base_cost=config["base_decision_cost"])
+                session = dict(run_id="run-runtime-version", mode="experiment", config=config,
+                               calibration_id="cal-runtime-version", messages=preview["messages"],
+                               tool_call_format="json", turns=0, external_messages=[])
+                calibration = dict(schema_version=2, metadata_sha256="a" * 64, vectors_sha256="b" * 64)
+                checkpoint = capture(session, effect, budget, environment, info, calibration)
+                restored, restored_effect, restored_budget, restored_env = restore(json.loads(json.dumps(checkpoint)), info, calibration)
+                self.assertEqual(restored["messages"], preview["messages"])
+                self.assertEqual(restored_effect.snapshot(), effect.snapshot())
+                self.assertEqual(restored_budget.snapshot(), budget.snapshot())
+                self.assertEqual(restored_env.metrics(), environment.metrics())
+                self.assertEqual(checkpoint["identity"]["model"]["fingerprint_sha256"], info["fingerprint_sha256"])
+                rt.unload()
+
     def test_prequantized_nf4_keeps_checkpoint_skip_modules(self):
         import transformers
         stored = {"quant_method": "bitsandbytes", "load_in_4bit": True,

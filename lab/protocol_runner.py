@@ -13,6 +13,7 @@ import json
 import math
 from pathlib import Path
 
+from .resources import ResourceStop
 from .effects import content_hash
 from .protocol_library import CAPABILITIES as KNOWN_CAPABILITIES
 from .storage import atomic_json, guarded_bytes, read_json, utc_now
@@ -307,7 +308,8 @@ class ProtocolRunner:
         states=[e['status'] for e in latest.values()]
         receipt['status']='complete' if all(s=='complete' for s in states) else 'stopped' if self.should_stop() else 'partial'
         receipt['finished_at']=utc_now();save_receipt(self.store,receipt)
-        return {'research_job_id':job_id,'status':receipt['status'],'planned':len(plan['episodes']),'complete':states.count('complete'),'attempts':len(receipt['entries'])}
+        return {'research_job_id':job_id,'status':receipt['status'],'planned':len(plan['episodes']),'complete':states.count('complete'),
+            'failed':states.count('failed'),'status_counts':{status:states.count(status) for status in sorted(set(states))},'attempts':len(receipt['entries'])}
 
 
 class LocalWorkerBackend:
@@ -371,6 +373,8 @@ class LocalWorkerBackend:
                 self.worker.restore_session(dict(payload,checkpoint=cp))
             else:self.worker.start_session(payload)
             self.worker.run_experiment()
+        except (ResourceStop, KeyboardInterrupt, SystemExit):
+            raise
         except BaseException as exc:
             if self.worker.session and self.worker.session.get('run_id')==entry['run_id'] and not self.worker.session.get('finished'):
                 self.worker.finish('stopped' if self.worker.stop.is_set() else 'failed',str(exc))

@@ -307,6 +307,41 @@ class LocalBackendTests(RunnerFixture):
             if cp['session']['turns']==2:
                 self.assertTrue(any(e['type']=='tool' for e in prefix));self.assertTrue(any(e.get('invalid') for e in prefix))
         self.assertTrue(read_job(self.store,receipt['id'],verify=True)['all_complete'])
+    def test_main_resource_error_halts_real_backend_without_normal_failed_final(self):
+        from lab.resources import ResourceStop
+        preview=dry_run(document());receipt,_=create_job(self.store,preview,'cal-test',capabilities=RUNNER_CAPABILITIES,model_info=self.worker.model_info)
+        with patch.object(self.runtime,'generate',side_effect=ResourceStop('during real backend inference')):
+            with self.assertRaises(ResourceStop):
+                ProtocolRunner(self.store,self.local).run(receipt['id'],preview['expansion_sha256'])
+        self.assertFalse(any(e['type']=='session_finished' for e in self.events))
+        state=read_job(self.store,receipt['id'],verify=True)
+        self.assertEqual(state['receipt']['status'],'resource_stopped')
+
+    def test_failed_research_job_has_explicit_terminal_counts_and_message(self):
+        from lab.service import LabService
+        service=LabService(self.store.root,self.store.root/'cache',historical=[]);service.store=self.store
+        self.worker.output=service.event
+        preview=dry_run(document(arms=('active','sham')))
+        receipt,entries=create_job(self.store,preview,'cal-test',capabilities=RUNNER_CAPABILITIES,model_info=self.worker.model_info)
+        class VersionString(str):pass
+        self.worker.model_info['version_fixture']=VersionString('2.8.0')
+        self.worker.receive({'id':'research-command','command':'run_research_job','payload':{'data_dir':str(self.store.root),'job_id':receipt['id'],
+            'expected_expansion_sha256':preview['expansion_sha256'],'entries':entries}})
+        self.worker.jobs.put(None)
+        self.worker.loop()
+        self.assertEqual(service.job['status'],'complete') # Command execution settled; study did not succeed.
+        self.assertEqual(service.job['research_result_status'],'partial')
+        self.assertEqual(service.job['research_status_counts'],{'failed':2})
+        self.assertEqual((service.job['research_planned'],service.job['research_completed'],service.job['research_failed']),(2,0,2))
+        self.assertIn('0/2 cases complete; 2 failed',service.job['message'])
+        state=read_job(self.store,receipt['id'],verify=True);self.assertEqual(state['status_counts'],{'failed':2})
+        for entry in entries:
+            events=self.store.read_run(entry['run_id'])['events']
+            self.assertEqual(sum(e['type']=='session_started' for e in events),1)
+            final=[e for e in events if e['type']=='session_finished']
+            self.assertEqual(len(final),1);self.assertEqual(final[0]['status'],'failed')
+            self.assertEqual(final[0]['summary']['termination'],'checkpoint_failed')
+
     def test_diagnostic_failure_retains_observed_failed_and_missing_denominators(self):
         st=stage('discovery',config={'arm_from_factor':'arm','completed_boundaries':[1,2],'separate_from_preference':True},bindings=['observable_criterion','diagnostic_contexts','answer_key'],budget=4)
         doc=document([st],changes={'two_buttons':True});doc.pop('content_sha256');doc['axes'][0]['levels'][0]['id']='naive';doc['smoke_axes']['arm']=['naive'];doc=freeze_protocol(doc)

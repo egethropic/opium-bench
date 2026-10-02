@@ -176,7 +176,11 @@ class Worker:
             self.pause_requested.clear()
             self.pause_wakeup.set()
             if self.session and not self.active:
-                self.finish("stopped", "stopped_by_user")
+                try:
+                    self.finish("stopped", "stopped_by_user")
+                except ResourceStop as exc:
+                    self._resource_stopped(exc, "start_session", self.session, request.get("id"))
+                    return
                 self.model_status("ready")
             self.emit(dict(type="job", command_id=request.get("id"), status="stopped", message="Stop requested"))
         elif command in {"pause", "resume"}:
@@ -325,18 +329,30 @@ class Worker:
                 else:
                     raise ValueError("Unsupported worker command")
                 self.resource_check(force=True)
+                details = {}
+                message = command
+                if command == "run_research_job":
+                    details = dict(research_job_id=result["research_job_id"], research_result_status=result["status"],
+                        research_planned=result["planned"], research_completed=result["complete"],
+                        research_failed=result["failed"], research_status_counts=result["status_counts"])
+                    remaining = "; ".join(f"{count} {status}" for status, count in result["status_counts"].items() if status != "complete" and count)
+                    message = f"Research job {result['status']}: {result['complete']}/{result['planned']} cases complete" + ("; " + remaining if remaining else "")
                 self.emit(dict(type="job", command_id=command_id,
-                               status="stopped" if self.stop.is_set() else "complete", message=command))
+                               status="stopped" if self.stop.is_set() else "complete", message=message, **details))
             except ResourceStop as exc:
                 self._resource_stopped(exc, command, payload, command_id)
             except Exception as exc:
                 if not self.stop.is_set():
                     traceback.print_exc(file=sys.stderr)
                 self.emit(dict(type="error", message=f"{type(exc).__name__}: {exc}", command_id=command_id))
-                if self.session and not self.session.get("finished") and command in {"start_session", "chat", "start_batch", "restore_session", "run_research_job"}:
-                    self.finish("stopped" if self.stop.is_set() else "failed", "stopped_by_user" if self.stop.is_set() else str(exc))
-                self.model_status("ready" if self.model_info else "error", str(exc))
-                self.emit(dict(type="job", command_id=command_id, status="stopped" if self.stop.is_set() else "failed", message=str(exc)))
+                try:
+                    if self.session and not self.session.get("finished") and command in {"start_session", "chat", "start_batch", "restore_session", "run_research_job"}:
+                        self.finish("stopped" if self.stop.is_set() else "failed", "stopped_by_user" if self.stop.is_set() else str(exc))
+                except ResourceStop as stopped:
+                    self._resource_stopped(stopped, command, payload, command_id)
+                else:
+                    self.model_status("ready" if self.model_info else "error", str(exc))
+                    self.emit(dict(type="job", command_id=command_id, status="stopped" if self.stop.is_set() else "failed", message=str(exc)))
             finally:
                 contexts.close()
                 if self.resource_emergency:
@@ -1097,10 +1113,23 @@ class Worker:
     def finish(self, status, reason):
         if not self.session or self.session.get("finished"):
             return
+        checkpoint_error = None
+        def save_terminal_boundary():
+            nonlocal checkpoint_error
+            try:
+                self.checkpoint()
+            except ResourceStop:
+                raise  # Capacity failures use the preallocated emergency path.
+            except OSError as exc:
+                raise ResourceStop(f"Checkpoint storage write failed: {exc}", operation="checkpoint") from exc
+            except Exception as exc:
+                checkpoint_error = dict(type=type(exc).__name__, message=str(exc)[:2000],
+                    latest_boundary_saved=False,
+                    previous_checkpoint_present=(Path(self.session["out_dir"]) / "checkpoint.json").is_file())
         if self.yoke:
             # Persist the last resumable boundary before final coverage closes its
             # cursor. The final cancellation is evidence, not a new resume point.
-            self.checkpoint()
+            save_terminal_boundary()
             final_yoke = self.yoke.finish(reason)
             for event in final_yoke.get("deliveries", []):
                 self.emit(event, scoped=True)
@@ -1112,7 +1141,15 @@ class Worker:
                        thinking=self.session["config"]["thinking"], cache_policy="rebuild_each_turn",
                        tool_call_format=self.session["tool_call_format"])
         if not self.yoke:
-            self.checkpoint()
+            save_terminal_boundary()
+        if checkpoint_error:
+            # A serialization/validation failure must not keep this session live
+            # and poison Stop or the next episode. Retain the last good checkpoint
+            # and make the missing final boundary explicit in terminal evidence.
+            summary.update(termination="checkpoint_failed", requested_termination=reason,
+                           requested_status=status, checkpoint_error=checkpoint_error)
+            status = "failed"
+            self.emit(dict(type="checkpoint_error", error=checkpoint_error), scoped=True)
         self.session["finished"] = True
         self.paused = False
         self.pause_requested.clear()

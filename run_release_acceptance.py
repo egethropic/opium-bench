@@ -114,13 +114,13 @@ class Acceptance:
         self.evidence.write(prefix + '-accepted.json', response)
         return response
 
-    def poll(self, getter, done):
+    def poll(self, getter, done, *, timeout=None):
         started = time.monotonic()
         while True:
             value = getter()
             if done(value):
                 return value
-            if time.monotonic() - started >= self.timeout:
+            if time.monotonic() - started >= (self.timeout if timeout is None else timeout):
                 raise TimeoutError('Acceptance wait expired; no automatic retry was started')
             time.sleep(self.interval)
 
@@ -155,7 +155,8 @@ class Acceptance:
             # Cancellation must still reach the service when local evidence storage fails.
             accepted = self.client.command('stop', {})
             stopped = self.poll(lambda: self.client.get('/api/state'), lambda s:
-                s.get('job', {}).get('command_id') == accepted.get('command_id') and s.get('job', {}).get('status') in TERMINAL)
+                s.get('job', {}).get('command_id') == accepted.get('command_id') and s.get('job', {}).get('status') in TERMINAL,
+                timeout=min(30, self.timeout))
             try: self.evidence.write('owned-cancellation.json', {'accepted': accepted, 'job': stopped['job']})
             except ResourceStop: pass
             return True
@@ -343,7 +344,8 @@ def run_stage(plan, profile, stage, output, client, *, calibration=None, source_
         result.update(status='cancelled' if isinstance(error, KeyboardInterrupt) else 'resource_stopped' if isinstance(error, ResourceStop) else 'failed',
             error={'type': type(error).__name__, 'message': str(error)[:4096]})
         try: result['owned_work_stopped'] = runner.cancel_owned()
-        except Exception as stop_error: result['stop_error'] = str(stop_error)
+        except (Exception, KeyboardInterrupt) as stop_error:
+            result['stop_error'] = type(stop_error).__name__ + ': ' + str(stop_error)
     result.update(finished_at=utc_now(), artifacts=deepcopy(evidence.files), interpretation='Engineering acceptance only; no independent semantic or subjective-experience conclusion.')
     try:
         evidence.write('result.json', result)
