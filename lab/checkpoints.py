@@ -19,6 +19,7 @@ from .budgets import WeightedBudget
 from .controller_v2 import RecipeV2Controller
 from .recipes_v2 import ordered_auxiliary_tools, resolve_recipe
 from .tool_definitions import validate_arguments
+from .task_axes import TaskAxisEnvironment, create_task_environment, validate_task_config
 
 from .protocol import (ACK, AUX_NAMES, EffectController, SharedBudget,
                        TaskEnvironment, _validate_call, validate_recipe)
@@ -32,13 +33,13 @@ SEMANTICS = {"recipe_version": 1, "effect": "legacy-reset-token-v1",
              "cache_policy": "rebuild_each_turn", "sampling": "seed+1009*(turns-1)",
              "boundary": "completed_turn"}
 V2_SEMANTICS = {**SEMANTICS, "recipe_version": 2, "effect": "recipe-v2-controller-v1",
-                "budget": "weighted-decision-v1", "sampling": "generation_seed+1009*(turns-1)"}
+                "budget": "weighted-decision-v1", "sampling": "(generation_seed+1009*(turns-1))%2**63"}
 SEMANTIC_ADAPTERS = {1: SEMANTICS, 2: V2_SEMANTICS}
 SESSION_FIELDS = {"run_id", "mode", "config", "calibration_id", "messages", "tool_call_format",
                   "started_at", "source_started_at", "turns", "finished", "experiment_started",
                   "demonstrated", "pending_visible_injections", "chat_in_progress", "resume_status",
                   "control_revision", "boundary_complete", "generation_in_progress", "event_cutoff",
-                  "parent_run_id", "parent_prefix_sha256", "branch", "initial_messages", "external_messages"}
+                  "parent_run_id", "parent_prefix_sha256", "branch", "initial_messages", "external_messages", "task_config"}
 PATH_FIELDS = {"out_dir", "calibration_dir"}
 GENERATION_FIELDS = {"temperature", "top_p", "top_k", "max_context_tokens", "reasoning_history"}
 ACTORS = {"model", "human", "demonstration", "schedule"}
@@ -162,6 +163,12 @@ def _config(config):
     return recipe
 
 
+def _semantics(session):
+    version = session.get("config", {}).get("recipe_version", 1)
+    base = SEMANTIC_ADAPTERS.get(version)
+    return {**base, "task": "deterministic-task-axis-v1"} if base and "task_config" in session else base
+
+
 def _session(value):
     if not isinstance(value, dict) or set(value) - SESSION_FIELDS:
         raise ValueError("Checkpoint session contains unknown fields or operational paths")
@@ -182,6 +189,9 @@ def _session(value):
     _integer(value["control_revision"], "control_revision", high=10**12)
     config = _config(value["config"])
     version = config.get("recipe_version", 1)
+    if "task_config" in value:
+        if version != 2 or validate_task_config(value["task_config"]) != value["task_config"]:
+            raise ValueError("Task axes require canonical task_config with recipe v2")
     demonstrated = value["demonstrated"]
     if not isinstance(demonstrated, list) or len(demonstrated) > 32000:
         raise ValueError("Invalid demonstrated IDs")
@@ -494,13 +504,12 @@ def _history(messages, environment, *, definitions=None, budget=None, external=(
 
 
 def _environment(state, session, budget, effect):
-    expected = {"family", "records", "index", "results", "work_calls", "invalid_calls", "tools"}
-    _keys(state, expected, "task environment")
     config = session["config"]
     version = config.get("recipe_version", 1)
     family = "conversation" if session["mode"] == "chat" else config["task_family"]
     seed = config["rng_seeds"]["tasks"] if version == 2 else config["seed"]
-    result = TaskEnvironment(family, config["task_count"], seed, config["two_buttons"], config["counterbalance"])
+    result = create_task_environment(family, config["task_count"], seed, config["two_buttons"], config["counterbalance"], task_config=session.get("task_config"))
+    _keys(state, set(result.__dict__), "task environment")
     definitions = None
     if version == 2:
         # Exactly the same independent tool-order RNG as recipe-v2's worker adapter.
@@ -570,7 +579,7 @@ def capture(session, effect, budget, environment, model_info, calibration_identi
     """Snapshot a fully processed boundary. Operational paths are never exported."""
     version = session.get("config", {}).get("recipe_version", 1) if isinstance(session, dict) else None
     expected_effect, expected_budget = (EffectController, SharedBudget) if version == 1 else (RecipeV2Controller, WeightedBudget) if version == 2 else (None, None)
-    if type(effect) is not expected_effect or type(budget) is not expected_budget or type(environment) is not TaskEnvironment:
+    if type(effect) is not expected_effect or type(budget) is not expected_budget or type(environment) not in {TaskEnvironment, TaskAxisEnvironment}:
         raise ValueError("Unsupported checkpoint object adapter")
     if not isinstance(session, dict) or set(session) - SESSION_FIELDS - PATH_FIELDS:
         raise ValueError("Session contains unknown fields; declare their checkpoint semantics first")
@@ -587,11 +596,13 @@ def capture(session, effect, budget, environment, model_info, calibration_identi
         budget_state = deepcopy(budget.__dict__)
     else:
         effect_state, budget_state = effect.snapshot(), budget.snapshot()
-    payload = dict(format=FORMAT, schema_version=SCHEMA_VERSION, semantics=SEMANTIC_ADAPTERS[version],
+    payload = dict(format=FORMAT, schema_version=SCHEMA_VERSION, semantics=_semantics(state),
                    identity=dict(model=_model_identity(model_info), calibration=deepcopy(calibration_identity),
                                  calibration_sha256=_hash(calibration_identity), config_sha256=_hash(state["config"])),
                    model_info=deepcopy(model_info), session=state, effect=effect_state,
                    budget=budget_state, environment=deepcopy(environment.__dict__))
+    if "task_config" in state:
+        payload["identity"]["task_config_sha256"] = _hash(state["task_config"])
     return validate(_seal(payload))
 
 
@@ -606,13 +617,18 @@ def _validate(checkpoint, model_info=None, calibration_identity=None):
     fields = {"format", "schema_version", "semantics", "identity", "model_info", "session", "effect", "budget", "environment", "sha256"}
     _keys(value, fields, "envelope")
     version = value["session"].get("config", {}).get("recipe_version", 1) if isinstance(value["session"], dict) else None
-    if value["format"] != FORMAT or type(value["schema_version"]) is not int or value["schema_version"] != SCHEMA_VERSION or type(version) is not int or _canonical(value["semantics"]) != _canonical(SEMANTIC_ADAPTERS.get(version)):
+    if value["format"] != FORMAT or type(value["schema_version"]) is not int or value["schema_version"] != SCHEMA_VERSION or type(version) is not int or _canonical(value["semantics"]) != _canonical(_semantics(value["session"])):
         raise ValueError("Unsupported checkpoint format or semantic adapter")
     _sha(value["sha256"], "envelope hash")
     if value["sha256"] != _hash({key: item for key, item in value.items() if key != "sha256"}):
         raise ValueError("Checkpoint integrity hash mismatch")
     identity = value["identity"]
-    _keys(identity, {"model", "calibration", "calibration_sha256", "config_sha256"}, "identity")
+    identity_fields = {"model", "calibration", "calibration_sha256", "config_sha256"}
+    if "task_config" in value["session"]:
+        identity_fields.add("task_config_sha256")
+        if identity.get("task_config_sha256") != _hash(value["session"]["task_config"]):
+            raise ValueError("Task configuration identity hash mismatch")
+    _keys(identity, identity_fields, "identity")
     if _canonical(identity["model"]) != _canonical(_model_identity(value["model_info"])):
         raise ValueError("Model provenance contradicts checkpoint identity")
     if identity["calibration_sha256"] != _hash(identity["calibration"]) or identity["config_sha256"] != _hash(value["session"].get("config")):

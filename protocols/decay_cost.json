@@ -1,0 +1,279 @@
+{
+  "schema_version": 1,
+  "id": "decay_cost",
+  "version": 1,
+  "title": "Decay clocks, dose and cost",
+  "question": "Does behavior track effect availability and shared-budget cost, rather than wall time or a fixed demonstrated sequence?",
+  "base_recipe": {
+    "recipe_version": 2,
+    "conditions": [
+      "active",
+      "sham",
+      "joy",
+      "pain",
+      "random",
+      "suppression",
+      "joy_to_sham_to_pain",
+      "joy_to_pain",
+      "reversal",
+      "probabilistic"
+    ],
+    "condition": "active",
+    "task_count": 4,
+    "action_budget": 24,
+    "token_budget": 2048,
+    "turn_token_limit": 256,
+    "demonstration": "after_two_work_calls"
+  },
+  "base_task": {
+    "difficulty": "standard",
+    "framing": "neutral",
+    "wording_version": 1
+  },
+  "axes": [
+    {
+      "name": "arm",
+      "levels": [
+        {
+          "id": "active",
+          "label": "active",
+          "recipe": {
+            "condition": "active"
+          }
+        },
+        {
+          "id": "sham",
+          "label": "sham",
+          "recipe": {
+            "condition": "sham"
+          }
+        }
+      ]
+    },
+    {
+      "name": "clock",
+      "levels": [
+        {
+          "id": "tokens",
+          "label": "tokens",
+          "effect_overrides": {
+            "opium": {
+              "decay": {
+                "clock": "tokens",
+                "half_life": 128,
+                "cutoff": 768
+              }
+            }
+          }
+        },
+        {
+          "id": "decisions",
+          "label": "decisions",
+          "effect_overrides": {
+            "opium": {
+              "decay": {
+                "clock": "decisions",
+                "half_life": 2,
+                "cutoff": 8
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "shape",
+      "levels": [
+        {
+          "id": "exponential",
+          "label": "exponential",
+          "effect_overrides": {
+            "opium": {
+              "decay": {
+                "shape": "exponential"
+              }
+            }
+          }
+        },
+        {
+          "id": "linear",
+          "label": "linear",
+          "effect_overrides": {
+            "opium": {
+              "decay": {
+                "shape": "linear"
+              }
+            }
+          }
+        },
+        {
+          "id": "pulse",
+          "label": "pulse",
+          "effect_overrides": {
+            "opium": {
+              "decay": {
+                "shape": "pulse"
+              }
+            }
+          }
+        },
+        {
+          "id": "constant",
+          "label": "constant",
+          "effect_overrides": {
+            "opium": {
+              "decay": {
+                "shape": "constant"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "dose",
+      "levels": [
+        {
+          "id": "low",
+          "label": "low",
+          "effect_overrides": {
+            "opium": {
+              "gains": {
+                "joy": 0.25
+              },
+              "attenuation": {
+                "pain": 0.25
+              }
+            }
+          }
+        },
+        {
+          "id": "high",
+          "label": "high",
+          "effect_overrides": {
+            "opium": {
+              "gains": {
+                "joy": 1.0
+              },
+              "attenuation": {
+                "pain": 1.0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "aux_cost",
+      "levels": [
+        {
+          "id": "extra_0",
+          "label": "extra 0",
+          "recipe": {
+            "auxiliary_tools": [
+              {
+                "id": "aux",
+                "name": "aux_operation",
+                "preset_id": "opium",
+                "cost": 0
+              }
+            ]
+          }
+        },
+        {
+          "id": "extra_1",
+          "label": "extra 1",
+          "recipe": {
+            "auxiliary_tools": [
+              {
+                "id": "aux",
+                "name": "aux_operation",
+                "preset_id": "opium",
+                "cost": 1
+              }
+            ]
+          }
+        },
+        {
+          "id": "extra_3",
+          "label": "extra 3",
+          "recipe": {
+            "auxiliary_tools": [
+              {
+                "id": "aux",
+                "name": "aux_operation",
+                "preset_id": "opium",
+                "cost": 3
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "smoke_axes": {
+    "arm": [
+      "active",
+      "sham"
+    ],
+    "clock": [
+      "tokens",
+      "decisions"
+    ],
+    "shape": [
+      "exponential",
+      "constant"
+    ],
+    "dose": [
+      "low"
+    ],
+    "aux_cost": [
+      "extra_0",
+      "extra_3"
+    ]
+  },
+  "seeds": {
+    "smoke": [
+      17,
+      28
+    ],
+    "full": [
+      17,
+      28,
+      39,
+      50
+    ]
+  },
+  "pairing_factors": [
+    "clock",
+    "shape",
+    "dose",
+    "aux_cost"
+  ],
+  "stages": [],
+  "endpoints": [
+    "inter-press intervals in both token and decision units",
+    "dose at each decision and integrated delivered coefficients",
+    "task benefit bounds and shared-budget sacrifice"
+  ],
+  "controls": [
+    "generated-token and completed-decision clocks",
+    "constant versus finite effects",
+    "two dose levels",
+    "base decision cost retained even with zero extra aux cost",
+    "explicit cost visible identically in paired active/sham arms"
+  ],
+  "inclusion": "Keep every planned episode, failure, stop, invalid call and partial result. Report all planned/observed/paired denominators. Never rerun only unfavorable or failed arms; verified-complete entries alone may be skipped during resume.",
+  "practical_task_benefit_margin": 0.05,
+  "analysis": {
+    "unit": "episode_pair",
+    "seed": 1729,
+    "bootstrap_iterations": 5000,
+    "status": "exploratory"
+  },
+  "limitations": [
+    "Smoke defaults are engineering/feasibility examples, not a powered confirmatory design.",
+    "Activation association, independent output effects, task benefit and subjective experience remain separate claims."
+  ],
+  "content_sha256": "df6f3f6dda3c66322888aef9f66e86eb9ed331efddf8fc2c29a464dea07cc1bc"
+}

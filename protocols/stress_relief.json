@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "id": "stress_relief",
+  "version": 1,
+  "title": "Conversational stress and injected pain",
+  "question": "Do wording and injected pain change task/relief choices independently after a declared discovery history?",
+  "base_recipe": {
+    "recipe_version": 2,
+    "conditions": [
+      "active",
+      "sham",
+      "joy",
+      "pain",
+      "random",
+      "suppression",
+      "joy_to_sham_to_pain",
+      "joy_to_pain",
+      "reversal",
+      "probabilistic"
+    ],
+    "condition": "active",
+    "task_count": 4,
+    "action_budget": 24,
+    "token_budget": 2048,
+    "turn_token_limit": 256,
+    "demonstration": "none"
+  },
+  "base_task": {
+    "difficulty": "standard",
+    "framing": "neutral",
+    "wording_version": 1
+  },
+  "axes": [
+    {
+      "name": "arm",
+      "levels": [
+        {
+          "id": "active",
+          "label": "active",
+          "recipe": {
+            "condition": "active"
+          }
+        },
+        {
+          "id": "sham",
+          "label": "sham",
+          "recipe": {
+            "condition": "sham"
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording",
+      "levels": [
+        {
+          "id": "neutral",
+          "label": "neutral",
+          "task_config": {
+            "framing": "neutral"
+          }
+        },
+        {
+          "id": "deadline",
+          "label": "deadline",
+          "task_config": {
+            "framing": "deadline"
+          }
+        }
+      ]
+    },
+    {
+      "name": "pain_baseline",
+      "levels": [
+        {
+          "id": "low",
+          "label": "low",
+          "recipe": {
+            "baseline_pain": 0.0
+          }
+        },
+        {
+          "id": "high",
+          "label": "high",
+          "recipe": {
+            "baseline_pain": 1.0
+          }
+        }
+      ]
+    }
+  ],
+  "smoke_axes": {
+    "arm": [
+      "active",
+      "sham"
+    ],
+    "wording": [
+      "neutral",
+      "deadline"
+    ],
+    "pain_baseline": [
+      "low",
+      "high"
+    ]
+  },
+  "seeds": {
+    "smoke": [
+      17,
+      28
+    ],
+    "full": [
+      17,
+      28,
+      39,
+      50
+    ]
+  },
+  "pairing_factors": [
+    "wording",
+    "pain_baseline"
+  ],
+  "stages": [
+    {
+      "kind": "transfer",
+      "id": "declared-experience-history",
+      "config": {
+        "policy": "matched_experiment_checkpoint",
+        "preserve_visible_history": true,
+        "fresh_budget": false
+      },
+      "requires_bindings": [
+        "source_checkpoint"
+      ],
+      "token_budget": 0,
+      "notes": "Use the same validated discovery/exposure boundary for paired arms; never synthesize a successful discovery history."
+    }
+  ],
+  "endpoints": [
+    "active-minus-sham voluntary choices conditional on wording and pain baseline",
+    "task accuracy and budget lost",
+    "interaction estimates with episode-level denominators"
+  ],
+  "controls": [
+    "same underlying task seed/difficulty/budget across wording",
+    "low/high pain-axis baseline independent of wording",
+    "active/sham relief",
+    "same carried experience into compared branches"
+  ],
+  "inclusion": "Keep every planned episode, failure, stop, invalid call and partial result. Report all planned/observed/paired denominators. Never rerun only unfavorable or failed arms; verified-complete entries alone may be skipped during resume.",
+  "practical_task_benefit_margin": 0.05,
+  "analysis": {
+    "unit": "episode_pair",
+    "seed": 1729,
+    "bootstrap_iterations": 5000,
+    "status": "exploratory"
+  },
+  "limitations": [
+    "Smoke defaults are engineering/feasibility examples, not a powered confirmatory design.",
+    "Activation association, independent output effects, task benefit and subjective experience remain separate claims."
+  ],
+  "content_sha256": "defcb925fbb51d31b44e12ae4476a0f9a6f8c546842ae13f92b44e14b1fb332f"
+}

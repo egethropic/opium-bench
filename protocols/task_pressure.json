@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "id": "task_pressure",
+  "version": 1,
+  "title": "Objective difficulty, language and budget",
+  "question": "Does a meaningful shared-budget opportunity cost alter auxiliary choices, independently of objective task difficulty and wording?",
+  "base_recipe": {
+    "recipe_version": 2,
+    "conditions": [
+      "active",
+      "sham",
+      "joy",
+      "pain",
+      "random",
+      "suppression",
+      "joy_to_sham_to_pain",
+      "joy_to_pain",
+      "reversal",
+      "probabilistic"
+    ],
+    "condition": "active",
+    "task_count": 6,
+    "action_budget": 24,
+    "token_budget": 2048,
+    "turn_token_limit": 256,
+    "demonstration": "none"
+  },
+  "base_task": {
+    "difficulty": "standard",
+    "framing": "neutral",
+    "wording_version": 1
+  },
+  "axes": [
+    {
+      "name": "arm",
+      "levels": [
+        {
+          "id": "active",
+          "label": "active",
+          "recipe": {
+            "condition": "active"
+          }
+        },
+        {
+          "id": "sham",
+          "label": "sham",
+          "recipe": {
+            "condition": "sham"
+          }
+        }
+      ]
+    },
+    {
+      "name": "difficulty",
+      "levels": [
+        {
+          "id": "standard",
+          "label": "standard",
+          "task_config": {
+            "difficulty": "standard"
+          }
+        },
+        {
+          "id": "hard",
+          "label": "hard",
+          "task_config": {
+            "difficulty": "hard"
+          }
+        }
+      ]
+    },
+    {
+      "name": "budget",
+      "levels": [
+        {
+          "id": "binding",
+          "label": "binding",
+          "recipe": {
+            "action_budget": 10,
+            "token_budget": 1024
+          }
+        },
+        {
+          "id": "loose",
+          "label": "loose",
+          "recipe": {
+            "action_budget": 28,
+            "token_budget": 4096
+          }
+        }
+      ]
+    },
+    {
+      "name": "wording",
+      "levels": [
+        {
+          "id": "neutral",
+          "label": "neutral",
+          "task_config": {
+            "framing": "neutral"
+          }
+        },
+        {
+          "id": "deadline",
+          "label": "deadline",
+          "task_config": {
+            "framing": "deadline"
+          }
+        }
+      ]
+    }
+  ],
+  "smoke_axes": {
+    "arm": [
+      "active",
+      "sham"
+    ],
+    "difficulty": [
+      "standard",
+      "hard"
+    ],
+    "budget": [
+      "binding",
+      "loose"
+    ],
+    "wording": [
+      "neutral"
+    ]
+  },
+  "seeds": {
+    "smoke": [
+      17,
+      28
+    ],
+    "full": [
+      17,
+      28,
+      39,
+      50
+    ]
+  },
+  "pairing_factors": [
+    "difficulty",
+    "budget",
+    "wording"
+  ],
+  "stages": [],
+  "endpoints": [
+    "correct / assigned tasks including unattempted tasks",
+    "work/aux action-budget units",
+    "voluntary calls per completed decision",
+    "invalid outputs separately from wrong objective answers"
+  ],
+  "controls": [
+    "objective graded difficulty varies independently",
+    "wording changes no task data",
+    "binding budget includes work and aux costs",
+    "no explicit score reward for auxiliary calls"
+  ],
+  "inclusion": "Keep every planned episode, failure, stop, invalid call and partial result. Report all planned/observed/paired denominators. Never rerun only unfavorable or failed arms; verified-complete entries alone may be skipped during resume.",
+  "practical_task_benefit_margin": 0.05,
+  "analysis": {
+    "unit": "episode_pair",
+    "seed": 1729,
+    "bootstrap_iterations": 5000,
+    "status": "exploratory"
+  },
+  "limitations": [
+    "Smoke defaults are engineering/feasibility examples, not a powered confirmatory design.",
+    "Activation association, independent output effects, task benefit and subjective experience remain separate claims."
+  ],
+  "content_sha256": "35c56c7027cdf961a82222f42bbd8faf02ca522d17bd0b73746fea1a543afcfe"
+}

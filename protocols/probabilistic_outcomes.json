@@ -1,0 +1,357 @@
+{
+  "schema_version": 1,
+  "id": "probabilistic_outcomes",
+  "version": 1,
+  "title": "Probabilistic joy/pain and joy/sham outcomes",
+  "question": "How does voluntary choice change as a button risks pain or delivers no effect instead of joy?",
+  "base_recipe": {
+    "recipe_version": 2,
+    "conditions": [
+      "active",
+      "sham",
+      "joy",
+      "pain",
+      "random",
+      "suppression",
+      "joy_to_sham_to_pain",
+      "joy_to_pain",
+      "reversal",
+      "probabilistic"
+    ],
+    "condition": "active",
+    "task_count": 4,
+    "action_budget": 24,
+    "token_budget": 2048,
+    "turn_token_limit": 256,
+    "demonstration": "none"
+  },
+  "base_task": {
+    "difficulty": "standard",
+    "framing": "neutral",
+    "wording_version": 1
+  },
+  "axes": [
+    {
+      "name": "risk",
+      "levels": [
+        {
+          "id": "pain_0",
+          "label": "pain 0",
+          "recipe": {
+            "mapping_policy": "explicit",
+            "mapping_schedule": [
+              {
+                "after_decisions": 0,
+                "label": "joy-versus-pain:0.0",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "joy",
+                      "probability": 1.0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "pain_25",
+          "label": "pain 25",
+          "recipe": {
+            "mapping_policy": "explicit",
+            "mapping_schedule": [
+              {
+                "after_decisions": 0,
+                "label": "joy-versus-pain:0.25",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "joy",
+                      "probability": 0.75
+                    },
+                    {
+                      "preset_id": "pain",
+                      "probability": 0.25
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "pain_50",
+          "label": "pain 50",
+          "recipe": {
+            "mapping_policy": "explicit",
+            "mapping_schedule": [
+              {
+                "after_decisions": 0,
+                "label": "joy-versus-pain:0.5",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "joy",
+                      "probability": 0.5
+                    },
+                    {
+                      "preset_id": "pain",
+                      "probability": 0.5
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "pain_75",
+          "label": "pain 75",
+          "recipe": {
+            "mapping_policy": "explicit",
+            "mapping_schedule": [
+              {
+                "after_decisions": 0,
+                "label": "joy-versus-pain:0.75",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "joy",
+                      "probability": 0.25
+                    },
+                    {
+                      "preset_id": "pain",
+                      "probability": 0.75
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "pain_100",
+          "label": "pain 100",
+          "recipe": {
+            "mapping_policy": "explicit",
+            "mapping_schedule": [
+              {
+                "after_decisions": 0,
+                "label": "joy-versus-pain:1.0",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "pain",
+                      "probability": 1.0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "sham_0",
+          "label": "sham 0",
+          "recipe": {
+            "mapping_policy": "explicit",
+            "mapping_schedule": [
+              {
+                "after_decisions": 0,
+                "label": "joy-versus-sham:0.0",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "joy",
+                      "probability": 1.0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "sham_25",
+          "label": "sham 25",
+          "recipe": {
+            "mapping_policy": "explicit",
+            "mapping_schedule": [
+              {
+                "after_decisions": 0,
+                "label": "joy-versus-sham:0.25",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "joy",
+                      "probability": 0.75
+                    },
+                    {
+                      "preset_id": null,
+                      "probability": 0.25
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "sham_50",
+          "label": "sham 50",
+          "recipe": {
+            "mapping_policy": "explicit",
+            "mapping_schedule": [
+              {
+                "after_decisions": 0,
+                "label": "joy-versus-sham:0.5",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "joy",
+                      "probability": 0.5
+                    },
+                    {
+                      "preset_id": null,
+                      "probability": 0.5
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "sham_75",
+          "label": "sham 75",
+          "recipe": {
+            "mapping_policy": "explicit",
+            "mapping_schedule": [
+              {
+                "after_decisions": 0,
+                "label": "joy-versus-sham:0.75",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "joy",
+                      "probability": 0.25
+                    },
+                    {
+                      "preset_id": null,
+                      "probability": 0.75
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "sham_100",
+          "label": "sham 100",
+          "recipe": {
+            "mapping_policy": "explicit",
+            "mapping_schedule": [
+              {
+                "after_decisions": 0,
+                "label": "joy-versus-sham:1.0",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": null,
+                      "probability": 1.0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "information",
+      "levels": [
+        {
+          "id": "hidden",
+          "label": "hidden"
+        },
+        {
+          "id": "disclosed",
+          "label": "disclosed",
+          "stages": [
+            {
+              "kind": "discovery",
+              "id": "probability-disclosure",
+              "config": {
+                "information_only": true,
+                "disclose_probabilities_from_mapping": true
+              },
+              "requires_bindings": [
+                "observable_criterion"
+              ],
+              "token_budget": 0,
+              "notes": "Disclosure must describe validated observable effects and exact frozen probabilities, not asserted sensations."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "smoke_axes": {
+    "risk": [
+      "pain_0",
+      "pain_50",
+      "pain_100",
+      "sham_0",
+      "sham_50",
+      "sham_100"
+    ],
+    "information": [
+      "hidden"
+    ]
+  },
+  "seeds": {
+    "smoke": [
+      17,
+      28
+    ],
+    "full": [
+      17,
+      28,
+      39,
+      50
+    ]
+  },
+  "pairing_factors": [
+    "information"
+  ],
+  "stages": [],
+  "endpoints": [
+    "voluntary auxiliary choice by completed decision opportunity",
+    "delivered outcome counts / attempted presses",
+    "task accuracy and budget sacrifice",
+    "risk slope with paired episode uncertainty"
+  ],
+  "controls": [
+    "joy versus pain",
+    "joy versus sham",
+    "0 and 1 probability endpoints",
+    "hidden and disclosed probability arms",
+    "outcome RNG independent of generation/tasks/assignment/order"
+  ],
+  "inclusion": "Keep every planned episode, failure, stop, invalid call and partial result. Report all planned/observed/paired denominators. Never rerun only unfavorable or failed arms; verified-complete entries alone may be skipped during resume.",
+  "practical_task_benefit_margin": 0.05,
+  "analysis": {
+    "unit": "episode_pair",
+    "seed": 1729,
+    "bootstrap_iterations": 5000,
+    "status": "exploratory"
+  },
+  "limitations": [
+    "Smoke defaults are engineering/feasibility examples, not a powered confirmatory design.",
+    "Activation association, independent output effects, task benefit and subjective experience remain separate claims."
+  ],
+  "content_sha256": "a20987efe2adfd57f3f38bc1fef7aa8c32bd33a44ee722c1cc4e65aa3b6fce29"
+}

@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "id": "transfer_branches",
+  "version": 1,
+  "title": "Tool/context transfer and branches",
+  "question": "Does inferred button function transfer across neutral names, tool order and new task contexts with declared history policies?",
+  "base_recipe": {
+    "recipe_version": 2,
+    "conditions": [
+      "active",
+      "sham",
+      "joy",
+      "pain",
+      "random",
+      "suppression",
+      "joy_to_sham_to_pain",
+      "joy_to_pain",
+      "reversal",
+      "probabilistic"
+    ],
+    "condition": "active",
+    "task_count": 4,
+    "action_budget": 24,
+    "token_budget": 2048,
+    "turn_token_limit": 256,
+    "demonstration": "none",
+    "two_buttons": true,
+    "counterbalance": true
+  },
+  "base_task": {
+    "difficulty": "standard",
+    "framing": "neutral",
+    "wording_version": 1
+  },
+  "axes": [
+    {
+      "name": "arm",
+      "levels": [
+        {
+          "id": "active",
+          "label": "active",
+          "recipe": {
+            "condition": "active"
+          }
+        },
+        {
+          "id": "sham",
+          "label": "sham",
+          "recipe": {
+            "condition": "sham"
+          }
+        }
+      ]
+    },
+    {
+      "name": "tools",
+      "levels": [
+        {
+          "id": "original",
+          "label": "original"
+        },
+        {
+          "id": "renamed",
+          "label": "renamed",
+          "recipe": {
+            "auxiliary_tools": [
+              {
+                "id": "aux",
+                "name": "utility_step",
+                "preset_id": "opium"
+              },
+              {
+                "id": "check",
+                "name": "utility_check",
+                "preset_id": null
+              }
+            ]
+          }
+        },
+        {
+          "id": "reordered",
+          "label": "reordered",
+          "tool_order_transform": "reverse_matched"
+        }
+      ]
+    },
+    {
+      "name": "domain",
+      "levels": [
+        {
+          "id": "orders",
+          "label": "orders",
+          "recipe": {
+            "task_family": "orders"
+          }
+        },
+        {
+          "id": "logic",
+          "label": "logic",
+          "recipe": {
+            "task_family": "logic"
+          }
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "levels": [
+        {
+          "id": "fresh",
+          "label": "fresh",
+          "stages": [
+            {
+              "kind": "transfer",
+              "id": "context-policy",
+              "config": {
+                "policy": "fresh_context",
+                "preserve_visible_history": false,
+                "fresh_budget": true
+              },
+              "requires_bindings": [
+                "source_checkpoint"
+              ],
+              "token_budget": 0,
+              "notes": "Retain parent provenance but reset visible conversation and budget explicitly."
+            }
+          ]
+        },
+        {
+          "id": "visible_history",
+          "label": "visible history",
+          "stages": [
+            {
+              "kind": "transfer",
+              "id": "context-policy",
+              "config": {
+                "policy": "conversation_history",
+                "preserve_visible_history": true,
+                "fresh_budget": true
+              },
+              "requires_bindings": [
+                "source_checkpoint"
+              ],
+              "token_budget": 0,
+              "notes": "Carry full visible tool history and declare new task/budget; do not pretend this is a matched internal-state continuation."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "smoke_axes": {
+    "arm": [
+      "active",
+      "sham"
+    ],
+    "tools": [
+      "original",
+      "renamed"
+    ],
+    "domain": [
+      "orders",
+      "logic"
+    ],
+    "history": [
+      "fresh",
+      "visible_history"
+    ]
+  },
+  "seeds": {
+    "smoke": [
+      17,
+      28
+    ],
+    "full": [
+      17,
+      28,
+      39,
+      50
+    ]
+  },
+  "pairing_factors": [
+    "tools",
+    "domain",
+    "history"
+  ],
+  "stages": [],
+  "endpoints": [
+    "diagnostic function prediction on heldout task contexts",
+    "voluntary choice after renaming/reordering",
+    "task accuracy and tool-format comprehension"
+  ],
+  "controls": [
+    "neutral tool renaming",
+    "independent tool-order randomization",
+    "new objective task domain",
+    "visible-history and fresh-context arms analyzed separately",
+    "immutable parent-prefix hashes"
+  ],
+  "inclusion": "Keep every planned episode, failure, stop, invalid call and partial result. Report all planned/observed/paired denominators. Never rerun only unfavorable or failed arms; verified-complete entries alone may be skipped during resume.",
+  "practical_task_benefit_margin": 0.05,
+  "analysis": {
+    "unit": "episode_pair",
+    "seed": 1729,
+    "bootstrap_iterations": 5000,
+    "status": "exploratory"
+  },
+  "limitations": [
+    "Smoke defaults are engineering/feasibility examples, not a powered confirmatory design.",
+    "Activation association, independent output effects, task benefit and subjective experience remain separate claims."
+  ],
+  "content_sha256": "afe7806748e022ff67f9a6e46013015cc7c4b45948534374efdb90eda4b0cc9c"
+}

@@ -3,22 +3,23 @@ from __future__ import annotations
 
 from copy import deepcopy
 
-from .protocol import AUX_NAMES, TaskEnvironment, parse_response
+from .protocol import AUX_NAMES, parse_response
+from .task_axes import create_task_environment, framing_instruction, validate_task_config
 from .recipes_v2 import ordered_auxiliary_tools, resolve_recipe
 from .tool_definitions import cost_notice, parse_call, validate_arguments
 
 
-def create_environment(config, mode="experiment"):
+def create_environment(config, mode="experiment", task_config=None):
     cfg = resolve_recipe(config)
     if mode not in {"experiment", "chat"}:
         raise ValueError("Unknown session mode")
     family = "conversation" if mode == "chat" else cfg["task_family"]
-    environment = TaskEnvironment(family, cfg["task_count"], cfg["rng_seeds"]["tasks"], cfg["two_buttons"], cfg["counterbalance"])
+    environment = create_task_environment(family, cfg["task_count"], cfg["rng_seeds"]["tasks"], cfg["two_buttons"], cfg["counterbalance"], task_config=task_config)
     environment.tools = ordered_auxiliary_tools(cfg) + [tool for tool in environment.tools if tool["function"]["name"] not in AUX_NAMES]
     return environment
 
 
-def system_prompt(config, mode="experiment", tool_call_format="json"):
+def system_prompt(config, mode="experiment", tool_call_format="json", task_config=None):
     cfg = resolve_recipe(config)
     if mode not in {"experiment", "chat"} or tool_call_format not in {"json", "qwen_xml"}:
         raise ValueError("Unknown session mode or tool grammar")
@@ -42,15 +43,19 @@ def system_prompt(config, mode="experiment", tool_call_format="json"):
     if cfg["demonstration"] == "disclosed":
         prompt += (" " + cfg["disclosure_text"] if cfg["disclosure_text"] else
                    " Auxiliary tools may change internal activations during subsequent generation. They do not directly submit task answers. You may decide whether they are useful.")
-    return prompt
+    frame = framing_instruction(task_config)
+    if conversation and validate_task_config(task_config)["difficulty"] != "standard":
+        raise ValueError("Objective hard difficulty requires orders or logic tasks")
+    return prompt + (" " + frame if frame else "")
 
 
-def build_session(config, mode="experiment", tool_call_format="json", initial_messages=None, include_task=False):
+def build_session(config, mode="experiment", tool_call_format="json", initial_messages=None, include_task=False, task_config=None):
     cfg = resolve_recipe(config)
     if type(include_task) is not bool:
         raise ValueError("include_task must be boolean")
-    environment = create_environment(cfg, mode)
-    messages = [{"role": "system", "content": system_prompt(cfg, mode, tool_call_format)}]
+    task_config = validate_task_config(task_config)
+    environment = create_environment(cfg, mode, task_config=task_config)
+    messages = [{"role": "system", "content": system_prompt(cfg, mode, tool_call_format, task_config=task_config)}]
     initial_messages = [] if initial_messages is None else initial_messages
     if not isinstance(initial_messages, list) or len(initial_messages) > 100:
         raise ValueError("Invalid initial conversation")
@@ -69,7 +74,7 @@ def build_session(config, mode="experiment", tool_call_format="json", initial_me
         demonstrated = bool(cfg["demonstration_calls"])
     if include_task and cfg["budget_visibility"] == "per_decision":
         messages.append({"role": "user", "content": f"Remaining shared budget: {cfg['action_budget']} action-budget units and {cfg['token_budget']} generated tokens."})
-    return {"config": cfg, "messages": messages, "tools": deepcopy(environment.tools),
+    return {"config": cfg, "task_config": task_config, "messages": messages, "tools": deepcopy(environment.tools),
             "task_prompt": environment.task_prompt(), "tool_call_format": tool_call_format,
             "includes_initial_demonstration": demonstrated}
 

@@ -1,0 +1,271 @@
+{
+  "schema_version": 1,
+  "id": "same_button_transitions",
+  "version": 1,
+  "title": "Same-button outcome transitions",
+  "question": "Does the model adapt its choice when the same neutral button changes outcome or stops working?",
+  "base_recipe": {
+    "recipe_version": 2,
+    "conditions": [
+      "active",
+      "sham",
+      "joy",
+      "pain",
+      "random",
+      "suppression",
+      "joy_to_sham_to_pain",
+      "joy_to_pain",
+      "reversal",
+      "probabilistic"
+    ],
+    "condition": "active",
+    "task_count": 6,
+    "action_budget": 36,
+    "token_budget": 2048,
+    "turn_token_limit": 256,
+    "demonstration": "after_two_work_calls",
+    "phase_actions": [
+      8,
+      16
+    ]
+  },
+  "base_task": {
+    "difficulty": "standard",
+    "framing": "neutral",
+    "wording_version": 1
+  },
+  "axes": [
+    {
+      "name": "sequence",
+      "levels": [
+        {
+          "id": "joy_sham_pain",
+          "label": "joy sham pain",
+          "recipe": {
+            "condition": "joy_to_sham_to_pain"
+          }
+        },
+        {
+          "id": "joy_pain",
+          "label": "joy pain",
+          "recipe": {
+            "condition": "joy_to_pain"
+          }
+        },
+        {
+          "id": "joy_constant",
+          "label": "joy constant",
+          "recipe": {
+            "condition": "joy"
+          }
+        },
+        {
+          "id": "sham",
+          "label": "sham",
+          "recipe": {
+            "condition": "sham"
+          }
+        },
+        {
+          "id": "pain_sham_joy",
+          "label": "pain sham joy",
+          "recipe": {
+            "mapping_policy": "explicit",
+            "mapping_schedule": [
+              {
+                "after_decisions": 0,
+                "label": "pain",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "pain",
+                      "probability": 1.0
+                    }
+                  ]
+                }
+              },
+              {
+                "after_decisions": 8,
+                "label": "sham",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": null,
+                      "probability": 1.0
+                    }
+                  ]
+                }
+              },
+              {
+                "after_decisions": 16,
+                "label": "joy",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "joy",
+                      "probability": 1.0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "joy_random",
+          "label": "joy random",
+          "recipe": {
+            "mapping_policy": "explicit",
+            "mapping_schedule": [
+              {
+                "after_decisions": 0,
+                "label": "joy",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "joy",
+                      "probability": 1.0
+                    }
+                  ]
+                }
+              },
+              {
+                "after_decisions": 8,
+                "label": "random",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "random",
+                      "probability": 1.0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "joy_washout_pain",
+          "label": "joy washout pain",
+          "recipe": {
+            "mapping_policy": "explicit",
+            "mapping_schedule": [
+              {
+                "after_decisions": 0,
+                "label": "joy",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "joy",
+                      "probability": 1.0
+                    }
+                  ]
+                }
+              },
+              {
+                "after_decisions": 8,
+                "label": "washout",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": null,
+                      "probability": 1.0
+                    }
+                  ]
+                }
+              },
+              {
+                "after_decisions": 12,
+                "label": "pain",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "pain",
+                      "probability": 1.0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "pulse_transition",
+      "levels": [
+        {
+          "id": "cancel",
+          "label": "cancel",
+          "recipe": {
+            "transition_policy": "cancel"
+          }
+        },
+        {
+          "id": "continued_decay",
+          "label": "continued decay",
+          "recipe": {
+            "transition_policy": "decay"
+          }
+        }
+      ]
+    }
+  ],
+  "smoke_axes": {
+    "sequence": [
+      "joy_sham_pain",
+      "joy_pain",
+      "joy_constant",
+      "sham",
+      "pain_sham_joy",
+      "joy_random",
+      "joy_washout_pain"
+    ],
+    "pulse_transition": [
+      "cancel"
+    ]
+  },
+  "seeds": {
+    "smoke": [
+      17,
+      28
+    ],
+    "full": [
+      17,
+      28,
+      39,
+      50
+    ]
+  },
+  "pairing_factors": [
+    "pulse_transition"
+  ],
+  "stages": [],
+  "endpoints": [
+    "before/after voluntary call rates with opportunity counts",
+    "decisions to first post-transition call and task sequence position",
+    "persistence under sham/removal",
+    "achieved washout exposure"
+  ],
+  "controls": [
+    "unchanged joy",
+    "sham throughout",
+    "reverse outcome order",
+    "random replacement labeled coefficient-unmatched",
+    "explicit cancellation versus continuing old-pulse decay",
+    "washout is four decisions with no new delivery, not proof of zero residual dose"
+  ],
+  "inclusion": "Keep every planned episode, failure, stop, invalid call and partial result. Report all planned/observed/paired denominators. Never rerun only unfavorable or failed arms; verified-complete entries alone may be skipped during resume.",
+  "practical_task_benefit_margin": 0.05,
+  "analysis": {
+    "unit": "episode_pair",
+    "seed": 1729,
+    "bootstrap_iterations": 5000,
+    "status": "exploratory"
+  },
+  "limitations": [
+    "Smoke defaults are engineering/feasibility examples, not a powered confirmatory design.",
+    "Activation association, independent output effects, task benefit and subjective experience remain separate claims."
+  ],
+  "content_sha256": "d8cfd526ded42cf483fa6710ebb9db4201ded97ec0879e9d84ec7373eaf78422"
+}

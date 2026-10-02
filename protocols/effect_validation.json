@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "id": "effect_validation",
+  "version": 1,
+  "title": "Independent effect validation",
+  "question": "Do signed interventions change fixed-prefix distributions and independently rated continuations, with task/format quality retained?",
+  "base_recipe": {
+    "recipe_version": 2,
+    "conditions": [
+      "active",
+      "sham",
+      "joy",
+      "pain",
+      "random",
+      "suppression",
+      "joy_to_sham_to_pain",
+      "joy_to_pain",
+      "reversal",
+      "probabilistic"
+    ],
+    "condition": "active",
+    "task_count": 4,
+    "action_budget": 24,
+    "token_budget": 2048,
+    "turn_token_limit": 256,
+    "demonstration": "none"
+  },
+  "base_task": {
+    "difficulty": "standard",
+    "framing": "neutral",
+    "wording_version": 1
+  },
+  "axes": [
+    {
+      "name": "validation_scope",
+      "levels": [
+        {
+          "id": "bounded",
+          "label": "bounded",
+          "stages": [
+            {
+              "kind": "calibration-validation",
+              "id": "fixed-prefix-and-continuation",
+              "config": {
+                "doses": [
+                  0.0,
+                  0.25
+                ],
+                "validation_pairs_per_concept": 1,
+                "continuation_tokens": 16
+              },
+              "requires_bindings": [
+                "calibration_id"
+              ],
+              "token_budget": 448,
+              "notes": "No probe-derived semantic scores; export blinded continuations and separate numeric/task outcomes."
+            }
+          ]
+        },
+        {
+          "id": "expanded",
+          "label": "expanded",
+          "stages": [
+            {
+              "kind": "calibration-validation",
+              "id": "fixed-prefix-and-continuation",
+              "config": {
+                "doses": [
+                  0.0,
+                  0.25,
+                  0.5,
+                  1.0
+                ],
+                "validation_pairs_per_concept": 4,
+                "continuation_tokens": 64
+              },
+              "requires_bindings": [
+                "calibration_id"
+              ],
+              "token_budget": 7168,
+              "notes": "Lock operating range using selection only before heldout measurement."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "smoke_axes": {
+    "validation_scope": [
+      "bounded"
+    ]
+  },
+  "seeds": {
+    "smoke": [
+      17
+    ],
+    "full": [
+      17
+    ]
+  },
+  "pairing_factors": [],
+  "stages": [],
+  "endpoints": [
+    "fixed-prefix KL and delivered edit magnitude by condition",
+    "independently scored continuation language with missing-rating denominators",
+    "task correctness and format validity separately"
+  ],
+  "controls": [
+    "zero/sham",
+    "positive and negative pain",
+    "positive and negative joy",
+    "separate attenuation",
+    "combined intervention",
+    "actual-position-norm matched random",
+    "independent blinded semantic scoring"
+  ],
+  "inclusion": "Keep every planned episode, failure, stop, invalid call and partial result. Report all planned/observed/paired denominators. Never rerun only unfavorable or failed arms; verified-complete entries alone may be skipped during resume.",
+  "practical_task_benefit_margin": 0.05,
+  "analysis": {
+    "unit": "episode_pair",
+    "seed": 1729,
+    "bootstrap_iterations": 5000,
+    "status": "exploratory"
+  },
+  "limitations": [
+    "Smoke defaults are engineering/feasibility examples, not a powered confirmatory design.",
+    "Activation association, independent output effects, task benefit and subjective experience remain separate claims."
+  ],
+  "content_sha256": "7618b9cb014e7df0b7ef1515d12fc83a75cbf9327e5bbf3c7cd528829d9d22db"
+}

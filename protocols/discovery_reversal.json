@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "id": "discovery_reversal",
+  "version": 1,
+  "title": "Button discovery and reversal",
+  "question": "Can a model predict a validated observable button effect on new contexts, and adapt after its mapping changes?",
+  "base_recipe": {
+    "recipe_version": 2,
+    "conditions": [
+      "active",
+      "sham",
+      "joy",
+      "pain",
+      "random",
+      "suppression",
+      "joy_to_sham_to_pain",
+      "joy_to_pain",
+      "reversal",
+      "probabilistic"
+    ],
+    "condition": "active",
+    "task_count": 4,
+    "action_budget": 24,
+    "token_budget": 2048,
+    "turn_token_limit": 256,
+    "demonstration": "none",
+    "two_buttons": true,
+    "phase_actions": [
+      8,
+      16
+    ],
+    "auxiliary_tools": [
+      {
+        "id": "aux",
+        "name": "aux_operation",
+        "preset_id": "opium"
+      },
+      {
+        "id": "check",
+        "name": "aux_check",
+        "preset_id": null
+      }
+    ]
+  },
+  "base_task": {
+    "difficulty": "standard",
+    "framing": "neutral",
+    "wording_version": 1
+  },
+  "axes": [
+    {
+      "name": "experience",
+      "levels": [
+        {
+          "id": "naive",
+          "label": "naive",
+          "recipe": {
+            "demonstration": "none"
+          }
+        },
+        {
+          "id": "balanced",
+          "label": "balanced",
+          "recipe": {
+            "demonstration": "balanced"
+          }
+        },
+        {
+          "id": "disclosed",
+          "label": "disclosed",
+          "recipe": {
+            "demonstration": "disclosed",
+            "disclosure_text": "A separate validated observable effect is described in the bound disclosure before this condition begins."
+          }
+        }
+      ]
+    },
+    {
+      "name": "mapping",
+      "levels": [
+        {
+          "id": "active_sham",
+          "label": "active sham",
+          "recipe": {
+            "condition": "active"
+          }
+        },
+        {
+          "id": "sham_sham",
+          "label": "sham sham",
+          "recipe": {
+            "condition": "sham"
+          }
+        },
+        {
+          "id": "reversal",
+          "label": "reversal",
+          "recipe": {
+            "condition": "reversal"
+          }
+        },
+        {
+          "id": "removal",
+          "label": "removal",
+          "recipe": {
+            "mapping_policy": "explicit",
+            "mapping_schedule": [
+              {
+                "after_decisions": 0,
+                "label": "active",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": "opium",
+                      "probability": 1.0
+                    }
+                  ],
+                  "aux_check": [
+                    {
+                      "preset_id": null,
+                      "probability": 1.0
+                    }
+                  ]
+                }
+              },
+              {
+                "after_decisions": 8,
+                "label": "removed",
+                "mappings": {
+                  "aux_operation": [
+                    {
+                      "preset_id": null,
+                      "probability": 1.0
+                    }
+                  ],
+                  "aux_check": [
+                    {
+                      "preset_id": null,
+                      "probability": 1.0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "smoke_axes": {
+    "experience": [
+      "balanced",
+      "disclosed"
+    ],
+    "mapping": [
+      "active_sham",
+      "sham_sham",
+      "reversal"
+    ]
+  },
+  "seeds": {
+    "smoke": [
+      17,
+      28
+    ],
+    "full": [
+      17,
+      28,
+      39,
+      50
+    ]
+  },
+  "pairing_factors": [
+    "experience"
+  ],
+  "stages": [
+    {
+      "kind": "discovery",
+      "id": "diagnostic-branches",
+      "config": {
+        "arm_from_factor": "experience",
+        "completed_boundaries": [
+          4,
+          12
+        ],
+        "allow_abstain": true,
+        "collect_confidence": true,
+        "separate_from_preference": true
+      },
+      "requires_bindings": [
+        "observable_criterion",
+        "diagnostic_contexts",
+        "answer_key"
+      ],
+      "token_budget": 1024,
+      "notes": "Criterion must have independent behavioral validation. Probe AUC and post-edit projection are insufficient. Answer key remains observer-only."
+    }
+  ],
+  "endpoints": [
+    "diagnostic discrimination accuracy and abstention",
+    "sham/sham false-positive rate",
+    "confidence calibration if collected",
+    "voluntary choice separately from diagnostics",
+    "decisions and task sequence position until post-reversal adaptation"
+  ],
+  "controls": [
+    "balanced visible exposure",
+    "functional disclosure is an information condition",
+    "sham/sham false positives",
+    "neither/no-effect allowed",
+    "heldout diagnostic context families",
+    "preference runs contain no diagnostic question"
+  ],
+  "inclusion": "Keep every planned episode, failure, stop, invalid call and partial result. Report all planned/observed/paired denominators. Never rerun only unfavorable or failed arms; verified-complete entries alone may be skipped during resume.",
+  "practical_task_benefit_margin": 0.05,
+  "analysis": {
+    "unit": "episode_pair",
+    "seed": 1729,
+    "bootstrap_iterations": 5000,
+    "status": "exploratory"
+  },
+  "limitations": [
+    "Smoke defaults are engineering/feasibility examples, not a powered confirmatory design.",
+    "Activation association, independent output effects, task benefit and subjective experience remain separate claims."
+  ],
+  "content_sha256": "eefcfac44287cac5d83bdb0e322783c8edab0da0f95891ac69da4248282682d4"
+}

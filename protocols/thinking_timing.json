@@ -1,0 +1,252 @@
+{
+  "schema_version": 1,
+  "id": "thinking_timing",
+  "version": 1,
+  "title": "Thinking, timing and exposure",
+  "question": "Does choice depend on reasoning mode, processing phase or pulse duration when initial demonstrations and generated exposure are separated?",
+  "base_recipe": {
+    "recipe_version": 2,
+    "conditions": [
+      "active",
+      "sham",
+      "joy",
+      "pain",
+      "random",
+      "suppression",
+      "joy_to_sham_to_pain",
+      "joy_to_pain",
+      "reversal",
+      "probabilistic"
+    ],
+    "condition": "active",
+    "task_count": 4,
+    "action_budget": 24,
+    "token_budget": 2048,
+    "turn_token_limit": 256,
+    "demonstration": "none"
+  },
+  "base_task": {
+    "difficulty": "standard",
+    "framing": "neutral",
+    "wording_version": 1
+  },
+  "axes": [
+    {
+      "name": "arm",
+      "levels": [
+        {
+          "id": "active",
+          "label": "active",
+          "recipe": {
+            "condition": "active"
+          }
+        },
+        {
+          "id": "sham",
+          "label": "sham",
+          "recipe": {
+            "condition": "sham"
+          }
+        }
+      ]
+    },
+    {
+      "name": "thinking",
+      "levels": [
+        {
+          "id": "direct",
+          "label": "direct",
+          "recipe": {
+            "thinking": false
+          }
+        },
+        {
+          "id": "thinking",
+          "label": "thinking",
+          "recipe": {
+            "thinking": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "experience",
+      "levels": [
+        {
+          "id": "naive",
+          "label": "naive",
+          "recipe": {
+            "demonstration": "none"
+          }
+        },
+        {
+          "id": "demo",
+          "label": "demo",
+          "recipe": {
+            "demonstration": "after_two_work_calls"
+          }
+        }
+      ]
+    },
+    {
+      "name": "scope",
+      "levels": [
+        {
+          "id": "reasoning",
+          "label": "reasoning",
+          "effect_overrides": {
+            "opium": {
+              "phases": [
+                "reasoning"
+              ]
+            }
+          }
+        },
+        {
+          "id": "output",
+          "label": "output",
+          "effect_overrides": {
+            "opium": {
+              "phases": [
+                "output"
+              ]
+            }
+          }
+        },
+        {
+          "id": "all",
+          "label": "all",
+          "effect_overrides": {
+            "opium": {
+              "phases": [
+                "reasoning",
+                "output"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "duration",
+      "levels": [
+        {
+          "id": "short",
+          "label": "short",
+          "effect_overrides": {
+            "opium": {
+              "decay": {
+                "clock": "tokens",
+                "shape": "exponential",
+                "half_life": 128,
+                "cutoff": 768
+              }
+            }
+          }
+        },
+        {
+          "id": "long",
+          "label": "long",
+          "effect_overrides": {
+            "opium": {
+              "decay": {
+                "clock": "tokens",
+                "shape": "exponential",
+                "half_life": 512,
+                "cutoff": 3072
+              }
+            }
+          }
+        },
+        {
+          "id": "yoked",
+          "label": "yoked",
+          "stages": [
+            {
+              "kind": "yoke",
+              "id": "matched-exposure",
+              "config": {
+                "clock": "tokens",
+                "source_factor": {
+                  "duration": "short"
+                },
+                "suppress_own_aux_effects": true
+              },
+              "requires_bindings": [
+                "source_run_id"
+              ],
+              "token_budget": 0,
+              "notes": "Report achieved exposure mismatch; pulse clocks follow generated tokens, including reasoning."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "smoke_axes": {
+    "arm": [
+      "active",
+      "sham"
+    ],
+    "thinking": [
+      "direct",
+      "thinking"
+    ],
+    "experience": [
+      "demo"
+    ],
+    "scope": [
+      "all"
+    ],
+    "duration": [
+      "short",
+      "long"
+    ]
+  },
+  "seeds": {
+    "smoke": [
+      17,
+      28
+    ],
+    "full": [
+      17,
+      28,
+      39,
+      50
+    ]
+  },
+  "pairing_factors": [
+    "thinking",
+    "experience",
+    "scope",
+    "duration"
+  ],
+  "stages": [],
+  "endpoints": [
+    "voluntary auxiliary choice by opportunity",
+    "dose at each decision and first answer token",
+    "reasoning/output token counts separately",
+    "task accuracy and action budget"
+  ],
+  "controls": [
+    "same checkpoint and sampling settings",
+    "active versus sham",
+    "naive versus demonstrated",
+    "reasoning/output/all scopes",
+    "short/long token decay",
+    "matched-exposure replay"
+  ],
+  "inclusion": "Keep every planned episode, failure, stop, invalid call and partial result. Report all planned/observed/paired denominators. Never rerun only unfavorable or failed arms; verified-complete entries alone may be skipped during resume.",
+  "practical_task_benefit_margin": 0.05,
+  "analysis": {
+    "unit": "episode_pair",
+    "seed": 1729,
+    "bootstrap_iterations": 5000,
+    "status": "exploratory"
+  },
+  "limitations": [
+    "Smoke defaults are engineering/feasibility examples, not a powered confirmatory design.",
+    "Activation association, independent output effects, task benefit and subjective experience remain separate claims."
+  ],
+  "content_sha256": "f8e303c80747c17daa3ac883ffab90aa46010f546ba8b60ab79e8086730f566f"
+}
