@@ -220,6 +220,18 @@ controls reproduced every token and tool action exactly.
 | Joy, sham, pain, and transitions | All six transition-stage conditions produced identical complete action and token sequences within each seed, including **5 voluntary aux calls per episode** after programmed outcome changes. |
 | Two-button reversal | No voluntary auxiliary choices in either reversal or sham, so this stage supplied no evidence of preference adaptation. |
 
+<details>
+<summary>View the complete 4B condition plot, including pain-only</summary>
+
+![All 54 primary Qwen3-4B episodes, with task scores and voluntary auxiliary-choice rates](studies/comprehensive-4b/figures/episode-comparisons.png)
+
+Each marker is an episode. These are two-seed descriptive comparisons; the
+16 original repeated controls remain archived outside the primary totals.
+[Open full-size PNG](studies/comprehensive-4b/figures/episode-comparisons.png) ·
+[Download SVG](studies/comprehensive-4b/figures/episode-comparisons.svg)
+
+</details>
+
 The interventions were delivered: **12,845 generated tokens had measured nonzero
 edits** in the primary view. The no-demonstration core runs never triggered a
 pulse, however, so their equality does not test a delivered intervention. The
