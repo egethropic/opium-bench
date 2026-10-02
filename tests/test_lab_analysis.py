@@ -11,7 +11,8 @@ from unittest.mock import patch
 from lab.analysis import analyze_run, aggregate_groups, paired_core, study_results
 from lab.protocol import TaskEnvironment, validate_recipe
 from lab.storage import atomic_json
-from publish_lab_study import deterministic_gzip, publish, read_events, render_dashboard
+from publish_lab_study import (deterministic_gzip, publish, read_events, render_dashboard,
+                               matched_condition_pairs, refresh_reference_dashboard, render_notes)
 
 
 class Trace:
@@ -291,6 +292,50 @@ class PublicationTests(unittest.TestCase):
             left['config'].pop('label')
             right['config'].pop('label')
             self.assertEqual(left,right)
+
+    def test_pain_arm_comparison_distinguishes_full_sequences_and_missing_arms(self):
+        active=Trace().grade().analyzed('active')
+        sham=Trace(condition='sham').grade().analyzed('sham')
+        pain=Trace(condition='pain', conditions=['active','sham','pain']).turn('aux_operation', tokens=(5,6)).analyzed('pain')
+        pairs=matched_condition_pairs([active,sham,pain])
+        self.assertEqual(len(pairs),3)
+        identical=next(row for row in pairs if row['right_condition']=='sham' and row['left_condition']=='active')
+        self.assertTrue(identical['actions_identical'])
+        self.assertTrue(identical['tokens_identical'])
+        changed=next(row for row in pairs if row['right_condition']=='pain')
+        self.assertFalse(changed['actions_identical'])
+        self.assertFalse(changed['tokens_identical'])
+        another=Trace(seed=28).grade().analyzed('missing-pain')
+        incomplete=matched_condition_pairs([active,sham,pain,another])
+        self.assertEqual(sum(not row['pair_complete'] for row in incomplete),3)
+        self.assertTrue(all('tokens_identical' not in row for row in incomplete if not row['pair_complete']))
+
+    def test_reference_dashboard_addendum_never_changes_prior_evidence(self):
+        with TemporaryDirectory() as name:
+            root=Path(name)
+            data,output,receipt=self.fixture(root)
+            page=root/'docs'/'results.html'
+            result=publish(receipt,data,output,dashboard=page,skip_figures=True)
+            before={path.relative_to(output):path.read_bytes() for path in output.rglob('*') if path.is_file()}
+            followup=deepcopy(result)
+            followup['publication_title']='Pain-only follow-up'
+            notes={'title':'Thinking <notes>', 'paragraphs':['Output is not <introspection>.'],
+                   'links':[{'label':'Read traces','href':'initial-thinking-notes.md'}]}
+            refresh_reference_dashboard(output,page,[(followup,'results-core-pain-4b.html')],notes)
+            self.assertIn('Pain-only follow-up',page.read_text())
+            self.assertIn('results-core-pain-4b.html',page.read_text())
+            self.assertIn('Thinking &lt;notes&gt;',page.read_text())
+            self.assertIn('totals do not include this follow-up',page.read_text())
+            self.assertEqual(before,{path.relative_to(output):path.read_bytes() for path in output.rglob('*') if path.is_file()})
+            with self.assertRaisesRegex(ValueError,'protected reference'):
+                refresh_reference_dashboard(output,output/'results.json',[],notes)
+            (output/'results.json').write_text('{}')
+            with self.assertRaisesRegex(ValueError,'checksum'):
+                refresh_reference_dashboard(output,page,[],notes)
+
+    def test_reasoning_notes_reject_script_links(self):
+        with self.assertRaisesRegex(ValueError,'relative or HTTP'):
+            render_notes({'links':[{'href':'javascript:alert(1)'}]})
 
     def test_complete_guard_requires_explicit_partial_override(self):
         with TemporaryDirectory() as name:

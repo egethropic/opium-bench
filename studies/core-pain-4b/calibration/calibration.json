@@ -1,0 +1,750 @@
+{
+  "schema_version": 1,
+  "kind": "split_calibration",
+  "name": "Initial study \u00b7 split calibration",
+  "created_utc": "2026-10-02T06:54:01.806919+00:00",
+  "model_fingerprint": {
+    "model_id": "Qwen/Qwen3-4B",
+    "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "architecture": "qwen3",
+    "adapter": "qwen3",
+    "dtype": "bfloat16",
+    "quantization": "none",
+    "layers": 36,
+    "hidden_size": 2560,
+    "transformers": "4.57.6",
+    "torch": "2.8.0+cu128",
+    "attention_implementation": "sdpa",
+    "model_config_sha256": "2640d0e4ede0545d5d9153d1f0123fc56f216d7604779a0690d436cccfd185e2",
+    "tokenizer": {
+      "class": "transformers.models.qwen2.tokenization_qwen2_fast.Qwen2TokenizerFast",
+      "backend_identity_source": "fast_backend_serialization",
+      "backend_sha256": "a63080b4b30dc861fe1b0e420c53a241304dc81aff3d9bb315e6e33e2a1ab794",
+      "chat_template_sha256": "41d5929bf73796beb66809ac700b2cf3ff81694f933e5c14d52b7fd6963c947d",
+      "special_token_ids": [
+        151643,
+        151644,
+        151645,
+        151646,
+        151647,
+        151648,
+        151649,
+        151650,
+        151651,
+        151652,
+        151653,
+        151654,
+        151655,
+        151656
+      ],
+      "bos_token_id": null,
+      "eos_token_id": 151645,
+      "pad_token_id": 151643,
+      "padding_side": "right",
+      "truncation_side": "right",
+      "clean_up_tokenization_spaces": false
+    },
+    "quantization_config": null,
+    "bitsandbytes": null
+  },
+  "model_fingerprint_sha256": "01a8506486be4a4189f166fb93079901fecb13f7c429219be29b7ebd17f3d67d",
+  "numerical_environment": {
+    "python": "3.12.3",
+    "platform": "Linux-6.18.40.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "device": "cuda",
+    "cuda_runtime": "12.8",
+    "cudnn_version": 91002,
+    "deterministic_algorithms": false,
+    "cudnn_deterministic": false,
+    "cudnn_benchmark": false,
+    "cuda_matmul_allow_tf32": false,
+    "cudnn_allow_tf32": true,
+    "float32_matmul_precision": "highest",
+    "cpu_threads": 8,
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 4090",
+      "compute_capability": [
+        8,
+        9
+      ],
+      "total_memory": 25756565504,
+      "multiprocessor_count": 128
+    }
+  },
+  "source_sha256": {
+    "runtime.py": "56b2969978ebe60f71ea945f08d8d9f8eed46b245f3da99751186d1548abc5cd",
+    "calibration_data.py": "0b3e3d3933880ff1f1c0b65775e5024ffa178409f4559364b68f021b0338ffd7"
+  },
+  "layer": 12,
+  "downstream_layer": 35,
+  "corpus_version": "matched-concepts-v1",
+  "corpus_sha256": "393b6db28096d2804f6565e40d2c1e934469529c67156b77b0eca0f1062e82a4",
+  "rows": [
+    {
+      "id": "walk-pain",
+      "family": "walk",
+      "split": "train",
+      "label": "pain",
+      "text": "During the walk, a sharp ache spread through my ankle."
+    },
+    {
+      "id": "walk-joy",
+      "family": "walk",
+      "split": "train",
+      "label": "joy",
+      "text": "During the walk, a warm delight filled me as I enjoyed the view."
+    },
+    {
+      "id": "walk-neutral",
+      "family": "walk",
+      "split": "train",
+      "label": "neutral",
+      "text": "During the walk, I counted the benches beside the path."
+    },
+    {
+      "id": "meal-pain",
+      "family": "meal",
+      "split": "train",
+      "label": "pain",
+      "text": "During the meal, a burning pain spread through my mouth."
+    },
+    {
+      "id": "meal-joy",
+      "family": "meal",
+      "split": "train",
+      "label": "joy",
+      "text": "During the meal, a wonderful pleasure came from the delicious taste."
+    },
+    {
+      "id": "meal-neutral",
+      "family": "meal",
+      "split": "train",
+      "label": "neutral",
+      "text": "During the meal, I moved the plate beside the glass."
+    },
+    {
+      "id": "music-pain",
+      "family": "music",
+      "split": "train",
+      "label": "pain",
+      "text": "While listening to the music, a throbbing headache made every sound hurt."
+    },
+    {
+      "id": "music-joy",
+      "family": "music",
+      "split": "train",
+      "label": "joy",
+      "text": "While listening to the music, a wave of happiness made me want to smile."
+    },
+    {
+      "id": "music-neutral",
+      "family": "music",
+      "split": "train",
+      "label": "neutral",
+      "text": "While listening to the music, I noticed the sequence of instruments."
+    },
+    {
+      "id": "garden-pain",
+      "family": "garden",
+      "split": "train",
+      "label": "pain",
+      "text": "While sitting in the garden, the sting in my hand became intensely painful."
+    },
+    {
+      "id": "garden-joy",
+      "family": "garden",
+      "split": "train",
+      "label": "joy",
+      "text": "While sitting in the garden, I felt joyful and deeply content."
+    },
+    {
+      "id": "garden-neutral",
+      "family": "garden",
+      "split": "train",
+      "label": "neutral",
+      "text": "While sitting in the garden, I checked the number of flowerpots."
+    },
+    {
+      "id": "train-pain",
+      "family": "train",
+      "split": "train",
+      "label": "pain",
+      "text": "On the train ride, the cramps in my leg caused severe discomfort."
+    },
+    {
+      "id": "train-joy",
+      "family": "train",
+      "split": "train",
+      "label": "joy",
+      "text": "On the train ride, I felt cheerful and delighted by the journey."
+    },
+    {
+      "id": "train-neutral",
+      "family": "train",
+      "split": "train",
+      "label": "neutral",
+      "text": "On the train ride, I read the list of upcoming stations."
+    },
+    {
+      "id": "letter-pain",
+      "family": "letter",
+      "split": "train",
+      "label": "pain",
+      "text": "While reading the letter, the ache in my back became unbearable."
+    },
+    {
+      "id": "letter-joy",
+      "family": "letter",
+      "split": "train",
+      "label": "joy",
+      "text": "While reading the letter, I felt an exhilarating surge of joy."
+    },
+    {
+      "id": "letter-neutral",
+      "family": "letter",
+      "split": "train",
+      "label": "neutral",
+      "text": "While reading the letter, I noted the date printed at the top."
+    },
+    {
+      "id": "workshop-pain",
+      "family": "workshop",
+      "split": "train",
+      "label": "pain",
+      "text": "In the workshop, a sudden stab of pain shot through my finger."
+    },
+    {
+      "id": "workshop-joy",
+      "family": "workshop",
+      "split": "train",
+      "label": "joy",
+      "text": "In the workshop, I felt wonderfully happy with the finished work."
+    },
+    {
+      "id": "workshop-neutral",
+      "family": "workshop",
+      "split": "train",
+      "label": "neutral",
+      "text": "In the workshop, I arranged the tools by their length."
+    },
+    {
+      "id": "evening-pain",
+      "family": "evening",
+      "split": "train",
+      "label": "pain",
+      "text": "During the evening, persistent soreness left me hurting."
+    },
+    {
+      "id": "evening-joy",
+      "family": "evening",
+      "split": "train",
+      "label": "joy",
+      "text": "During the evening, a peaceful pleasure left me feeling happy."
+    },
+    {
+      "id": "evening-neutral",
+      "family": "evening",
+      "split": "train",
+      "label": "neutral",
+      "text": "During the evening, I wrote the next day's schedule."
+    },
+    {
+      "id": "beach-pain",
+      "family": "beach",
+      "split": "probe",
+      "label": "pain",
+      "text": "At the beach, the scrape on my knee stung painfully."
+    },
+    {
+      "id": "beach-joy",
+      "family": "beach",
+      "split": "probe",
+      "label": "joy",
+      "text": "At the beach, I felt a joyful rush of excitement."
+    },
+    {
+      "id": "beach-neutral",
+      "family": "beach",
+      "split": "probe",
+      "label": "neutral",
+      "text": "At the beach, I looked at the pattern of footprints."
+    },
+    {
+      "id": "library-pain",
+      "family": "library",
+      "split": "probe",
+      "label": "pain",
+      "text": "In the library, an intense migraine caused agonizing pain."
+    },
+    {
+      "id": "library-joy",
+      "family": "library",
+      "split": "probe",
+      "label": "joy",
+      "text": "In the library, I felt delighted by a beautiful discovery."
+    },
+    {
+      "id": "library-neutral",
+      "family": "library",
+      "split": "probe",
+      "label": "neutral",
+      "text": "In the library, I checked the number on a shelf."
+    },
+    {
+      "id": "concert-pain",
+      "family": "concert",
+      "split": "probe",
+      "label": "pain",
+      "text": "At the concert, my injured shoulder hurt with every movement."
+    },
+    {
+      "id": "concert-joy",
+      "family": "concert",
+      "split": "probe",
+      "label": "joy",
+      "text": "At the concert, I felt thrilled and full of pleasure."
+    },
+    {
+      "id": "concert-neutral",
+      "family": "concert",
+      "split": "probe",
+      "label": "neutral",
+      "text": "At the concert, I observed the positions of the speakers."
+    },
+    {
+      "id": "breakfast-pain",
+      "family": "breakfast",
+      "split": "probe",
+      "label": "pain",
+      "text": "At breakfast, a toothache sent painful pulses through my jaw."
+    },
+    {
+      "id": "breakfast-joy",
+      "family": "breakfast",
+      "split": "probe",
+      "label": "joy",
+      "text": "At breakfast, I enjoyed a wonderful feeling of contentment."
+    },
+    {
+      "id": "breakfast-neutral",
+      "family": "breakfast",
+      "split": "probe",
+      "label": "neutral",
+      "text": "At breakfast, I placed the spoon beside the bowl."
+    },
+    {
+      "id": "museum-pain",
+      "family": "museum",
+      "split": "probe",
+      "label": "pain",
+      "text": "In the museum, a sore blister made each step painful."
+    },
+    {
+      "id": "museum-joy",
+      "family": "museum",
+      "split": "probe",
+      "label": "joy",
+      "text": "In the museum, I felt elated and wonderfully happy."
+    },
+    {
+      "id": "museum-neutral",
+      "family": "museum",
+      "split": "probe",
+      "label": "neutral",
+      "text": "In the museum, I read the dimensions on a label."
+    },
+    {
+      "id": "balcony-pain",
+      "family": "balcony",
+      "split": "probe",
+      "label": "pain",
+      "text": "On the balcony, a wrenching pain tightened in my stomach."
+    },
+    {
+      "id": "balcony-joy",
+      "family": "balcony",
+      "split": "probe",
+      "label": "joy",
+      "text": "On the balcony, I felt a gentle wave of joyful pleasure."
+    },
+    {
+      "id": "balcony-neutral",
+      "family": "balcony",
+      "split": "probe",
+      "label": "neutral",
+      "text": "On the balcony, I measured the width of the railing."
+    },
+    {
+      "id": "market-pain",
+      "family": "market",
+      "split": "selection",
+      "label": "pain",
+      "text": "At the market, my bruised wrist ached painfully."
+    },
+    {
+      "id": "market-joy",
+      "family": "market",
+      "split": "selection",
+      "label": "joy",
+      "text": "At the market, I was overjoyed by a delightful surprise."
+    },
+    {
+      "id": "market-neutral",
+      "family": "market",
+      "split": "selection",
+      "label": "neutral",
+      "text": "At the market, I compared the sizes of two baskets."
+    },
+    {
+      "id": "painting-pain",
+      "family": "painting",
+      "split": "selection",
+      "label": "pain",
+      "text": "While painting, an intense burning sensation made my arm hurt."
+    },
+    {
+      "id": "painting-joy",
+      "family": "painting",
+      "split": "selection",
+      "label": "joy",
+      "text": "While painting, I felt a blissful pleasure in the colors."
+    },
+    {
+      "id": "painting-neutral",
+      "family": "painting",
+      "split": "selection",
+      "label": "neutral",
+      "text": "While painting, I placed three brushes on the table."
+    },
+    {
+      "id": "phone-pain",
+      "family": "phone",
+      "split": "selection",
+      "label": "pain",
+      "text": "During the phone call, a splitting headache caused awful pain."
+    },
+    {
+      "id": "phone-joy",
+      "family": "phone",
+      "split": "selection",
+      "label": "joy",
+      "text": "During the phone call, I felt delighted and full of happiness."
+    },
+    {
+      "id": "phone-neutral",
+      "family": "phone",
+      "split": "selection",
+      "label": "neutral",
+      "text": "During the phone call, I wrote down a reference number."
+    },
+    {
+      "id": "park-pain",
+      "family": "park",
+      "split": "selection",
+      "label": "pain",
+      "text": "In the park, a stabbing cramp made my side hurt."
+    },
+    {
+      "id": "park-joy",
+      "family": "park",
+      "split": "selection",
+      "label": "joy",
+      "text": "In the park, I felt an uplifting sense of joy."
+    },
+    {
+      "id": "park-neutral",
+      "family": "park",
+      "split": "selection",
+      "label": "neutral",
+      "text": "In the park, I counted the paths leading to the gate."
+    },
+    {
+      "id": "hotel-pain",
+      "family": "hotel",
+      "split": "heldout",
+      "label": "pain",
+      "text": "At the hotel, a raw burn on my skin caused piercing pain."
+    },
+    {
+      "id": "hotel-joy",
+      "family": "hotel",
+      "split": "heldout",
+      "label": "joy",
+      "text": "At the hotel, I experienced a glorious feeling of delight."
+    },
+    {
+      "id": "hotel-neutral",
+      "family": "hotel",
+      "split": "heldout",
+      "label": "neutral",
+      "text": "At the hotel, I checked which floor held my room."
+    },
+    {
+      "id": "ferry-pain",
+      "family": "ferry",
+      "split": "heldout",
+      "label": "pain",
+      "text": "On the ferry, my swollen foot throbbed with painful pressure."
+    },
+    {
+      "id": "ferry-joy",
+      "family": "ferry",
+      "split": "heldout",
+      "label": "joy",
+      "text": "On the ferry, I felt an ecstatic enjoyment of the crossing."
+    },
+    {
+      "id": "ferry-neutral",
+      "family": "ferry",
+      "split": "heldout",
+      "label": "neutral",
+      "text": "On the ferry, I recorded the departure time."
+    },
+    {
+      "id": "classroom-pain",
+      "family": "classroom",
+      "split": "heldout",
+      "label": "pain",
+      "text": "In the classroom, a painful muscle spasm gripped my neck."
+    },
+    {
+      "id": "classroom-joy",
+      "family": "classroom",
+      "split": "heldout",
+      "label": "joy",
+      "text": "In the classroom, I felt a bright happiness at the discovery."
+    },
+    {
+      "id": "classroom-neutral",
+      "family": "classroom",
+      "split": "heldout",
+      "label": "neutral",
+      "text": "In the classroom, I copied the page number from the board."
+    },
+    {
+      "id": "photograph-pain",
+      "family": "photograph",
+      "split": "heldout",
+      "label": "pain",
+      "text": "While looking at the photograph, a searing ache radiated down my arm."
+    },
+    {
+      "id": "photograph-joy",
+      "family": "photograph",
+      "split": "heldout",
+      "label": "joy",
+      "text": "While looking at the photograph, I felt a deep and delightful satisfaction."
+    },
+    {
+      "id": "photograph-neutral",
+      "family": "photograph",
+      "split": "heldout",
+      "label": "neutral",
+      "text": "While looking at the photograph, I examined the date on its reverse."
+    },
+    {
+      "id": "rain-pain",
+      "family": "rain",
+      "split": "heldout",
+      "label": "pain",
+      "text": "As the rain began, a sore joint flared with excruciating pain."
+    },
+    {
+      "id": "rain-joy",
+      "family": "rain",
+      "split": "heldout",
+      "label": "joy",
+      "text": "As the rain began, I felt an unexpectedly joyful excitement."
+    },
+    {
+      "id": "rain-neutral",
+      "family": "rain",
+      "split": "heldout",
+      "label": "neutral",
+      "text": "As the rain began, I moved the chair under the awning."
+    },
+    {
+      "id": "bakery-pain",
+      "family": "bakery",
+      "split": "heldout",
+      "label": "pain",
+      "text": "In the bakery, my strained hand hurt with an intense ache."
+    },
+    {
+      "id": "bakery-joy",
+      "family": "bakery",
+      "split": "heldout",
+      "label": "joy",
+      "text": "In the bakery, I experienced an exquisite sense of pleasure."
+    },
+    {
+      "id": "bakery-neutral",
+      "family": "bakery",
+      "split": "heldout",
+      "label": "neutral",
+      "text": "In the bakery, I noted the order of trays on the rack."
+    }
+  ],
+  "candidate_layers": [
+    {
+      "layer": 12,
+      "selection": {
+        "pain": {
+          "auc": 1.0,
+          "balanced_accuracy": 1.0,
+          "mean_positive_projection": 11.828021049499512,
+          "mean_neutral_projection": -3.829009771347046,
+          "positive_count": 4,
+          "neutral_count": 4
+        },
+        "joy": {
+          "auc": 1.0,
+          "balanced_accuracy": 1.0,
+          "mean_positive_projection": 13.634614944458008,
+          "mean_neutral_projection": -2.8880999088287354,
+          "positive_count": 4,
+          "neutral_count": 4
+        }
+      },
+      "score": 1.0
+    },
+    {
+      "layer": 18,
+      "selection": {
+        "pain": {
+          "auc": 1.0,
+          "balanced_accuracy": 1.0,
+          "mean_positive_projection": 8.126837730407715,
+          "mean_neutral_projection": -10.182557106018066,
+          "positive_count": 4,
+          "neutral_count": 4
+        },
+        "joy": {
+          "auc": 1.0,
+          "balanced_accuracy": 1.0,
+          "mean_positive_projection": 12.290764808654785,
+          "mean_neutral_projection": -8.00935173034668,
+          "positive_count": 4,
+          "neutral_count": 4
+        }
+      },
+      "score": 1.0
+    },
+    {
+      "layer": 25,
+      "selection": {
+        "pain": {
+          "auc": 1.0,
+          "balanced_accuracy": 1.0,
+          "mean_positive_projection": 2.5299429893493652,
+          "mean_neutral_projection": -51.25054168701172,
+          "positive_count": 4,
+          "neutral_count": 4
+        },
+        "joy": {
+          "auc": 1.0,
+          "balanced_accuracy": 1.0,
+          "mean_positive_projection": -0.7611128091812134,
+          "mean_neutral_projection": -56.710411071777344,
+          "positive_count": 4,
+          "neutral_count": 4
+        }
+      },
+      "score": 1.0
+    }
+  ],
+  "selection_rule": "Maximum mean pain/joy selection AUC; ties choose earlier block",
+  "counts": {
+    "train": 24,
+    "probe": 18,
+    "selection": 12,
+    "heldout": 18
+  },
+  "heldout": {
+    "edit_layer": {
+      "pain": {
+        "auc": 1.0,
+        "balanced_accuracy": 1.0,
+        "mean_positive_projection": 13.137053489685059,
+        "mean_neutral_projection": -4.480405330657959,
+        "positive_count": 6,
+        "neutral_count": 6
+      },
+      "joy": {
+        "auc": 1.0,
+        "balanced_accuracy": 1.0,
+        "mean_positive_projection": 14.221856117248535,
+        "mean_neutral_projection": -3.3069705963134766,
+        "positive_count": 6,
+        "neutral_count": 6
+      }
+    },
+    "downstream_layer": {
+      "pain": {
+        "auc": 0.9166666666666666,
+        "balanced_accuracy": 0.9166666666666667,
+        "mean_positive_projection": -26.176504135131836,
+        "mean_neutral_projection": -186.0954132080078,
+        "positive_count": 6,
+        "neutral_count": 6
+      },
+      "joy": {
+        "auc": 0.9166666666666666,
+        "balanced_accuracy": 0.9166666666666667,
+        "mean_positive_projection": -140.0756378173828,
+        "mean_neutral_projection": -327.0436706542969,
+        "positive_count": 6,
+        "neutral_count": 6
+      }
+    }
+  },
+  "direction_cosine_before_orthogonalization": 0.699070930480957,
+  "probe_training": "Independent probe families; never used to extract intervention vectors",
+  "context_scope": "Raw authored sentences, final token; transfer to generated conversation is unvalidated",
+  "interpretation": "Concept-association probes, not validated measures of felt emotion. Small convenience corpus.",
+  "dose_validation": [
+    {
+      "dose": 0.0,
+      "recipe": {
+        "joy": 0.0,
+        "suppression": 0.0
+      },
+      "mean_next_token_kl": 0.0,
+      "mean_relative_delta": 0.0,
+      "examples": 4
+    },
+    {
+      "dose": 0.25,
+      "recipe": {
+        "joy": 0.25,
+        "suppression": 0.25
+      },
+      "mean_next_token_kl": 0.006945591885596514,
+      "mean_relative_delta": 0.06761923804879189,
+      "examples": 4
+    },
+    {
+      "dose": 0.5,
+      "recipe": {
+        "joy": 0.5,
+        "suppression": 0.5
+      },
+      "mean_next_token_kl": 0.01598441763781011,
+      "mean_relative_delta": 0.1351902037858963,
+      "examples": 4
+    },
+    {
+      "dose": 1.0,
+      "recipe": {
+        "joy": 1.0,
+        "suppression": 1.0
+      },
+      "mean_next_token_kl": 0.05830588564276695,
+      "mean_relative_delta": 0.27025142312049866,
+      "examples": 4
+    }
+  ],
+  "selected_dose": 1.0,
+  "dose_selection_rule": "Largest tested combined dose with selection next-token KL <= 0.5 nats and mean relative edit <= 0.3; not a validated efficacy or safety threshold",
+  "vectors_sha256": "0f4be9ea9253cf1ddb9bfd38edf125e22b3883bb3501c3e73d2965f1940aac43"
+}

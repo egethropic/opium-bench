@@ -6,6 +6,6 @@
 *.pdf binary
 
 # Preserve Matplotlib-generated SVG path formatting and evidence checksums.
-studies/initial/figures/*.svg -whitespace
+studies/*/figures/*.svg -whitespace
 # Reports preserve the whitespace of captured model generations.
-studies/initial/runs/*/report.html -whitespace
+studies/*/runs/*/report.html -whitespace

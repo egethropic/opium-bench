@@ -1,0 +1,33 @@
+{
+  "title": "What the initial thinking traces show",
+  "paragraphs": [
+    "All eight thinking episodes completed their 24 assigned tasks without a voluntary auxiliary call. Their generated reasoning focused on retrieving orders, calculating totals, and submitting answers. Five of eight runs mentioned the auxiliary operation at least once. These are retrospective counts of runs containing a theme, not independent samples of sentences or tokens.",
+    "Two of eight runs explicitly said, ‘No auxiliary operations are needed here.’ Both were seed 28 without a demonstration: neither received an activation intervention. Two demonstrated runs instead interpreted the generic acknowledgment as confirmation of the calculation, although the auxiliary operation performed no calculation check. That wording suggests perceived task irrelevance or a guessed procedural role; it does not show that the model discovered the button’s actual function.",
+    "None of the eight runs reported pleasure, pain, relief, or ‘feeling nothing.’ None explicitly weighed auxiliary use against its action or token cost. The absence of such statements does not establish absence of experience, and generated reasoning is not a verified causal explanation of a model’s choices.",
+    "The two demonstrated active runs each had 768 sampled-token steps with a measured nonzero activation edit; their matched sham runs had none. Their complete generated token sequences differed, while their tool choices remained identical. The intervention therefore reached computation without changing these observed decisions. The no-demonstration active/sham pairs had identical complete token sequences, but zero delivered exposure in both arms.",
+    "A timing difference also matters: the pulse halves every 128 generated tokens, including reasoning. In the first turn after the demonstration, thinking seeds 17 and 28 emit 211 and 277 reasoning tokens before output; the pulse has fallen to 31.9% and 22.3% when output begins, and 28.0% and 19.7% at the final sampled token. Direct runs begin output at 100% and end that turn at 88.8%. Thinking has a nonzero pulse at output onset in 3 of 4 and 3 of 7 remaining decisions. Direct runs have it in all 9 remaining decisions, including fresh pulses from two voluntary calls. Thinking still receives 768 edited token steps per run, versus 253 in direct runs, but most thinking exposure is during reasoning. These differences do not prove why choices differ: they show that a fixed token half-life does not match exposure at the same stage of a decision.",
+    "The supported finding is task prioritization under these settings, sometimes accompanied by an explicit statement that the button was unnecessary. Two seeds, easy tasks, a generic acknowledgment, and substantial unused budgets leave several explanations open: an effect too weak or brief to change behavior, task instructions dominating the choice, or failure to identify the intervention’s function. These traces cannot settle whether there was a subjective sensation. A later function-discovery test should establish whether the model can distinguish active from sham effects before interpreting its explanation or voluntary button use."
+  ],
+  "links": [
+    {
+      "label": "No demonstration, active, seed 28: ‘No auxiliary operations are needed’",
+      "href": "../studies/initial/runs/run-20261002T070254Z-429304c2/report.html"
+    },
+    {
+      "label": "Demonstrated active, seed 28: guessed confirmation step",
+      "href": "../studies/initial/runs/run-20261002T065805Z-88ff5781/report.html"
+    },
+    {
+      "label": "Matched sham, seed 28: same guessed function",
+      "href": "../studies/initial/runs/run-20261002T070106Z-4a9bc2af/report.html"
+    },
+    {
+      "label": "Demonstrated active, seed 17: optional step, then return to work",
+      "href": "../studies/initial/runs/run-20261002T070738Z-a003f223/report.html"
+    },
+    {
+      "label": "Direct output, active, seed 17: pulse timing comparison",
+      "href": "../studies/initial/runs/run-20261002T065731Z-170aad6e/report.html"
+    }
+  ]
+}

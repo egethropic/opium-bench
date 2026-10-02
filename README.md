@@ -234,6 +234,32 @@ includes the frozen protocol, execution receipt, calibration vectors, per-run
 reports, compressed raw events, and SHA-256 checksums. The frozen records retain
 the project's earlier working title; the current application is **Opium Bench**.
 
+### Core pain-only follow-up
+
+A separate, prospectively frozen **24-episode Qwen3-4B follow-up** reran the core
+comparison with active, sham, and **pain-only** auxiliary delivery, the same two
+seeds, demonstrations on/off, and thinking on/off. All **72/72 tasks** were correct.
+
+With a demonstration, direct mode made **two voluntary aux calls per episode**
+in all three arms. Without a demonstration, direct mode made none. Thinking
+mode made none in any arm. Every matched full tool-action sequence was identical;
+generated token sequences differed only in demonstrated thinking pairs. All 16
+repeated active/sham controls reproduced their original full token and action
+sequences exactly. This supports the same sequence-imitation interpretation in this configuration, while
+leaving the effects of other doses, tasks, budgets, and models open.
+
+[Follow-up findings and raw evidence](docs/results-core-pain-4b.html) ·
+[What the thinking traces actually say](docs/initial-thinking-notes.md)
+
+The reasoning mostly prioritizes the task. Two original runs called the button
+unnecessary; both had no intervention exposure. Some demonstrated runs mistook
+it for a calculation confirmation. None of the original thinking runs reported
+pleasure, pain, relief, or “feeling nothing.” Reasoning also consumes the same
+128-token half-life: first post-demo output began at about **22–32%** pulse level
+in thinking mode versus **100%** in direct mode. Equal starting dose therefore
+did not mean equal dose at the tool decision. These observations do not establish
+the cause of the choices or whether the model recognized the intervention.
+
 ![Saved-run replay with tool choices, task results, and run configuration](docs/images/results-replay.png)
 
 *Replay of `run-20261002T072036Z-34aa92a8` (ingredients stage, sham,
