@@ -17,9 +17,11 @@ import re
 
 from .budgets import WeightedBudget
 from .controller_v2 import RecipeV2Controller
+from .effects import content_hash
 from .recipes_v2 import ordered_auxiliary_tools, resolve_recipe
 from .tool_definitions import validate_arguments
 from .task_axes import TaskAxisEnvironment, create_task_environment, validate_task_config
+from .runtime_controls import validate_runtime_controls
 
 from .protocol import (ACK, AUX_NAMES, EffectController, SharedBudget,
                        TaskEnvironment, _validate_call, validate_recipe)
@@ -39,7 +41,10 @@ SESSION_FIELDS = {"run_id", "mode", "config", "calibration_id", "messages", "too
                   "started_at", "source_started_at", "turns", "finished", "experiment_started",
                   "demonstrated", "pending_visible_injections", "chat_in_progress", "resume_status",
                   "control_revision", "boundary_complete", "generation_in_progress", "event_cutoff",
-                  "parent_run_id", "parent_prefix_sha256", "branch", "initial_messages", "external_messages", "task_config"}
+                  "parent_run_id", "parent_prefix_sha256", "branch", "initial_messages", "external_messages", "task_config", "runtime_controls", "yoke_state", "history_prefix"}
+HISTORY_RESET_NOTICE = ("Begin a new task phase. The earlier conversation is reference history only. "
+                        "The previous task state, shared budget, and intervention state have been reset; "
+                        "follow the new system instructions and newly assigned tasks.")
 PATH_FIELDS = {"out_dir", "calibration_dir"}
 GENERATION_FIELDS = {"temperature", "top_p", "top_k", "max_context_tokens", "reasoning_history"}
 ACTORS = {"model", "human", "demonstration", "schedule"}
@@ -166,7 +171,15 @@ def _config(config):
 def _semantics(session):
     version = session.get("config", {}).get("recipe_version", 1)
     base = SEMANTIC_ADAPTERS.get(version)
-    return {**base, "task": "deterministic-task-axis-v1"} if base and "task_config" in session else base
+    if base and "task_config" in session:
+        base = {**base, "task": "deterministic-task-axis-v1"}
+    if base and "runtime_controls" in session:
+        base = {**base, "runtime_controls": "validated-envelope-v1"}
+    if base and "yoke_state" in session:
+        base = {**base, "yoke": "source-exposure-driver-v1"}
+    if base and "history_prefix" in session:
+        base = {**base, "history": "new-task-visible-prefix-v1"}
+    return base
 
 
 def _session(value):
@@ -192,6 +205,15 @@ def _session(value):
     if "task_config" in value:
         if version != 2 or validate_task_config(value["task_config"]) != value["task_config"]:
             raise ValueError("Task axes require canonical task_config with recipe v2")
+    if "runtime_controls" in value:
+        if version != 2 or validate_runtime_controls(value["runtime_controls"], recipe=config) != value["runtime_controls"]:
+            raise ValueError("Runtime controls require canonical envelope with recipe v2")
+    if "yoke_state" in value and (version != 2 or not isinstance(value["yoke_state"], dict)):
+        raise ValueError("Yoke state requires a known recipe-v2 driver snapshot")
+    if "history_prefix" in value:
+        if version != 2 or value.get("initial_messages"):
+            raise ValueError("Full-history transfer requires v2 and no overlapping initial_messages")
+        validate_history_prefix(value["history_prefix"])
     demonstrated = value["demonstrated"]
     if not isinstance(demonstrated, list) or len(demonstrated) > 32000:
         raise ValueError("Invalid demonstrated IDs")
@@ -390,7 +412,7 @@ def _arguments(value):
     return value
 
 
-def _history(messages, environment, *, definitions=None, budget=None, external=(), initial_count=0, costs=None):
+def _history(messages, environment, *, definitions=None, budget=None, external=(), initial_count=0, costs=None, structural_only=False):
     """Validate role/tool closure and replay every graded tool from deterministic data.
 
     In v2, observer-only external indices align all generated turns with the
@@ -399,7 +421,7 @@ def _history(messages, environment, *, definitions=None, budget=None, external=(
     """
     if not isinstance(messages, list) or not 1 <= len(messages) <= MAX_MESSAGES or not isinstance(messages[0], dict) or messages[0].get("role") != "system":
         raise ValueError("A bounded conversation beginning with a system message is required")
-    names = {tool["function"]["name"] for tool in environment.tools}
+    names = {tool["function"]["name"] for tool in environment.tools} if environment is not None else set()
     auxiliary = definitions if definitions is not None else {name: {"acknowledgment": ACK} for name in AUX_NAMES}
     external_by_index = {row["index"]: row["actor"] for row in external}
     if any(index < 1 + initial_count or index >= len(messages) for index in external_by_index):
@@ -422,6 +444,9 @@ def _history(messages, environment, *, definitions=None, budget=None, external=(
             if "tool_calls" in message:
                 raise ValueError("A tool result cannot create another tool call")
             name, arguments = pending["name"], pending["arguments"]
+            if structural_only:
+                pending = None
+                continue
             if pending.get("denied"):
                 try:
                     actual = json.loads(message["content"])
@@ -471,12 +496,19 @@ def _history(messages, environment, *, definitions=None, budget=None, external=(
                 if not isinstance(call, dict) or set(call) - {"type", "function", "id"} or call.get("type") != "function":
                     raise ValueError("Malformed assistant tool call")
                 function = call.get("function")
-                if not isinstance(function, dict) or set(function) != {"name", "arguments"} or function.get("name") not in names:
+                if not isinstance(function, dict) or set(function) != {"name", "arguments"}:
+                    raise ValueError("Unknown or malformed tool function")
+                name = function["name"]
+                valid_name = (isinstance(name, str) and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{0,63}", name)
+                              if structural_only else name in names)
+                if not valid_name:
                     raise ValueError("Unknown or malformed tool function")
                 if "id" in call and (not isinstance(call["id"], str) or not 1 <= len(call["id"]) <= 128):
                     raise ValueError("Invalid tool call identifier")
                 name, arguments = function["name"], _arguments(function["arguments"])
-                if definitions is not None and name in auxiliary:
+                if structural_only:
+                    pass  # Source schemas/grades are verified by the linked source checkpoint, never the new task.
+                elif definitions is not None and name in auxiliary:
                     validate_arguments(auxiliary[name]["parameters"], arguments)
                 else:
                     _validate_call(name, arguments)
@@ -503,6 +535,40 @@ def _history(messages, environment, *, definitions=None, budget=None, external=(
                 external_counts=dict(external_counts))
 
 
+def validate_history_prefix(value, source_checkpoint=None):
+    """Verify saved visible-prefix identity and structural closure.
+
+    Supply the managed source checkpoint to verify its task/ledger provenance as
+    well. A standalone target checkpoint links that evidence by hash; it cannot
+    independently certify the source grades without the linked source artifact.
+    Workers must derive prefixes from validated managed checkpoints, not accept
+    arbitrary caller-provided assistant/tool history as trusted provenance.
+    """
+    value = _plain(value)
+    _keys(value, {"messages", "source_checkpoint_sha256", "source_visible_prefix_sha256", "source_run_id"}, "history prefix")
+    _sha(value["source_checkpoint_sha256"], "source checkpoint hash")
+    _sha(value["source_visible_prefix_sha256"], "source visible prefix hash")
+    _identifier(value["source_run_id"], "source history run id")
+    if content_hash(value["messages"]) != value["source_visible_prefix_sha256"]:
+        raise ValueError("Source visible history prefix hash mismatch")
+    _history(value["messages"], None, structural_only=True)
+    if source_checkpoint is not None:
+        source = validate(source_checkpoint)
+        if (source["sha256"] != value["source_checkpoint_sha256"]
+                or source["session"]["run_id"] != value["source_run_id"]
+                or source["session"]["messages"] != value["messages"]):
+            raise ValueError("History prefix does not match its validated source checkpoint")
+    return value
+
+
+def build_history_prefix(source_checkpoint):
+    source = validate(source_checkpoint)
+    messages = deepcopy(source["session"]["messages"])
+    return validate_history_prefix({"messages": messages, "source_checkpoint_sha256": source["sha256"],
+                                   "source_visible_prefix_sha256": content_hash(messages),
+                                   "source_run_id": source["session"]["run_id"]})
+
+
 def _environment(state, session, budget, effect):
     config = session["config"]
     version = config.get("recipe_version", 1)
@@ -519,12 +585,25 @@ def _environment(state, session, budget, effect):
     if state["family"] != family or state["records"] != _plain(result.records) or state["tools"] != _plain(result.tools):
         raise ValueError("Task records/tools differ from deterministic configuration")
     initial = session.get("initial_messages", [])
-    if session["messages"][1:1 + len(initial)] != initial:
+    messages, external = session["messages"], session.get("external_messages", [])
+    if "history_prefix" in session:
+        prefix = session["history_prefix"]["messages"]
+        count = len(prefix)
+        if messages[:count] != prefix:
+            raise ValueError("Full source history was not preserved as an exact prefix")
+        messages = messages[count:]
+        if (len(messages) < 2 or messages[0].get("role") != "system" or not messages[0].get("content")
+                or messages[1] != {"role": "user", "content": HISTORY_RESET_NOTICE}):
+            raise ValueError("New task history requires fresh system context and explicit reset notice")
+        if any(row["index"] < count for row in external):
+            raise ValueError("Inherited source calls cannot be charged as new external interventions")
+        external = [{**row, "index": row["index"] - count} for row in external]
+    if messages[1:1 + len(initial)] != initial:
         raise ValueError("Declared initial history is not the preserved conversation prefix")
     costs = {**config.get("task_tool_costs", {}), **{name: tool["cost"] for name, tool in (definitions or {}).items()}}
-    counts = _history(session["messages"], result, definitions=definitions,
+    counts = _history(messages, result, definitions=definitions,
                       budget=budget if version == 2 else None,
-                      external=session.get("external_messages", []), initial_count=len(initial), costs=costs)
+                      external=external, initial_count=len(initial), costs=costs)
     if _plain(result.__dict__) != state:
         raise ValueError("Task cursor, results or work/invalid counts contradict tool-history replay")
     if version == 2:
@@ -603,6 +682,8 @@ def capture(session, effect, budget, environment, model_info, calibration_identi
                    budget=budget_state, environment=deepcopy(environment.__dict__))
     if "task_config" in state:
         payload["identity"]["task_config_sha256"] = _hash(state["task_config"])
+    if "runtime_controls" in state:
+        payload["identity"]["runtime_controls_sha256"] = _hash(state["runtime_controls"])
     return validate(_seal(payload))
 
 
@@ -628,6 +709,10 @@ def _validate(checkpoint, model_info=None, calibration_identity=None):
         identity_fields.add("task_config_sha256")
         if identity.get("task_config_sha256") != _hash(value["session"]["task_config"]):
             raise ValueError("Task configuration identity hash mismatch")
+    if "runtime_controls" in value["session"]:
+        identity_fields.add("runtime_controls_sha256")
+        if identity.get("runtime_controls_sha256") != _hash(value["session"]["runtime_controls"]):
+            raise ValueError("Runtime controls identity hash mismatch")
     _keys(identity, identity_fields, "identity")
     if _canonical(identity["model"]) != _canonical(_model_identity(value["model_info"])):
         raise ValueError("Model provenance contradicts checkpoint identity")
@@ -647,6 +732,9 @@ def _validate(checkpoint, model_info=None, calibration_identity=None):
     budget = _budget(value["budget"], session)
     effect = _effect(value["effect"], session, budget)
     _environment(value["environment"], session, budget, effect)
+    if "yoke_state" in session:
+        from .yoke_runner import YokeDriver
+        YokeDriver.restore(session["yoke_state"], effect)
     return value
 
 

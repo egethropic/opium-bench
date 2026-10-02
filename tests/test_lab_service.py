@@ -284,6 +284,32 @@ class ServiceTests(unittest.TestCase):
         started = next(e for e in self.service.events if e["type"] == "session_started")
         self.assertEqual(started["config"], original, "Live control edits must not mutate the original event configuration")
 
+    def test_research_run_cannot_restart_or_change_a_previous_standalone_run(self):
+        self.service.command("start_session", self.payload(seed=11))
+        saved = copy.deepcopy(self.service.last_start)
+        other, _ = self.service.store.create("experiment", {"seed": 22})
+        self.service.session.update(id=other, mode="experiment", status="running", config={"seed": 22})
+        self.service.event({"type": "control", "run_id": other, "settings": {"pain": 2}})
+        self.assertEqual(self.service.last_start, saved)
+        self.assertEqual(self.service.session["config"]["baseline_pain"], 2)
+        self.service.worker["status"] = "ready"
+        self.service.session["status"] = "complete"
+        with self.assertRaisesRegex(ValueError, "current standalone session"):
+            self.service.command("restart", {})
+        self.assertFalse(self.service.state()["session"]["restart_available"])
+        self.service.event({"type": "session_started", "run_id": other, "config": {"seed": 22}})
+        self.assertIsNone(self.service.last_start)
+
+    def test_restart_preserves_explicit_initial_conversation(self):
+        payload = self.payload()
+        payload["initial_messages"] = [{"role": "user", "content": "Remember the task context."}]
+        first = self.service.command("start_session", payload)
+        self.service.session.update(id=first["run_id"], status="complete")
+        self.service.worker["status"] = "ready"
+        self.assertTrue(self.service.state()["session"]["restart_available"])
+        self.service.command("restart", {})
+        self.assertEqual(self.service.sent[-1][1]["initial_messages"], payload["initial_messages"])
+
     def test_worker_crash_finalizes_running_and_queued_and_unblocks_load(self):
         running, _ = self.service.store.create("experiment", {"task_count": 5})
         queued, _ = self.service.store.create("experiment", {"task_count": 5})
@@ -375,6 +401,8 @@ class ServiceTests(unittest.TestCase):
         self.assertEqual(old_bytes, (historical / 'old-run' / 'manifest.json').read_bytes())
 
     def test_worker_cache_environment_is_anchored_to_selected_data_drive(self):
+        # Temporary fixture lives on the WSL backing disk; no real child writes.
+        self.service.resources.forbid_large_c_writes = False
         process = FakeProcess()
         with patch('lab.service.subprocess.Popen', return_value=process) as popen, patch('lab.service.threading.Thread'):
             LabService._send(self.service, 'load_model', {"profile": {"id": "fake"}})
@@ -382,6 +410,9 @@ class ServiceTests(unittest.TestCase):
         for key in ('TRITON_CACHE_DIR', 'CUDA_CACHE_PATH', 'TORCHINDUCTOR_CACHE_DIR', 'XDG_CACHE_HOME', 'TORCH_HOME', 'PIP_CACHE_DIR', 'TMPDIR'):
             self.assertTrue(Path(env[key]).is_relative_to(self.service.store.root), key)
         self.assertEqual(env['HF_HOME'], self.service.cache_dir)
+        self.assertEqual(env['OPIUM_DATA_DIR'], str(self.service.store.root))
+        self.assertEqual(env['HF_HUB_DISABLE_XET'], '1')
+        self.assertTrue(popen.call_args.kwargs['start_new_session'])
 
     def test_failed_worker_launch_cancels_queued_run_and_job(self):
         identifier, path = self.service.store.create('experiment', {"task_count": 4})
@@ -502,7 +533,7 @@ class HTTPTests(unittest.TestCase):
 
     def test_request_size_and_content_type_enforced(self):
         self.assertEqual(self.request('POST', '/api/command', '{}', {'Content-Type': 'text/plain'})[0], 415)
-        self.assertEqual(self.request('POST', '/api/command', b'', {'Content-Type': 'application/json', 'Content-Length': '1048577'})[0], 413)
+        self.assertEqual(self.request('POST', '/api/command', b'', {'Content-Type': 'application/json', 'Content-Length': '4194305'})[0], 413)
 
     def test_paths_cannot_escape_static_or_run_roots(self):
         for path in ('/../AGENTS.md', '/%2e%2e/AGENTS.md', '/api/runs/..',

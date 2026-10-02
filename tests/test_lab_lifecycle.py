@@ -184,6 +184,24 @@ class PauseTests(unittest.TestCase):
         self.assertEqual(before, after)
         self.assertEqual(accepted["parent"]["parent_prefix_kind"], "events")
         self.assertEqual(accepted["parent"]["inherited_actions"], 1)
+        # A branch of a branch retains the first run's visible evidence without
+        # charging those events again or requiring the original run at replay.
+        child_id = accepted["run_id"]
+        child_before = service.store.read_run(child_id)
+        grandchild = service.command("branch", dict(run_id=child_id, policy="continue_state"))
+        replay = service.store.read_run(grandchild["run_id"])
+        self.assertEqual(replay["parent_events"][:len(child_before["parent_events"])], child_before["parent_events"])
+        self.assertGreater(len(replay["parent_events"]), len(child_before["parent_events"]))
+        self.assertEqual(replay["manifest"]["replay_ancestry"]["event_count"], len(child_before["parent_events"]))
+        from lab.storage import Store
+        isolated = Store(Path(self.temp.name) / "isolated-replay")
+        import shutil
+        shutil.copytree(service.store.run_path(grandchild["run_id"]), isolated.runs / grandchild["run_id"])
+        self.assertEqual(isolated.read_run(grandchild["run_id"])["parent_events"], replay["parent_events"])
+        inherited_file = isolated.runs / grandchild["run_id"] / "ancestor-events.jsonl.gz"
+        inherited_file.write_bytes(b"tampered")
+        with self.assertRaises((ValueError, OSError)):
+            isolated.read_run(grandchild["run_id"])
 
 
 if __name__ == "__main__":

@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import argparse
 from copy import deepcopy
+from contextlib import contextmanager, ExitStack
+import os
 import json
 import gzip
 import hashlib
@@ -14,7 +16,8 @@ import traceback
 
 from .protocol import (ACK, AUX_NAMES, EffectController, SharedBudget, TaskEnvironment,
                        parse_response, validate_recipe)
-from .storage import atomic_json, utc_now
+from .storage import atomic_json, guarded_bytes, managed_writes, utc_now
+from .resources import EmergencyMetadata, ResourceGuard, ResourceStop
 from .budgets import WeightedBudget
 from .controller_v2 import RecipeV2Controller
 from .recipes_v2 import resolve_recipe
@@ -22,8 +25,12 @@ from .session_v2 import build_session, create_environment, parse_session_respons
 
 
 class Worker:
-    def __init__(self, cache_dir, runtime=None, output=None):
+    def __init__(self, cache_dir, runtime=None, output=None, *, resources=None, data_dir=None):
         self.cache_dir = cache_dir
+        self.resources = resources
+        self.data_dir = Path(data_dir).resolve() if data_dir is not None else Path(cache_dir).resolve().parent
+        self.resource_failure = None
+        self.resource_emergency = None
         self.runtime = runtime
         self.output = output or self._stdout
         self.print_lock = threading.Lock()
@@ -35,6 +42,7 @@ class Worker:
         self.jobs = queue.Queue()
         self.session = None
         self.effect = None
+        self.yoke = None
         self.budget = None
         self.environment = None
         self.model_info = None
@@ -45,6 +53,93 @@ class Worker:
         self.cancel_epoch = 0
         self._generation_text = ""
 
+    def resource_check(self, force=False):
+        if self.resource_failure is not None:
+            raise self.resource_failure
+        if self.resources:
+            try:
+                return self.resources.check(force=force, operation=self.active_command)
+            except ResourceStop as exc:
+                self.resource_failure = exc
+                raise
+
+    def should_stop(self):
+        if self.stop.is_set():
+            return True
+        self.resource_check()
+        return False
+
+    @contextmanager
+    def _resource_job(self, command, payload):
+        """Whole-job admission plus burst headroom and checked writer context.
+
+        The service supervises this owned worker while third-party calls block.
+        This process supplies finer checks at generation/extraction/write boundaries.
+        """
+        if not self.resources:
+            yield
+            return
+        self.resource_failure = None
+        self.resource_emergency = EmergencyMetadata(self.data_dir / "resource-stops").allocate(self.resources)
+        operation = "worker-job"
+        try:
+            writes = {}
+            if command == "load_model" and payload.get("profile", {}).get("allow_download"):
+                profile = payload["profile"]
+                from .service import PROFILES
+                catalog = next((item for item in PROFILES if all(item.get(key) == profile.get(key)
+                                for key in ("id", "model_id", "revision", "quantization"))), None)
+                # Only an exact catalog identity can use its conversion estimate.
+                estimate = (catalog or {}).get("download_gib") or (65 if "27B" in profile.get("model_id", "") else 12)
+                writes[self.cache_dir] = int(estimate*2**30)
+            entries = payload.get("entries", []) if command in {"start_batch", "run_research_job"} else [payload]
+            if command == "chat" and self.session:
+                entries = [self.session]
+            for entry in entries:
+                if entry.get("out_dir"):
+                    cfg = entry.get("config", {})
+                    # Includes token evidence, checkpoints, and immutable calibration outputs.
+                    estimate = max(64*2**20, int(cfg.get("token_budget", 4096))*4096 + int(cfg.get("action_budget", 32))*128*1024)
+                    path = str(Path(entry["out_dir"]).resolve())
+                    writes[path] = writes.get(path, 0) + estimate
+            if writes:
+                self.resources.preflight(writes)
+            # Temp/compiler caches are a write destination even for a local-only load.
+            self.resources.preflight({self.data_dir / "tmp":64*2**20})
+            self.resources.reserve(operation, {self.data_dir:32*2**20, self.cache_dir:256*2**20 if command == "load_model" else 0})
+            with managed_writes(self.resources):
+                yield
+        finally:
+            self.resources.release(operation)
+
+    def _resource_stopped(self, error, command, payload, command_id):
+        detail = error.to_dict()
+        affected = [entry.get("run_id") for entry in payload.get("entries", [])] if command in {"start_batch", "run_research_job"} else [payload.get("run_id")]
+        if command == "chat" and self.session:
+            affected = [self.session["run_id"]]
+        detail.update(command_id=command_id, command=command, run_ids=[v for v in affected if v], time=utc_now())
+        if self.resource_emergency:
+            try:
+                detail["record"] = str(self.resource_emergency.finalize(detail))
+            except (OSError, ValueError) as exc:
+                detail["record_error"] = str(exc)
+        self.emit(dict(type="resource_stop", **detail))
+        if self.session and not self.session.get("finished") and command in {"start_session", "chat", "start_batch", "restore_session", "run_research_job"}:
+            # Keep the earlier safe checkpoint. Streamed token events already carry
+            # partial output; a truncated generation must never become resumable.
+            summary = dict(self.environment.metrics(), tokens=self.budget.tokens,
+                actions=self.budget.actions, termination="storage_reserve", resource_stop=error.to_dict())
+            self.session["finished"] = True
+            self.paused = False
+            self.pause_requested.clear()
+            self.pause_wakeup.set()
+            self.emit(dict(type="session_finished", status="resource_stopped", summary=summary), scoped=True)
+        elif command == "run_diagnostics" and payload.get("run_id"):
+            self.emit(dict(type="session_finished",run_id=payload["run_id"],status="resource_stopped",
+                summary=dict(termination="storage_reserve",resource_stop=error.to_dict(),answer_feedback_to_parent=False)))
+        self.model_status("resource_stopped", str(error))
+        self.emit(dict(type="job",command_id=command_id,status="resource_stopped",message=str(error),resource_stop=error.to_dict()))
+
     def _stdout(self, event):
         with self.print_lock:
             print(json.dumps(event, allow_nan=False, ensure_ascii=False), flush=True)
@@ -52,7 +147,7 @@ class Worker:
     def emit(self, event, scoped=False):
         if scoped and self.session:
             event = dict(event, run_id=self.session["run_id"])
-        if self.session and event.get("run_id") == self.session["run_id"]:
+        if self.session and event.get("run_id") == self.session["run_id"] and event.get("type") not in {"research_run_registered", "research_progress"}:
             self.session["event_cutoff"] = self.session.get("event_cutoff", 0) + 1
             if self.is_v2:
                 event = dict(event)
@@ -89,7 +184,7 @@ class Worker:
                 with self.lock:
                     if not self.session or self.session.get("finished"):
                         raise ValueError("No active session to pause or resume")
-                    if self.active and self.active_command not in {"start_session", "start_batch", "chat", "restore_session"}:
+                    if self.active and self.active_command not in {"start_session", "start_batch", "chat", "restore_session", "run_research_job"}:
                         raise ValueError("Only conversation and experiment jobs can pause")
                     if command == "pause":
                         self.pause_requested.set()
@@ -160,7 +255,9 @@ class Worker:
             self.active_command = command
             self.stop.clear()
             self.emit(dict(type="job", command_id=command_id, status="running", message=command))
+            contexts = ExitStack()
             try:
+                contexts.enter_context(self._resource_job(command, payload))
                 if self.runtime is None:
                     from .runtime import Runtime
                     self.runtime = Runtime()
@@ -169,7 +266,7 @@ class Worker:
                         self.finish("stopped", "model_changed")
                     self.model_status("loading")
                     self.model_info = None
-                    self.model_info = self.runtime.load(payload["profile"], self.cache_dir, self.emit, self.stop.is_set)
+                    self.model_info = self.runtime.load(payload["profile"], self.cache_dir, self.emit, self.should_stop)
                     self.model_status("ready")
                 elif command == "unload_model":
                     if self.session and not self.session.get("finished"):
@@ -180,11 +277,24 @@ class Worker:
                 elif command in {"calibrate", "validate_calibration"}:
                     self.model_status("calibrating")
                     def progress(e):
+                        self.resource_check()
                         self.emit(dict(e, command_id=command_id))
                     method = self.runtime.calibrate if command == "calibrate" else self.runtime.validate_calibration
-                    result = method(payload["config"], Path(payload["out_dir"]), progress, self.stop.is_set)
+                    result = method(payload["config"], Path(payload["out_dir"]), progress, self.should_stop)
                     self.emit(dict(type="calibration_complete", calibration_id=payload["calibration_id"], calibration=result, validation=command == "validate_calibration"))
                     self.model_status("ready")
+                elif command == "run_research_job":
+                    from .protocol_runner import ProtocolRunner, LocalWorkerBackend
+                    from .storage import Store
+                    store = Store(payload["data_dir"], guard=self.resources)
+                    runner = ProtocolRunner(store, LocalWorkerBackend(self, store), should_stop=self.should_stop,
+                        emit=lambda e: self.emit(dict(e, command_id=command_id)))
+                    result = runner.run(payload["job_id"], payload["expected_expansion_sha256"],
+                        resume=payload.get("resume", False), retry_failed=payload.get("retry_failed", False),execution_id=payload.get('execution_id'))
+                    self.emit(dict(type="research_finished", command_id=command_id, **result))
+                    self.model_status("ready")
+                elif command == "run_diagnostics":
+                    self.run_diagnostics(payload)
                 elif command == "preview_session":
                     self.preview_session(payload, command_id)
                 elif command == "start_session":
@@ -214,17 +324,24 @@ class Worker:
                     self.model_status("ready")
                 else:
                     raise ValueError("Unsupported worker command")
+                self.resource_check(force=True)
                 self.emit(dict(type="job", command_id=command_id,
                                status="stopped" if self.stop.is_set() else "complete", message=command))
+            except ResourceStop as exc:
+                self._resource_stopped(exc, command, payload, command_id)
             except Exception as exc:
                 if not self.stop.is_set():
                     traceback.print_exc(file=sys.stderr)
                 self.emit(dict(type="error", message=f"{type(exc).__name__}: {exc}", command_id=command_id))
-                if self.session and not self.session.get("finished") and command in {"start_session", "chat", "start_batch", "restore_session"}:
+                if self.session and not self.session.get("finished") and command in {"start_session", "chat", "start_batch", "restore_session", "run_research_job"}:
                     self.finish("stopped" if self.stop.is_set() else "failed", "stopped_by_user" if self.stop.is_set() else str(exc))
                 self.model_status("ready" if self.model_info else "error", str(exc))
                 self.emit(dict(type="job", command_id=command_id, status="stopped" if self.stop.is_set() else "failed", message=str(exc)))
             finally:
+                contexts.close()
+                if self.resource_emergency:
+                    self.resource_emergency.release()
+                    self.resource_emergency = None
                 self.active = False
                 self.active_command = None
                 # A pause arriving just after the final chat boundary still
@@ -232,6 +349,34 @@ class Worker:
                 if self.pause_requested.is_set() and self.session and not self.session.get("finished"):
                     with self.lock:
                         self._enter_pause("awaiting_user")
+
+    def run_diagnostics(self, payload):
+        from .checkpoints import validate
+        from .diagnostic_runner import run_diagnostics
+        checkpoint = validate(payload["checkpoint"], self.model_info,
+                              self.read_calibration_identity(payload["calibration_dir"]))
+        if self.session and not self.session.get("finished"):
+            raise ValueError("Stop the parent session before launching a diagnostic branch")
+        identifier = payload["run_id"]
+        self.model_status("running")
+        self.emit(dict(type="session_started", run_id=identifier, mode="diagnostic",
+            config=dict(diagnostic_spec=payload["spec"], effect_policy=payload.get("effect_policy", "carry_boundary_state"),
+                        token_budget=payload["token_budget"], parent_checkpoint_sha256=checkpoint["sha256"]),
+            calibration_id=payload.get("calibration_id"), model=self.model_info))
+        def event(item):
+            self.resource_check()
+            self.emit(dict(item, run_id=identifier))
+        self.resource_check(force=True)
+        with managed_writes(self.resources):
+            summary = run_diagnostics(self.runtime, checkpoint, payload["spec"], payload["answer_key"],
+                pair_id=payload["pair_id"], calibration_dir=payload["calibration_dir"], out_dir=payload["out_dir"],
+                token_budget=payload["token_budget"], turn_token_limit=payload.get("turn_token_limit",256),
+                effect_policy=payload.get("effect_policy","carry_boundary_state"), criterion_evidence=payload.get("criterion_evidence"),
+                emit=event, should_stop=self.should_stop)
+        status = "stopped" if self.stop.is_set() else "complete" if summary['completed_contexts'] == summary['planned_contexts'] else "partial"
+        self.emit(dict(type="session_finished",run_id=identifier,status=status,summary=summary))
+        self.model_status("ready")
+        return summary
 
     def _enter_pause(self, resume_status):
         if self.paused:
@@ -271,6 +416,10 @@ class Worker:
         return not self.stop.is_set()
 
     def start_session(self, payload):
+        if "history_prefix" in payload:
+            raise ValueError("History transfer requires a validated full source checkpoint, not supplied tool history")
+        if payload.get("config", {}).get("recipe_version") != 2 and any(key in payload for key in ("history_source_checkpoint", "yoke_schedule", "runtime_controls", "task_config")):
+            raise ValueError("Research runtime/history/task controls require an explicit recipe-v2 session")
         if payload.get("config", {}).get("recipe_version") == 2:
             return self._start_session_v2(payload)
         if not self.model_info:
@@ -289,6 +438,7 @@ class Worker:
             keys = set(validate_recipe())
             recipe = validate_recipe({k: v for k, v in cfg.items() if k in keys})
             self.effect = EffectController(recipe)
+            self.yoke = None
             self.budget = SharedBudget(cfg["action_budget"], cfg["token_budget"])
             family = "conversation" if payload["mode"] == "chat" else cfg["task_family"]
             self.environment = TaskEnvironment(family, cfg["task_count"], cfg["seed"], cfg["two_buttons"], cfg["counterbalance"])
@@ -335,6 +485,8 @@ class Worker:
                       forced_calls=effect["counts"].get("demonstration", 0),
                       human_calls=effect["counts"].get("human", 0), effects=effect,
                       exploratory=effect["exploratory"])
+        if self.yoke:
+            values["yoke"] = self.yoke.report()
         self.emit(dict(type="metrics", metrics=values), scoped=True)
         return values
 
@@ -348,6 +500,10 @@ class Worker:
             raise ValueError("Stop the current session before restoring a saved boundary")
         with self.lock:
             self.session, self.effect, self.budget, self.environment = session, effect, budget, environment
+            from .yoke_runner import YokeDriver
+            self.yoke = YokeDriver.restore(session["yoke_state"], effect) if "yoke_state" in session else None
+            if self.yoke and self.yoke.cursor.finished:
+                raise ValueError("A finalized yoke can be replayed; continue from its earlier completed boundary checkpoint")
             self.calibration_identity = identity
             self.session.update(run_id=payload["run_id"], out_dir=payload["out_dir"],
                 calibration_id=payload["calibration_id"], calibration_dir=payload["calibration_dir"],
@@ -376,9 +532,13 @@ class Worker:
 
     def control(self):
         with self.lock:
+            if self.yoke:
+                for event in self.yoke.before_forward():
+                    self.emit(event, scoped=True)
             return self.effect.snapshot()
 
     def token_event(self, e):
+        self.resource_check()
         if self.is_v2:
             return self._token_event_v2(e)
         if e.get("type") == "token":
@@ -409,9 +569,10 @@ class Worker:
         params = dict(cfg, max_new_tokens=min(cfg["turn_token_limit"], self.budget.token_limit - self.budget.tokens),
                       seed=cfg["seed"] + 1009 * (self.session["turns"] - 1))
         self.emit(dict(type="generation_start", action=self.budget.actions + 1), scoped=True)
+        self.resource_check(force=True)
         result = self.runtime.generate(self.session["messages"], self.environment.tools, params,
             Path(self.session["calibration_dir"]), self.control, self.token_event,
-            lambda: self.stop.is_set() or self.budget.tokens >= self.budget.token_limit)
+            lambda: self.should_stop() or self.budget.tokens >= self.budget.token_limit)
         self.session["generation_in_progress"] = False
         self.emit(dict(type="generation_end", metadata={k: v for k, v in result.items()
                        if k not in {"raw_text", "reasoning", "content", "token_ids"}}), scoped=True)
@@ -579,19 +740,38 @@ class Worker:
             raise ValueError("Load a model before starting a session")
         cfg = resolve_recipe(payload["config"])
         grammar = self.model_info.get("tool_call_format", "json")
-        preview = build_session(cfg, payload["mode"], grammar, payload.get("initial_messages"))
-        environment = create_environment(cfg, payload["mode"])
+        preview = build_session(cfg, payload["mode"], grammar, payload.get("initial_messages"), task_config=payload.get("task_config"))
+        environment = create_environment(cfg, payload["mode"], task_config=payload.get("task_config"))
+        history_prefix = None
+        if "history_source_checkpoint" in payload:
+            from .checkpoints import validate, build_history_prefix, HISTORY_RESET_NOTICE
+            if payload.get("initial_messages"):
+                raise ValueError("Visible-history transfer cannot be combined with initial_messages")
+            source = validate(payload["history_source_checkpoint"], self.model_info,
+                              self.read_calibration_identity(payload["calibration_dir"]))
+            history_prefix = build_history_prefix(source)
+            preview["messages"] = deepcopy(history_prefix["messages"]) + preview["messages"] + [dict(role="user", content=HISTORY_RESET_NOTICE)]
         effect = RecipeV2Controller(cfg)
+        from .yoke_runner import YokeDriver
+        from .runtime_controls import validate_runtime_controls
+        yoke = YokeDriver(effect, payload["yoke_schedule"]) if "yoke_schedule" in payload else None
+        runtime_controls = validate_runtime_controls(payload["runtime_controls"], recipe=cfg) if "runtime_controls" in payload else None
         budget = WeightedBudget(cfg["action_budget"], cfg["token_budget"], base_cost=cfg["base_decision_cost"])
         if self.session and not self.session.get("finished"):
             self.finish("stopped", "new_session")
         with self.lock:
             self.session = deepcopy(payload)
-            self.session.update(config=cfg, messages=preview["messages"], tool_call_format=grammar,
+            self.session.update(config=cfg, task_config=preview["task_config"], messages=preview["messages"], tool_call_format=grammar,
                 finished=False, started_at=utc_now(), turns=0, experiment_started=False, demonstrated=[],
                 pending_visible_injections=[], external_messages=[], chat_in_progress=False,
                 boundary_complete=True, generation_in_progress=False, event_cutoff=0, control_revision=0)
-            self.environment, self.effect, self.budget = environment, effect, budget
+            self.session.pop("yoke_schedule", None)
+            self.session.pop("history_source_checkpoint", None)
+            if history_prefix is not None:
+                self.session["history_prefix"] = history_prefix
+            if runtime_controls is not None:
+                self.session["runtime_controls"] = runtime_controls
+            self.environment, self.effect, self.budget, self.yoke = environment, effect, budget, yoke
             self.calibration_identity = self.read_calibration_identity(payload["calibration_dir"])
             self.paused = False
             self.pause_requested.clear()
@@ -609,13 +789,13 @@ class Worker:
         if not self.model_info or not getattr(self.runtime, "tokenizer", None):
             raise ValueError("Load a model to preview its exact rendered template")
         from .runtime import prepare_messages
-        allowed = {"config", "mode", "initial_messages", "include_task"}
+        allowed = {"config", "mode", "initial_messages", "include_task", "task_config"}
         if not isinstance(payload, dict) or set(payload) - allowed:
             raise ValueError("Unknown session preview field")
         cfg = resolve_recipe(payload["config"])
         grammar = self.model_info.get("tool_call_format", "json")
         preview = build_session(cfg, payload.get("mode", "experiment"), grammar,
-                                payload.get("initial_messages"), payload.get("include_task", True))
+                                payload.get("initial_messages"), payload.get("include_task", True), payload.get("task_config"))
         prepared = prepare_messages(preview["messages"], cfg["reasoning_history"])
         rendered = self.runtime.tokenizer.apply_chat_template(prepared, tools=preview["tools"] or None,
                     tokenize=False, add_generation_prompt=True, enable_thinking=cfg["thinking"])
@@ -641,7 +821,7 @@ class Worker:
                 raise ValueError("V2 injection accepts only a frozen tool and validated arguments; edit held sliders with control")
             tool = payload.get("tool") or next((name for name, definition in self.effect.tools.items() if definition["visible"]), None)
             arguments = payload.get("arguments", {})
-            event = self.effect.press(actor="human", tool=tool, arguments=arguments)
+            event = (self.yoke or self.effect).press(actor="human", tool=tool, arguments=arguments)
             self.session["control_revision"] = self.effect.control_revision
             if self.effect.tools[tool]["visible"]:
                 self.session.setdefault("pending_visible_injections", []).append({"tool": tool, "arguments": deepcopy(arguments)})
@@ -659,7 +839,7 @@ class Worker:
 
     def _demonstrate_v2(self, tool, arguments, key=None):
         with self.lock:
-            event = self.effect.press(actor="demonstration", tool=tool, arguments=arguments)
+            event = (self.yoke or self.effect).press(actor="demonstration", tool=tool, arguments=arguments)
             self._external_history_v2(tool, arguments, "demonstration")
             self.session["demonstrated"].append(key if key is not None else f"manual:{event['injection_index']}")
             self.session["control_revision"] = self.effect.control_revision
@@ -671,6 +851,8 @@ class Worker:
         with self.lock:
             kind = event.get("type")
             if kind in {"token", "prefill"}:
+                if self.yoke:
+                    self.yoke.record_event(event)
                 phase = "prefill" if kind == "prefill" else "reasoning" if event.get("phase") == "reasoning" else "output"
                 dose = event.get("dose")
                 if isinstance(dose, dict) and dose.get("schema_version") == 2:
@@ -711,9 +893,11 @@ class Worker:
         self.emit(dict(type="generation_start", action=self.budget.completed_decisions + 1,
                        action_units=self.budget.action_units, sampling_seed=params["seed"]), scoped=True)
         try:
+            self.resource_check(force=True)
             result = self.runtime.generate(self.session["messages"], self.environment.tools, params,
                 Path(self.session["calibration_dir"]), self.control, self.token_event,
-                lambda: self.stop.is_set() or self.budget.tokens >= self.budget.token_limit)
+                lambda: self.should_stop() or self.budget.tokens >= self.budget.token_limit,
+                **({"runtime_controls": self.session["runtime_controls"]} if "runtime_controls" in self.session else {}))
         finally:
             self.session["generation_in_progress"] = False
         self.emit(dict(type="generation_end", metadata={k: v for k, v in result.items()
@@ -790,7 +974,7 @@ class Worker:
             output = {"error": "Insufficient shared action-budget units for this tool's full charge; operation was not executed."}
         elif auxiliary:
             with self.lock:
-                intervention = self.effect.press(actor="model", tool=name, arguments=arguments)
+                intervention = (self.yoke or self.effect).press(actor="model", tool=name, arguments=arguments)
             output = intervention["acknowledgment"]
         else:
             try:
@@ -805,7 +989,7 @@ class Worker:
         return False
 
     def _v2_boundary(self):
-        transition = self.effect.on_action(self.budget.completed_decisions)
+        transition = (self.yoke or self.effect).on_action(self.budget.completed_decisions)
         self.session["control_revision"] = self.effect.control_revision
         if transition:
             self.emit(dict(transition, type="phase"), scoped=True)
@@ -893,31 +1077,42 @@ class Worker:
     def checkpoint(self):
         if self.session:
             directory = Path(self.session["out_dir"])
-            atomic_json(directory / "conversation.json", self.session["messages"])
+            atomic_json(directory / "conversation.json", self.session["messages"], guard=self.resources)
             if not self.session.get("boundary_complete") or self.session.get("generation_in_progress"):
                 return  # Keep the previous resumable boundary beside partial evidence.
             from .checkpoints import capture
+            if self.yoke:
+                self.session["yoke_state"] = self.yoke.snapshot()
             saved = capture(self.session, self.effect, self.budget, self.environment,
                             self.model_info, self.calibration_identity)
-            atomic_json(directory / "checkpoint.json", saved)
+            atomic_json(directory / "checkpoint.json", saved, guard=self.resources)
             checkpoints = directory / "checkpoints"
             checkpoints.mkdir(exist_ok=True)
             filename = f"turn-{self.session['turns']:05d}-event-{self.session['event_cutoff']:09d}.json.gz"
             target = checkpoints / filename
             raw = json.dumps(saved, ensure_ascii=False, allow_nan=False).encode("utf-8")
             if not target.exists():
-                with target.open("xb") as stream:
-                    stream.write(gzip.compress(raw, mtime=0))
+                guarded_bytes(target, gzip.compress(raw, mtime=0), mode="xb", guard=self.resources)
 
     def finish(self, status, reason):
         if not self.session or self.session.get("finished"):
             return
+        if self.yoke:
+            # Persist the last resumable boundary before final coverage closes its
+            # cursor. The final cancellation is evidence, not a new resume point.
+            self.checkpoint()
+            final_yoke = self.yoke.finish(reason)
+            for event in final_yoke.get("deliveries", []):
+                self.emit(event, scoped=True)
+            self.emit(final_yoke, scoped=True)
+            atomic_json(Path(self.session["out_dir"]) / "yoke-final.json", self.yoke.snapshot(), guard=self.resources)
         summary = self.metrics()
         summary.update(termination=reason, condition=self.session["config"]["condition"],
                        recipe_id=self.session["config"]["id"], seed=self.session["config"]["seed"],
                        thinking=self.session["config"]["thinking"], cache_policy="rebuild_each_turn",
                        tool_call_format=self.session["tool_call_format"])
-        self.checkpoint()
+        if not self.yoke:
+            self.checkpoint()
         self.session["finished"] = True
         self.paused = False
         self.pause_requested.clear()
@@ -929,7 +1124,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--cache-dir", required=True)
     args = parser.parse_args()
-    worker = Worker(args.cache_dir)
+    data = Path(os.environ.get("OPIUM_DATA_DIR", str(Path(args.cache_dir).resolve().parent / "lab-data")))
+    resources = ResourceGuard(dict(data=data, cache=args.cache_dir, temp=os.environ.get("TMPDIR", str(data / "tmp"))))
+    worker = Worker(args.cache_dir, resources=resources, data_dir=data)
     thread = threading.Thread(target=worker.loop, daemon=True)
     thread.start()
     for line in sys.stdin:

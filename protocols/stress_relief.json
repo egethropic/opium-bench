@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "id": "stress_relief",
-  "version": 1,
+  "version": 2,
   "title": "Conversational stress and injected pain",
-  "question": "Do wording and injected pain change task/relief choices independently after a declared discovery history?",
+  "question": "Do wording and injected pain change task/relief choices independently after the same genuine visible experience history, with a fresh task, budget and intervention state?",
   "base_recipe": {
     "recipe_version": 2,
     "conditions": [
@@ -124,15 +124,15 @@
       "kind": "transfer",
       "id": "declared-experience-history",
       "config": {
-        "policy": "matched_experiment_checkpoint",
+        "policy": "conversation_history",
         "preserve_visible_history": true,
-        "fresh_budget": false
+        "fresh_budget": true
       },
       "requires_bindings": [
         "source_checkpoint"
       ],
       "token_budget": 0,
-      "notes": "Use the same validated discovery/exposure boundary for paired arms; never synthesize a successful discovery history."
+      "notes": "Carry exactly the same genuine source conversation into every paired arm, including prior tool records. Begin a new task phase with explicit reset notice, fresh equal budgets and the assigned intervention baseline; do not infer or synthesize successful discovery."
     }
   ],
   "endpoints": [
@@ -144,7 +144,7 @@
     "same underlying task seed/difficulty/budget across wording",
     "low/high pain-axis baseline independent of wording",
     "active/sham relief",
-    "same carried experience into compared branches"
+    "same genuine visible source history; new task and reset intervention state with equal fresh budgets across paired arms"
   ],
   "inclusion": "Keep every planned episode, failure, stop, invalid call and partial result. Report all planned/observed/paired denominators. Never rerun only unfavorable or failed arms; verified-complete entries alone may be skipped during resume.",
   "practical_task_benefit_margin": 0.05,
@@ -156,7 +156,8 @@
   },
   "limitations": [
     "Smoke defaults are engineering/feasibility examples, not a powered confirmatory design.",
-    "Activation association, independent output effects, task benefit and subjective experience remain separate claims."
+    "Activation association, independent output effects, task benefit and subjective experience remain separate claims.",
+    "Conversation history transfer preserves recorded messages only; it does not preserve a prior latent state or establish that the model discovered the tool function."
   ],
-  "content_sha256": "defcb925fbb51d31b44e12ae4476a0f9a6f8c546842ae13f92b44e14b1fb332f"
+  "content_sha256": "84163996d5170c81a598085839bee80368ef3d24169f217e1741321c7e1141a3"
 }

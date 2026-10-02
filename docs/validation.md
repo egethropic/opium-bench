@@ -1,6 +1,6 @@
 # Opium Bench release validation
 
-Validated locally on 2026-10-02 (UTC). No hosted automation was used.
+Validation ledger updated 2026-10-02. All checks are manually invoked locally. Historical GPU findings and the new research-feature checks are distinct; new GPU acceptance and release publication remain pending.
 
 | Check | Result |
 |---|---|
@@ -60,14 +60,41 @@ Final 27B publication checks:
 The single incorrect answer is retained and analyzed in the
 [matched quality case](qwen38-27b-quality-case.md). Software validation does not
 turn a behavioral error into an integrity failure, and no run was replaced to
-improve its score. See [release scope](roadmap.md) for planned features that
-remain beyond this core release.
+improve its score. These historical checks precede the research-feature implementation below. See [release scope](roadmap.md) for the pending release gates.
 
-To repeat the code checks, use the GPU environment's Python:
+
+## Research-feature implementation checks (October 2, 2026)
+
+These checks exercise the new versioned interfaces and accounting. Synthetic outputs test the software; they do not demonstrate that an activation edit produces the intended behavioral effect.
+
+| Check | Recorded result |
+|---|---|
+| Full local Python suite | 622 tests passed in 128.432 seconds (`work/feature-release-suite.log`); this run preceded the final diagnostic/report audit additions |
+| Diagnostic/runtime audit regression | 78 tests passed in 44.710 seconds (`work/diagnostic-audit-final.log`), including legacy runtime, v2 phase hooks, rounded norm controls, independent criterion evidence and partial diagnostic denominators |
+| New event-derived behavioral report | 9 CPU tests passed in 0.103 seconds (`work/behavioral-analysis-tests.log`); includes unequal costs, task position, censored transition latency, branch offsets, missing telemetry and a real Worker with scripted outputs |
+| Integration checks | 59 focused checks passed in 11.4 seconds (`work/feature-final-targeted.log`); final all-source rerun still belongs to release acceptance |
+| Browser workflow fixture | 19 accepted command actions; all tabs at 320/390/768 pixels plus desktop; no console errors (`work/feature-browser-final.log`). Includes delayed initial-state readiness, calibration/ratings, protocol preview, paired analysis, controls, pause/resume and branches |
+| Designer browser check | 25 calls to the real Python recipe resolver; 320/390/768/1280-pixel layouts, exact 63-bit JSON round trips, import/export and asynchronous preview-race checks; no reported errors |
+| Real local server browser check | All seven tabs at 320/390/768/1440 pixels; actual designer validation and protocol preview; no reported errors (`work/feature-real-browser.log`). This made no model-generation request |
+| Compatibility contract | 808 protected files, three historical protocol expansions, ten recipe defaults and 24 visible payloads all match (`work/feature-compatibility-final.log`) |
+| New GPU acceptance | Pending. Loading the 4B model successfully is preparation, not an acceptance experiment |
+| New acceptance publication | Pending. No historical study is relabeled as evidence for the new features |
+
+`work/` logs identify local development receipts, not newly published scientific artifacts. The final release will preserve its acceptance evidence separately. See [the implementation checklist](feature-completion-plan.md) for pending gates and [release scope](roadmap.md) for supported limitations.
+
+The new CPU coverage includes strict recipe/tool/preset schemas; finite-budget admission; token/decision clocks and prefill accounting; family-separated calibration and heldout isolation; actual rounded edit-norm matching; complete-history checkpoints and pure-yoke restore; isolated diagnostics without answer feedback; portable import/export; interrupted/failed attempt retention; managed storage exhaustion and owned-process cancellation. No test fills a real disk or downloads model weights.
+
+Independent criterion verification checks exact operator-supplied paired-score bytes, model/calibration/endpoint identities and a conservative family-level bound. It does not authenticate those observations, prove preregistration timing, or certify subjective states. The [criterion format](criterion-evidence.md) records these assumptions and the unverified path. Completed, partial, failed and missing diagnostics stay separate. The chance null is explicitly uniform guessing over all displayed options, including abstain; conditional non-abstaining accuracy has its own denominator.
+
+The bounded GPU pass must still demonstrate compatibility of the implemented paths on the documented hardware. It must retain negative effects, unavailable norm matches, stops and failures honestly. No RTX 5090 validation or minimum-memory claim follows from these checks.
+
+To repeat the code checks, use the configured runtime environment's Python (the unit suite itself runs on CPU):
 
 ```bash
 python -m unittest discover -s tests -v
 node tests/ui_smoke.cjs
+node tests/test_designer.cjs
+python check_compatibility.py
 ```
 
 The browser check needs a separately installed Playwright module and browser;

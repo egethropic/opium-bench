@@ -14,3 +14,9 @@
 .status-chip.paused{background:#fff0d9;color:#826531}.run-buttons{flex-wrap:wrap;justify-content:flex-end}
 
 .import-form{display:flex;align-items:center;flex-wrap:wrap;gap:14px;padding:16px;margin-bottom:20px}.import-form label{flex:1;min-width:0}.import-form input{max-width:100%}.import-form .helper{flex-basis:100%;margin:0}
+
+.calibration-followups{margin:20px 0}.calibration-followups pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow:auto}.calibration-item details{margin-top:10px}
+
+.selected-token-message{outline:2px solid var(--teal,#127967);outline-offset:2px}.chart-sampling-note{flex-basis:100%;font-size:.68rem;color:#637a6d}.chart-container svg:focus-visible{outline:2px solid #127967;outline-offset:-2px}.chart-tooltip{max-height:270px;overflow:auto;max-width:min(420px,90%)}
+
+.protocol-library{margin-bottom:20px;min-width:0}.protocol-library .table-wrap{overflow:auto;max-width:100%;max-height:340px}.protocol-library pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:400px;overflow:auto}.protocol-library .helper{overflow-wrap:anywhere}

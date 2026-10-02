@@ -12,7 +12,8 @@ The **Opium Den Test** is the core experiment: give the model task tools and an
 optional activation-changing tool, then measure its choices under controlled
 conditions.
 
-[User guide](docs/guide.html) · [Findings & limitations](docs/results.html) ·
+[User guide](docs/guide.html) · [Research workflows](docs/research-workflows.md) ·
+[Findings & limitations](docs/results.html) ·
 [Source study records](studies/initial/README.md) · [Research design](LAB_PLAN.html) ·
 [Release scope & remaining work](docs/roadmap.md)
 
@@ -33,20 +34,23 @@ measurements.*
 
 - **Models:** load a local checkpoint, inspect storage, and keep inference fully
   GPU-resident. Qwen3-4B BF16 is the reference profile.
-- **Calibration:** extract model-specific directions, fit separate readouts,
-  select a layer, and evaluate held-out examples and a small dose sweep.
+- **Calibration:** retain the original pilot procedure or use Research v2
+  extraction, independent intervention checks and imported blinded ratings.
 - **Live lab:** converse with the model, inspect streamed reasoning and tool
   calls, apply baseline sliders or decaying/held pulses, and follow token graphs.
-- **Experiments:** compare active/sham conditions, demonstrations, ingredients,
-  thinking, hidden button reversals, joy→pain transitions, and probabilistic
-  outcomes on bounded, automatically scored tasks.
-- **Results:** replay conversations, inspect raw events, compare run summaries,
-  and export reports and JSON. Stopped and failed runs retain their records.
+- **Design:** edit v2 effects, tools, costs, mappings and token/decision decay;
+  preview the exact messages, schemas and loaded model's rendered template.
+- **Experiments:** freeze controlled matrices with explicit stage budgets,
+  diagnostic branches, yoked exposure and task/history transfer contracts.
+- **Results:** replay, continue complete saved boundaries, compare summaries,
+  and import/export portable evidence. Stopped and failed attempts remain visible.
 
-This is a usable core release; the full research plan is not yet implemented.
-A general tool/effect editor, scored button-discovery tests, broader calibration
-validation, and complete conversation branching are among the
-[remaining planned features](docs/roadmap.md).
+These research workflows are implemented and undergoing acceptance validation;
+**their GPU acceptance checks are still pending**. The published findings below
+come from the preserved earlier protocols. They do not validate every new
+workflow. The RTX 5090 is unavailable for this acceptance pass and remains
+untested. See the [workflow guide](docs/research-workflows.md) for current
+interfaces and limitations.
 
 The browser has no build step, CDN dependency, or cloud inference requirement.
 The local service listens on loopback. Each rig runs its own installation.
@@ -87,16 +91,24 @@ on that drive when C: is nearly full.
 
 ```bash
 export OPIUM_STORAGE=/path/to/large-drive/opium-bench
-mkdir -p "$OPIUM_STORAGE/tmp" "$OPIUM_STORAGE/pip-cache"
-export TMPDIR="$OPIUM_STORAGE/tmp"
-export PIP_CACHE_DIR="$OPIUM_STORAGE/pip-cache"
-export HF_HOME="$OPIUM_STORAGE/hf-cache"
-export TORCH_HOME="$OPIUM_STORAGE/torch-cache"
+export HF_HOME="$OPIUM_STORAGE/cache/huggingface"
+prepare_opium() {
+  python3 prepare_runtime.py \
+    --environment-dir "$OPIUM_STORAGE/venv" \
+    --cache-dir "$OPIUM_STORAGE/cache" --temp-dir "$OPIUM_STORAGE/tmp" \
+    --environment-gib 12 --cache-gib 12 --temp-gib 4 "$@"
+}
 
-python3 -m venv "$OPIUM_STORAGE/venv"
-"$OPIUM_STORAGE/venv/bin/python" -m pip install torch==2.8.0 \
+prepare_opium --execute -- python3 -m venv "$OPIUM_STORAGE/venv"
+prepare_opium --allow-network --execute -- \
+  "$OPIUM_STORAGE/venv/bin/python" -m pip install torch==2.8.0 \
   --index-url https://download.pytorch.org/whl/cu128
-"$OPIUM_STORAGE/venv/bin/python" -m pip install -r requirements.txt
+prepare_opium --allow-network --execute -- \
+  "$OPIUM_STORAGE/venv/bin/python" -m pip install -r requirements.txt
+
+python3 check_runtime.py --check --profile 4b \
+  --python "$OPIUM_STORAGE/venv/bin/python" \
+  --data-dir "$OPIUM_STORAGE/data" --cache-dir "$HF_HOME"
 
 python3 launch_lab.py \
   --data-dir "$OPIUM_STORAGE/data" \
@@ -108,23 +120,44 @@ The service itself uses standard-library Python; `--python` selects the separate
 worker interpreter with GPU dependencies. Native Windows GPU execution is not
 our validated reference path.
 
-The lab reserves **10 GiB** on the destination during its storage preflight.
+The read-only checker reports the selected interpreter, missing or mismatched
+package pins, and data/cache/temp backing-volume reserves. It creates no folders
+and imports no GPU packages by default. Add `--check-cuda` to explicitly import
+PyTorch and query CUDA availability, without loading a model or allocating
+tensors. A passed check does not establish model compatibility or GPU capacity;
+loading and calibration remain separate checks. Exit code 2 indicates issues.
+
+The manually invoked preparation helper selects common caches, monitors its
+owned command and keeps a bounded log/receipt. Omit `--execute` to print its plan;
+without `--allow-network`, pip and Hugging Face are offline. The example declares
+12 GiB environment, 12 GiB cache and 4 GiB temporary headroom per operation;
+adjust these estimates for your installation. It is not an OS quota or a network
+sandbox for arbitrary external commands.
+
+The lab preserves a **10 GiB** free-space reserve on actual backing volumes,
+combining demands when destinations share a volume. It checks managed writes in
+chunks and watches the owned worker during long operations. A capacity failure
+stops owned work with `resource_stopped` and retains emergency/partial evidence.
 The current download estimate is conservative: 12 GiB plus reserve for the 4B
 profile, 20 GiB plus reserve for the exact curated 27B NF4 checkpoint, and
 65 GiB plus reserve for other IDs containing `27B`. Check actual host-volume
 space as well. WSL's reported virtual free capacity does not establish that its
 backing Windows drive can grow. The app does not expand WSL, delete other models,
-or silently enable CPU/disk offload. These checks do not replace monitoring space
-during long downloads or studies.
+or silently enable CPU/disk offload. See the
+[storage workflow](docs/research-workflows.md#1-choose-storage-and-prepare-a-runtime)
+for destinations, records and limits.
 
 ### 2. Load and calibrate
 
 1. In **Models**, choose **Qwen3 · 4B**. If the checkpoint is missing, open
    **Advanced checkpoint configuration**, keep the reference model and pinned
    revision, explicitly enable downloads, and load it after the storage preflight.
-2. In **Calibration**, use the default candidate layers `12, 18, 25`, or
-   choose just `18` for a simpler calibration. Optionally upload a custom corpus
-   JSON file (up to 500 KB). Select **Extract & validate**.
+2. In **Calibration**, choose **Fast pilot** for the original procedure or
+   **Research v2** for the larger corpus and configurable readouts. Review candidate
+   layers, optionally upload a custom corpus (up to 2 MiB), and select
+   **Extract & evaluate probes**. Run **Validate observable effects** separately
+   before claiming independent evidence of an intervention effect. See
+   [calibration and blinded scoring](docs/research-calibration.md).
 3. In **Live lab**, select the saved calibration and choose **Conversation** or
    **Opium Den**. Review thinking, budgets, demonstration, and pulse settings;
    then select **Start session**.
@@ -161,6 +194,21 @@ This requests 12 episodes: two recipes × two arms × three seeds. Use
 explicit overrides, and `--url` if using another port. The default `latest`
 calibration is convenient for exploration; recorded study protocols should pin
 an ID. A seed is not a promise of bitwise reproducibility across GPUs or backends.
+
+For new v2 studies, freeze a complete protocol preview before launching it:
+
+```bash
+python3 run_research_protocol.py dry-run --protocol task_pressure \
+  --mode smoke --seeds 17 --output "$OPIUM_STORAGE/task-pressure-preview.json"
+python3 run_research_protocol.py launch \
+  --preview "$OPIUM_STORAGE/task-pressure-preview.json" \
+  --calibration CALIBRATION_ID --output "$OPIUM_STORAGE/task-pressure-launch.json"
+```
+
+The [research workflow guide](docs/research-workflows.md#4-freeze-and-execute-a-controlled-protocol)
+covers polling, explicit retries, analysis, source bindings and separate diagnostic
+budgets. [Discovery diagnostics](docs/discovery-diagnostics.md) test predictions
+against an observable criterion; they do not turn self-report into a feeling score.
 
 To reproduce the frozen **46-episode initial study**, use its separate runner
 with a compatible calibration and a new receipt path on your data drive:
@@ -409,6 +457,11 @@ in `<data-dir>/calibrations/`. Preserve complete directories for replay and
 reproduction. The manifest includes model/configuration information and source
 hashes; events preserve controls, generated tokens, tool results, and measurements.
 Reports and JSON exports are available from **Results & replay** without a model.
+New sessions also save full JSON checkpoints at complete boundaries. Continuations
+create new runs with source hashes; a stopped half-generation retains the previous
+safe boundary. Portable ZIP and JSON imports are validated and installed without
+overwriting existing evidence. Replay does not imply eligibility for continuation;
+the model, runtime and calibration must match the saved state.
 
 Run validation locally with the GPU environment's packages installed; these
 unit tests do not download checkpoints or require a loaded GPU model:
@@ -418,13 +471,14 @@ unit tests do not download checkpoints or require a loaded GPU model:
 python3 launch_lab.py --help
 python3 run_lab_experiments.py --help
 python3 run_lab_study.py --help
+python3 run_research_protocol.py --help
+python3 prepare_runtime.py --help
 ```
 
-The current local suite passed **255 Python tests**. The original release also
-passed **19 browser fixture checks**; later page checks are recorded with their
-respective changes.
-See the [validation record](docs/validation.md) for the tested environment and
-review-only, replay, download, and evidence-integrity checks.
+The [validation record](docs/validation.md) preserves the earlier release's
+tested environment and review-only, replay, download and evidence-integrity
+checks. New research workflows add local fixture tests; their GPU acceptance
+results are pending and are separate from that historical record.
 
 An optional browser fixture check is available with Playwright and a browser
 installed separately: `node tests/ui_smoke.cjs`. It starts an isolated local
@@ -436,6 +490,10 @@ fixture service and cannot contact a real model worker. `PLAYWRIGHT_MODULE` and
 | `launch_lab.py`, `lab/server.py`, `lab/service.py` | Loopback API, job control, storage checks, run catalog |
 | `lab/runtime.py`, `lab/calibration_data.py` | Model adapters, calibration, readouts, activation hooks |
 | `lab/protocol.py`, `lab/worker.py` | Tasks, recipes, tool parsing, budgets, isolated inference worker |
+| `lab/recipes_v2.py`, `lab/effects.py`, `lab/budgets.py` | Versioned tool/effect definitions, phase clocks and weighted shared budgets |
+| `run_research_protocol.py`, `lab/protocol_runner.py` | Frozen matrices, complete research stages, receipts and analysis |
+| `lab/discovery.py`, `lab/exposure.py`, `lab/checkpoints.py` | Diagnostic scoring, source exposure and durable completed-boundary state |
+| `lab/resources.py`, `lab/portability.py`, `prepare_runtime.py` | Storage supervision, bounded evidence import/export and explicit setup commands |
 | `lab/static/`, `lab/reports.py` | Workbench, live graphs, replay, static reports |
 | `lab/analysis.py`, `publish_lab_study.py` | Raw-evidence audit, study publication, and figures |
 | `runs/`, `studies/` | Preserved evidence and study records |

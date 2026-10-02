@@ -16,7 +16,8 @@ RUN_ARTIFACTS = frozenset({
     "manifest.json", "summary.json", "conversation.json", "events.jsonl", "events.jsonl.gz",
     "content_audit.json", "generations.jsonl", "quality.png", "episodes.jsonl",
     "traces.jsonl", "self_admin.png", "dosage_traces.png", "paired_comparison.json",
-    "checkpoint.json", "source-checkpoint.json", "parent-events.jsonl.gz",
+    "checkpoint.json", "source-checkpoint.json", "parent-events.jsonl.gz", "ancestor-events.jsonl.gz",
+    "diagnostic-design.json", "diagnostic-records.json",
 })
 
 
@@ -115,6 +116,39 @@ def create_server(service, host="127.0.0.1", port=8766):
                     if len(parts) != 4:
                         raise FileNotFoundError()
                     return self.reply(200, run)
+                if path.startswith("/api/research/"):
+                    from .research_jobs import read_job, analysis_records, analyze_job
+                    parts = path.split("/")
+                    if len(parts) == 4:
+                        return self.reply(200, read_job(service.store, parts[3]))
+                    if len(parts) == 5 and parts[4] == "analysis-records":
+                        return self.reply(200, dict(records=analysis_records(service.store, parts[3])))
+                    if len(parts) == 5 and parts[4] == "analysis":
+                        return self.reply(200, analyze_job(service.store, parts[3]))
+                    raise FileNotFoundError()
+                if path.startswith("/api/presets/"):
+                    from .presets import load
+                    parts = path.split("/")
+                    if len(parts) != 5:
+                        raise FileNotFoundError()
+                    record = load(service.store.root, parts[3], parts[4])
+                    return self.reply(200, record, extra={"Content-Disposition": "attachment; filename=" + json.dumps(record["id"] + ".json")})
+                if path.startswith("/api/ratings/"):
+                    parts = path.split("/")
+                    if len(parts) != 4:
+                        raise FileNotFoundError()
+                    file = service.rating_path(parts[3])
+                    return self.reply(200, file.read_bytes(), extra={"Content-Disposition": "attachment; filename=" + json.dumps(file.name)})
+                if path.startswith("/api/calibrations/"):
+                    parts = path.split("/")
+                    allowed = {"calibration.json", "diagnostics.json", "continuations.json", "scoring-sheet.json", "scoring-key.json", "progress.json"}
+                    if len(parts) != 5 or parts[4] not in allowed:
+                        raise FileNotFoundError()
+                    directory = service.store.calibration_path(parts[3]).resolve()
+                    file = directory / parts[4]
+                    if file.is_symlink() or not file.is_file() or file.resolve().parent != directory:
+                        raise FileNotFoundError()
+                    return self.reply(200, file.read_bytes(), extra={"Content-Disposition": "attachment; filename=" + json.dumps(parts[3] + "-" + parts[4])})
                 if path in {"/api/guide", "/guide"}:
                     return self.reply(302, "", extra={"Location": "/docs/guide.html"})
                 elif path in {"/plan", "/LAB_PLAN.html"}:
@@ -128,7 +162,7 @@ def create_server(service, host="127.0.0.1", port=8766):
                         raise FileNotFoundError()
                 else:
                     name = "index.html" if path == "/" else path.lstrip("/")
-                    if name not in {"index.html", "app.js", "style.css", "favicon.svg"}:
+                    if name not in {"index.html", "app.js", "style.css", "designer.js", "designer.css", "favicon.svg"}:
                         raise FileNotFoundError()
                     file = ROOT / "lab" / "static" / name
                 return self.reply_file(file)
@@ -159,7 +193,7 @@ def create_server(service, host="127.0.0.1", port=8766):
                 if not self.headers.get("Content-Type", "").startswith("application/json"):
                     return self.reply(415, dict(error="Use application/json"))
                 size = int(self.headers.get("Content-Length", "0"))
-                if not 0 < size <= 1048576:
+                if not 0 < size <= 4 * 1024**2:
                     return self.reply(413, dict(error="Invalid request size"))
                 body = json.loads(self.rfile.read(size), parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Non-finite JSON")))
                 if not isinstance(body, dict) or not isinstance(body.get("csrf"), str) or not hmac.compare_digest(body["csrf"], service.csrf):

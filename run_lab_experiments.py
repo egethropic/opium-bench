@@ -20,7 +20,7 @@ class Client:
         body = json.dumps(dict(csrf=state["csrf"], command=command, payload=payload)).encode()
         request = Request(self.url + "/api/command", data=body, headers={"Content-Type": "application/json"})
         try:
-            with urlopen(request, timeout=30) as response:
+            with urlopen(request, timeout=120) as response:
                 return json.load(response)
         except HTTPError as exc:
             raise RuntimeError(exc.read().decode()) from None
@@ -35,7 +35,7 @@ class Client:
             if signature != previous:
                 print(json.dumps(dict(job=job, worker_status=state["worker"]["status"])), flush=True)
                 previous = signature
-            if job.get("command_id") == command_id and job.get("status") in {"complete", "failed", "stopped"}:
+            if job.get("command_id") == command_id and job.get("status") in {"complete", "failed", "stopped", "resource_stopped"}:
                 if job["status"] != "complete":
                     raise RuntimeError(job.get("message", job["status"]))
                 return state

@@ -29,7 +29,16 @@ def main():
     args = parser.parse_args()
     if not 1024 <= args.port <= 65535:
         parser.error("Port must be 1024–65535")
+    # Resolve symlinked data roots before the worker inherits cache/temp paths.
+    args.data_dir = args.data_dir.expanduser().resolve()
+    args.cache_dir = args.cache_dir.expanduser().resolve()
+    os.environ["OPIUM_DATA_DIR"] = str(args.data_dir)
     service = LabService(args.data_dir, args.cache_dir, args.python)
+    try:
+        service.resources.check(force=True)
+    except (OSError, ValueError, RuntimeError) as exc:
+        service.close()
+        parser.error(str(exc))
     server = create_server(service, port=args.port)
     print(f"Opium Bench: http://localhost:{args.port}\nData: {service.store.root}\nModel cache: {service.cache_dir}", flush=True)
     try:

@@ -8,6 +8,7 @@ Dependencies are imported lazily so the viewer and replay need no ML runtime.
 """
 from contextlib import contextmanager
 from copy import deepcopy
+from .storage import guarded_npz, guarded_copyfile
 from datetime import datetime, timezone
 import gc
 import hashlib
@@ -103,7 +104,8 @@ def tokenizer_identity(tokenizer):
 
 
 def _write_json(path, value):
-    path.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    from .storage import atomic_json
+    atomic_json(path, value, ensure_ascii=True)
 
 
 def normalized_control(value, phase):
@@ -640,7 +642,7 @@ class Runtime:
         metadata["selected_dose"] = max(acceptable, default=0)
         metadata["dose_selection_rule"] = "Largest tested combined dose with selection next-token KL <= 0.5 nats and mean relative edit <= 0.3; not a validated efficacy or safety threshold"
         _check_stop(should_stop)
-        np.savez(out_dir / "vectors.npz", **vectors)
+        guarded_npz(out_dir / "vectors.npz", **vectors)
         metadata["vectors_sha256"] = hashlib.sha256((out_dir / "vectors.npz").read_bytes()).hexdigest()
         _write_json(out_dir / "calibration.json", metadata)
         emit({"type": "calibration_complete", "path": str(out_dir), "layer": layer,
@@ -766,7 +768,7 @@ class Runtime:
                   "message": "Extraction and heldout discrimination only; independent intervention validation is a separate immutable job"})
             arrays = self._extract_research(corpus, config, emit, should_stop)
             _check_stop(should_stop)
-            np.savez(out_dir / "activations.npz", **arrays)
+            guarded_npz(out_dir / "activations.npz", **arrays)
             _write_json(out_dir / "corpus.json", corpus)
             emit({"type": "calibration_progress", "stage": "research_fit"})
             package = fit_calibration(arrays, corpus, config, lambda: _check_stop(should_stop), emit)
@@ -795,7 +797,7 @@ class Runtime:
             metadata["runtime_compatibility_sha256"] = digest({"fit": metadata["compatibility_sha256"],
                 "model": metadata["model_fingerprint_sha256"], "tokenizer": metadata["tokenizer_identity"],
                 "extraction": metadata["extraction_policy"]})
-            np.savez(out_dir / "vectors.npz", **package["vectors"])
+            guarded_npz(out_dir / "vectors.npz", **package["vectors"])
             metadata["vectors_sha256"] = hashlib.sha256((out_dir / "vectors.npz").read_bytes()).hexdigest()
             metadata["evidence_sha256"] = {name: hashlib.sha256((out_dir / name).read_bytes()).hexdigest()
                                           for name in ("corpus.json", "activations.npz")}
@@ -1095,7 +1097,7 @@ class Runtime:
             _write_json(target / "scoring-key.json", key)
             for name in ("corpus.json", "activations.npz", "vectors.npz"):
                 _check_stop(should_stop)
-                shutil.copyfile(source / name, target / name)
+                guarded_copyfile(source / name, target / name)
             metadata = deepcopy(package["metadata"])
             metadata.update(created_utc=datetime.now(timezone.utc).isoformat(), parent_calibration_sha256=plan["source_calibration_sha256"],
                             validation_config=cfg, validation_plan=plan, selected_dose=locked["selected_dose"],
@@ -1237,7 +1239,7 @@ class Runtime:
             for handle in handles:
                 handle.remove()
 
-    def _prepare_control_v2(self, value, package):
+    def _prepare_control_v2(self, value, package, runtime_controls=None):
         """Validate the actual controller snapshot, never UI display scalars."""
         import numpy as np
         from .effects import (ATTENUATION_AXES, COEFFICIENT_AXES, GAIN_AXES,
@@ -1310,13 +1312,22 @@ class Runtime:
                 joint_attenuation(np.zeros(self.info["hidden_size"]), [axes[n] for n in names], [pulse[n + "_attenuation"] for n in names])
             prepared["phase_coefficients"][phase] = pulse
             prepared["baseline_by_phase"][phase] = base
+        if runtime_controls:
+            from .runtime_controls import prepare_random_match
+            match = prepare_random_match(value, runtime_controls)
+            require_axis("random_gain")
+            for target in match["target_by_phase"].values():
+                names = [axis.removesuffix("_attenuation") for axis in ATTENUATION_AXES if target[axis]]
+                if names:
+                    joint_attenuation(np.zeros(self.info["hidden_size"]), [axes[n] for n in names], [target[n + "_attenuation"] for n in names])
+            prepared["random_norm_match"] = match
         return prepared
 
     def _dose_v2(self, prepared, phase_key):
         pulse = deepcopy(prepared["phase_coefficients"][phase_key])
         baseline = deepcopy(prepared["baseline_by_phase"][phase_key])
         effective = {**pulse, **{f"baseline_{key}": value for key, value in baseline.items()}}
-        return {"schema_version": 2, "phase": "prefill" if phase_key.startswith("prefill_") else phase_key,
+        result = {"schema_version": 2, "phase": "prefill" if phase_key.startswith("prefill_") else phase_key,
                 "prefill_position": phase_key.split("_", 1)[1] if phase_key.startswith("prefill_") else None,
                 "coefficients": pulse, "baseline": baseline, "effective": effective,
                 "applied": any(effective.values()), "enabled": prepared["enabled"], "level": prepared["level"],
@@ -1325,6 +1336,12 @@ class Runtime:
                 "operation_order": ["baseline_challenge", "joint_attenuation", "addition"],
                 "attenuation_reference": "residual_origin",
                 "attenuation_basis": "symmetric_lowdin_orthogonalization", "recipe_hash": prepared["recipe_hash"]}
+        if "random_norm_match" in prepared:
+            match = prepared["random_norm_match"]
+            result["random_norm_match"] = {key: deepcopy(value) for key, value in match.items() if key != "target_by_phase"}
+            result["random_norm_match"].update(target_coefficients=deepcopy(match["target_by_phase"][phase_key]),
+                                               nominal_random_gain=pulse["random_gain"])
+        return result
 
     @contextmanager
     def _hooks_v2(self, package, state):
@@ -1382,6 +1399,33 @@ class Runtime:
                 if coefficient:
                     after = after + coefficient * v["scale"] * axes[axis]
             return after
+        def requested_edit(before, dose, v, dtype):
+            if "random_norm_match" not in dose:
+                return apply(before, dose, v) if dose["applied"] else before
+            from .runtime_controls import match_rounded_random, RuntimeControlUnavailable
+            match = dose["random_norm_match"]
+            target_dose = {**dose, "coefficients": match["target_coefficients"]}
+            target = apply(before, target_dose, v).to(dtype).float()
+            nominal = match["nominal_random_gain"]
+            if nominal == 0:
+                if bool((target != before).any()):
+                    raise RuntimeControlUnavailable("Counterfactual target is active without a random source pulse")
+                match.update(status="inactive", target_edit_norms=0., delivered_edit_norms=0., absolute_errors=0.,
+                             norm_ratios=1., effective_random_coefficients=0., rounding_dtype=str(dtype))
+                return before
+            actual, gains, evidence = match_rounded_random(before, target, v["random"], v["scale"],
+                1 if nominal > 0 else -1, dtype, relative_tolerance=match["relative_tolerance"],
+                absolute_tolerance=match["absolute_tolerance"])
+            match.update(evidence)
+            # A multi-position prefill group exposes every individual gain and
+            # its mean for the existing positions-weighted exposure ledger.
+            coefficient = float(gains.mean())
+            dose["coefficients"]["random_gain"] = coefficient
+            dose["effective"]["random_gain"] = coefficient
+            dose["applied"] = any(dose["effective"].values())
+            dose["numeric_nonzero"] = bool((actual != before).any())
+            dose["coefficient_aggregation"] = "mean_over_positions" if gains.ndim else "single_position"
+            return actual
         def edit(module, inputs, output):
             hidden = _hidden(output)
             if hidden.ndim != 3 or hidden.shape[0] != 1:
@@ -1398,7 +1442,7 @@ class Runtime:
                 for position, indices in groups:
                     dose = self._dose_v2(state["prepared"], "prefill_" + position)
                     before = working[0, indices].float()
-                    requested = apply(before, dose, v) if dose["applied"] else before
+                    requested = requested_edit(before, dose, v, hidden.dtype)
                     actual = requested.to(hidden.dtype).float()
                     if dose["applied"]:
                         if not changed:
@@ -1419,7 +1463,7 @@ class Runtime:
                         "composition": "prefill stage precedes generation-stage edit of the final prompt position"})
             before = working[0, -1].float().clone()
             dose = state["dose"]
-            requested = apply(before, dose, v) if dose["applied"] else before
+            requested = requested_edit(before, dose, v, hidden.dtype)
             actual = requested.to(hidden.dtype).float()
             if dose["applied"]:
                 if not changed:
@@ -1454,8 +1498,10 @@ class Runtime:
                 handle.remove()
 
     def generate(self, messages, tools, config, calibration_dir, control=lambda: {},
-                 emit=lambda event: None, should_stop=lambda: False):
+                 emit=lambda event: None, should_stop=lambda: False, runtime_controls=None):
         import torch
+        from .runtime_controls import validate_runtime_controls
+        runtime_controls = validate_runtime_controls(runtime_controls)
         self._require_loaded()
         limit = _integer(config.get("max_new_tokens", 512), "max_new_tokens", 1, 32768)
         max_context = _integer(config.get("max_context_tokens", 8192), "max_context_tokens", 128, 262144)
@@ -1484,7 +1530,21 @@ class Runtime:
         if isinstance(initial_control, dict) and "schema_version" in initial_control and (type(initial_control["schema_version"]) is not int or initial_control["schema_version"] not in (1, 2)):
             raise ValueError("Unsupported control snapshot schema")
         v2 = isinstance(initial_control, dict) and initial_control.get("schema_version") == 2
-        prepared_initial = self._prepare_control_v2(initial_control, package) if v2 else None
+        def control_failure(exc, snapshot):
+            if runtime_controls:
+                snapshot = snapshot if isinstance(snapshot, dict) else {}
+                emit({"type": "runtime_control_unavailable", "runtime_controls": deepcopy(runtime_controls),
+                      "control_revision": snapshot.get("control_revision"),
+                      "generated_token_index": snapshot.get("generated_tokens"),
+                      "completed_decisions": snapshot.get("completed_decisions"),
+                      "evidence": deepcopy(getattr(exc, "evidence", {"status": "unavailable", "reason": str(exc)}))})
+        try:
+            if runtime_controls and not v2:
+                raise ValueError("Actual-norm matching requires recipe-v2 controller snapshots")
+            prepared_initial = self._prepare_control_v2(initial_control, package, runtime_controls) if v2 else None
+        except ValueError as exc:
+            control_failure(exc, initial_control)
+            raise
         eos = self.model.generation_config.eos_token_id
         eos_ids = {eos} if isinstance(eos, int) else set(eos or [])
         if self.tokenizer.eos_token_id is not None:
@@ -1494,6 +1554,7 @@ class Runtime:
         cache, phase = None, "reasoning" if thinking else "output"
         reasoning_tokens, finish = 0, "length"
         state = {}
+        requested_control = initial_control
         try:
             hook_context = self._hooks_v2(package, state) if v2 else self._hooks(package, state)
             with torch.inference_mode(), hook_context:
@@ -1503,7 +1564,7 @@ class Runtime:
                         break
                     requested_control = initial_control if index == 0 else control()
                     if v2:
-                        prepared = prepared_initial if index == 0 else self._prepare_control_v2(requested_control, package)
+                        prepared = prepared_initial if index == 0 else self._prepare_control_v2(requested_control, package, runtime_controls)
                         if prepared["preset_identity"] != prepared_initial["preset_identity"] or prepared["recipe_hash"] != prepared_initial["recipe_hash"]:
                             raise ValueError("A running generation cannot change its frozen recipe/presets")
                         state.update(prepared=prepared, first_forward=index == 0)
@@ -1562,6 +1623,9 @@ class Runtime:
                     elif "<think>" in raw and not thinking:
                         phase = "reasoning"
                     input_ids = torch.tensor([[token]], device=self.device)
+        except ValueError as exc:
+            control_failure(exc, requested_control)
+            raise
         finally:
             del cache
         reasoning, content = split_reasoning(raw, thinking)
@@ -1600,7 +1664,7 @@ class Runtime:
                    "probe_center": center, "probe_scale": np.asarray(scale, dtype=np.float32),
                    "random": _unit(np.random.default_rng(20261001).normal(size=pain.shape), "random")}
         out_dir.mkdir(parents=True, exist_ok=True)
-        np.savez(out_dir / "vectors.npz", **vectors)
+        guarded_npz(out_dir / "vectors.npz", **vectors)
         metadata = {"schema_version": SCHEMA_VERSION, "kind": "legacy_pilot_import",
                     "model_fingerprint": fingerprint, "model_fingerprint_sha256": self.info["fingerprint_sha256"],
                     "layer": manifest["layer"], "downstream_layer": None,

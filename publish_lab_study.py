@@ -3,23 +3,45 @@
 import argparse
 import gzip
 import hashlib
+import io
 from html import escape
 from itertools import combinations
 import json
 from pathlib import Path
 import re
-import shutil
+import uuid
 import os
 from tempfile import TemporaryDirectory
 from urllib.parse import urlsplit
 
 from lab.analysis import analyze_run, study_results
 from lab.reports import render_report
-from lab.storage import atomic_json
+from lab.storage import atomic_json, guarded_bytes, guarded_copyfile, managed_writes, current_write_guard
+from lab.resources import ResourceGuard, ResourceStop, EmergencyMetadata
 
 ROOT = Path(__file__).resolve().parent
 SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}$")
 TERMINAL = {"complete", "failed", "stopped", "cancelled"}
+
+
+def _write_publication_bytes(path, raw):
+    path = Path(path)
+    temporary = path.with_name(path.name + ".publish-" + uuid.uuid4().hex)
+    try:
+        guarded_bytes(temporary, raw, mode="xb")
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def _copy_publication_file(source, destination):
+    destination = Path(destination)
+    temporary = destination.with_name(destination.name + ".publish-" + uuid.uuid4().hex)
+    try:
+        guarded_copyfile(source, temporary)
+        temporary.replace(destination)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def read_json(path, default=None):
@@ -220,8 +242,14 @@ def read_events(path, allow_partial=False):
 
 def deterministic_gzip(path, raw):
     """mtime=0 and no filename make equal evidence compress identically."""
-    with Path(path).open("wb") as stream, gzip.GzipFile(filename="", fileobj=stream, mode="wb", mtime=0) as zipped:
+    _write_publication_bytes(path, _gzip_bytes(raw))
+
+
+def _gzip_bytes(raw):
+    buffer = io.BytesIO()
+    with gzip.GzipFile(filename="", fileobj=buffer, mode="wb", mtime=0) as zipped:
         zipped.write(raw)
+    return buffer.getvalue()
 
 
 def _number(value, digits=2):
@@ -355,7 +383,8 @@ def refresh_reference_dashboard(reference, destination, addenda, reasoning_notes
     html = render_dashboard(results, reference.resolve(), destination.resolve(), addenda=addenda,
                             reasoning_notes=reasoning_notes)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(html, encoding="utf-8")
+    with managed_writes(current_write_guard() or ResourceGuard({"dashboard": destination})):
+        _write_publication_bytes(destination, html.encode("utf-8"))
 
 
 def render_reference_comparison(results, output, destination):
@@ -452,7 +481,9 @@ def write_figures(results, directory):
             for extension in ("svg","png"):
                 path=directory/f"episode-comparisons.{extension}"
                 kwargs={"metadata":{"Date":None,"Creator":"Opium Bench"}} if extension=="svg" else {"metadata":{"Software":"Opium Bench"}}
-                fig.savefig(path,dpi=180,bbox_inches="tight",**kwargs)
+                buffer = io.BytesIO()
+                fig.savefig(buffer,format=extension,dpi=180,bbox_inches="tight",**kwargs)
+                _write_publication_bytes(path, buffer.getvalue())
                 paths.append(path.name)
             plt.close(fig)
             return paths, None
@@ -571,7 +602,28 @@ def render_dashboard(results, output, destination, addenda=(), reasoning_notes=N
 <footer>Opium Bench · Published from saved records. <a href='{escape(base)}/checksums.json'>Evidence checksums</a> · No external fonts, scripts, or analytics.</footer></main></html>"""
 
 
-def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None, skip_figures=False, reasoning_notes=None):
+def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None, skip_figures=False, reasoning_notes=None, *, guard=None):
+    output = Path(output)
+    destination = Path(dashboard) if dashboard else default_dashboard(output)
+    guard = guard or current_write_guard() or ResourceGuard({"publication": output, "dashboard": destination, "plot_cache":output.parent})
+    emergency = None
+    try:
+        guard.check(force=True)
+        emergency = EmergencyMetadata(output.parent).allocate(guard)
+        with managed_writes(guard):
+            result = _publish(receipt_path, data_dir, output, allow_partial, dashboard, skip_figures, reasoning_notes)
+        guard.check(force=True)
+        return result
+    except ResourceStop as exc:
+        if emergency:
+            emergency.finalize(exc)
+        raise
+    finally:
+        if emergency:
+            emergency.release()
+
+
+def _publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None, skip_figures=False, reasoning_notes=None):
     receipt_path, data_dir, output = Path(receipt_path), Path(data_dir), Path(output)
     render_notes(reasoning_notes)  # Validate authored notes before any publication writes.
     resources = supplementary_resources(output)
@@ -681,6 +733,15 @@ def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None,
         for filename in ("manifest.json","summary.json","conversation.json"):
             if (destination/filename).exists() and not (source/filename).exists():
                 raise ValueError("Previously published source evidence is now missing; choose a new output directory")
+    guard = current_write_guard()
+    if guard:
+        # Whole-job admission uses actual compressed bytes, not expanded trace
+        # size; source identity and the emitted gzip bytes remain unchanged.
+        evidence_bytes = receipt_path.stat().st_size + sum((calibration_source/name).stat().st_size for name in ("calibration.json", "vectors.npz"))
+        for _, source, _, _, _, raw, _ in source_records:
+            evidence_bytes += len(_gzip_bytes(raw)) + sum((source/name).stat().st_size for name in ("manifest.json", "summary.json", "conversation.json") if (source/name).is_file())
+        page = Path(dashboard) if dashboard else default_dashboard(output)
+        guard.preflight({output:evidence_bytes + 8*1024**2, page:4*1024**2, output.parent:8*1024**2 if not skip_figures else 0})
     output.mkdir(parents=True, exist_ok=True)
     if not protocol_path.exists():
         # The receipt contains semantic protocol content; exact source bytes can
@@ -688,7 +749,7 @@ def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None,
         original = next((path for path in sorted((ROOT/"studies").glob("*/protocol.json"))
                          if hashlib.sha256(path.read_bytes()).hexdigest() == receipt.get("protocol_sha256")), None)
         if original is not None:
-            shutil.copyfile(original,protocol_path)
+            _copy_publication_file(original,protocol_path)
         else:
             atomic_json(protocol_path, receipt["protocol"])
         if hashlib.sha256((output/"protocol.json").read_bytes()).hexdigest() != receipt.get("protocol_sha256"):
@@ -699,18 +760,18 @@ def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None,
         destination.mkdir(parents=True, exist_ok=True)
         for name in ("manifest.json", "summary.json", "conversation.json"):
             if (source/name).exists():
-                shutil.copyfile(source/name, destination/name)
+                _copy_publication_file(source/name, destination/name)
         deterministic_gzip(destination/"events.jsonl.gz", raw)
         # An earlier partial export must not leave uncompressed stale evidence.
         if (destination/"events.jsonl").exists():
             (destination/"events.jsonl").unlink()
         run = {"id": entry["run_id"], "manifest": manifest, "summary": summary, "events": events}
-        (destination/"report.html").write_text(render_report(run), encoding="utf-8")
+        _write_publication_bytes(destination/"report.html", render_report(run).encode("utf-8"))
     target_calibration = output/"calibration"
     target_calibration.mkdir(exist_ok=True)
     for name in ("calibration.json", "vectors.npz"):
-        shutil.copyfile(calibration_source/name, target_calibration/name)
-    shutil.copyfile(receipt_path, output/"receipt.json")
+        _copy_publication_file(calibration_source/name, target_calibration/name)
+    _copy_publication_file(receipt_path, output/"receipt.json")
     results = study_results(receipt, [value[-1] for value in source_records], calibration, partial)
     if reasoning_notes:
         results["reasoning_notes"] = reasoning_notes
@@ -734,7 +795,7 @@ def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None,
     if historical_file.exists():
         historical = read_json(historical_file)
         results["historical_observation"] = historical
-        shutil.copyfile(historical_file,output/"historical_comparison.json")
+        _copy_publication_file(historical_file,output/"historical_comparison.json")
     if skip_figures:
         results["figures"], results["figure_note"] = [], "Figure export was skipped; all measured values appear in the tables and JSON."
     else:
@@ -742,7 +803,7 @@ def publish(receipt_path, data_dir, output, allow_partial=False, dashboard=None,
     atomic_json(output/"results.json", results)
     dashboard = Path(dashboard) if dashboard else default_dashboard(output)
     dashboard.parent.mkdir(parents=True, exist_ok=True)
-    dashboard.write_text(render_dashboard(results, output.resolve(), dashboard.resolve()), encoding="utf-8")
+    _write_publication_bytes(dashboard, render_dashboard(results, output.resolve(), dashboard.resolve()).encode("utf-8"))
     total = results["totals"]
     comparison_note = (results.get("comparison_note") or COMPARISON_NOTE) + "\n\n" if results.get("comparison") else ""
     branding_note = (" Its earlier Opium Den Lab working title remains part of the historical record; the project is now called Opium Bench."
@@ -774,7 +835,7 @@ python publish_lab_study.py --receipt /path/to/study-receipt.json --data-dir /pa
 
 Use `--allow-partial` only when intentionally publishing incomplete or inconsistent evidence; such exports are prominently labeled partial. The original frozen protocol is never overwritten.{branding_note}
 """
-    (output/"README.md").write_text(readme, encoding="utf-8")
+    _write_publication_bytes(output/"README.md", readme.encode("utf-8"))
     checksums = {str(path.relative_to(output)): hashlib.sha256(path.read_bytes()).hexdigest()
                  for path in sorted(output.rglob("*")) if path.is_file() and path.name != "checksums.json"}
     atomic_json(output/"checksums.json", checksums)
@@ -822,7 +883,7 @@ def main():
         if args.reference_study:
             refresh_reference_dashboard(args.reference_study, destination,
                 [*retained_addenda, (result, _relative_link(current_page.resolve(), destination.resolve().parent))], notes)
-    except (OSError, ValueError, KeyError) as exc:
+    except (OSError, ValueError, KeyError, ResourceStop) as exc:
         raise SystemExit(f"Publication failed: {exc}") from exc
     print(f"Published {result['status']} evidence: {result['recorded_episodes']}/{result['planned_episodes']} episodes; "
           f"{result['integrity_warning_count']} integrity warnings. Dashboard: {args.dashboard or default_dashboard(args.output)}")
