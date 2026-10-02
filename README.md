@@ -13,7 +13,8 @@ optional activation-changing tool, then measure its choices under controlled
 conditions.
 
 [User guide](docs/guide.html) · [Findings & limitations](docs/results.html) ·
-[Source study records](studies/initial/README.md) · [Research design](LAB_PLAN.html)
+[Source study records](studies/initial/README.md) · [Research design](LAB_PLAN.html) ·
+[Release scope & remaining work](docs/roadmap.md)
 
 “Opium,” “joy,” and “pain” name experimental interventions and text-associated
 representations. They are **not established emotion mechanisms or measurements
@@ -41,6 +42,11 @@ measurements.*
   outcomes on bounded, automatically scored tasks.
 - **Results:** replay conversations, inspect raw events, compare run summaries,
   and export reports and JSON. Stopped and failed runs retain their records.
+
+This is a usable core release; the full research plan is not yet implemented.
+A general tool/effect editor, scored button-discovery tests, broader calibration
+validation, and complete conversation branching are among the
+[remaining planned features](docs/roadmap.md).
 
 The browser has no build step, CDN dependency, or cloud inference requirement.
 The local service listens on loopback. Each rig runs its own installation.
