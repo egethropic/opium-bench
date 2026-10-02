@@ -41,12 +41,12 @@ and 24 model-visible payloads. Run `python3 check_compatibility.py` to verify it
 | [Calibration specificity](../LAB_PLAN.html#calibration) | Current calibration uses 72 authored sentences, final-token activations, mean-contrast probes, and one selected edit layer. Broader lexical/context controls, pooling comparisons, label-shuffled validation, signed calibration sweeps, and independently scored continuation effects remain. |
 | [Session controls and branches](../LAB_PLAN.html#workbench) | Stop/restart and completed-turn pause/resume work. Durable checkpoint recovery is still in progress. API branches currently accept user/assistant text, without restoring tool state, cache, or RNG. A complete conversation-branch workflow remains; exact internal-state continuation is a separate protocol. |
 | [Timing and research batteries](../LAB_PLAN.html#thinking) | Decay uses generated tokens; action-based decay remains. The stress/relief, cost/transfer, and broader task-pressure comparisons in the plan are not complete automated batteries. Confirmatory sample planning and uncertainty analysis also remain beyond the descriptive pilot. |
-| [Storage safeguards](../LAB_PLAN.html#models) | Admission checks preserve a configured reserve. Continuous monitoring and clean cancellation before every large job exhausts that reserve remain. |
+| [Storage safeguards](../LAB_PLAN.html#models) | Admission checks preserve a configured reserve, and portable imports/exports check bounded writes continuously. Applying the continuous guard and supervised cancellation to model downloads, calibration, and generation remains. |
 
 The [user guide](guide.html) documents practical limits: custom recipes have a
-fixed schema; some advanced options require the API; replaying an exported run
-on another installation requires copying its directory. There is no automatic
-GUI import of a JSON export.
+fixed schema; some advanced options require the API. Results now imports JSON
+exports or checksummed portable ZIP bundles for offline replay. Complete durable
+checkpoint recovery and branching are still in progress.
 
 ## Optional expansion and hardware validation
 

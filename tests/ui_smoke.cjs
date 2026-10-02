@@ -20,6 +20,7 @@ let seq = 0;
 let events = [];
 let forceReset = false;
 let runReads = 0;
+let importedRun = null;
 const fixture = {
   csrf: 'fixture-token', cursor: 0,
   worker: {status:'ready',model:{model_id:'Qwen/Qwen3-4B',fingerprint_sha256:'fixture-model'}},
@@ -71,7 +72,8 @@ const server=http.createServer(async(req,res)=>{
     if(url.pathname==='/api/state')body=fixture;
     else if(url.pathname==='/api/events'){body={events:forceReset?events.slice(-2):events.filter(e=>e.seq>Number(url.searchParams.get('after')||0)),cursor:seq,reset:forceReset};forceReset=false;}
     else if(url.pathname==='/api/command'&&req.method==='POST'){let raw='';for await(const chunk of req)raw+=chunk;body=command(JSON.parse(raw));}
-    else if(url.pathname.startsWith('/api/runs/')){runReads++;body={id:'run-fixture',manifest:{config:fixture.session.config,status:'stopped'},summary:fixture.session.metrics,events};}
+    else if(url.pathname==='/api/import'&&req.method==='POST'){assert.equal(req.headers['x-csrf-token'],fixture.csrf);let raw='';for await(const chunk of req)raw+=chunk;importedRun={...JSON.parse(raw),imported:true};fixture.runs.push({id:importedRun.id,status:'complete',config:{},imported:true});body={id:importedRun.id,replay_only:true};}
+    else if(url.pathname.startsWith('/api/runs/')){runReads++;body=url.pathname.endsWith('/run-imported')?importedRun:{id:'run-fixture',manifest:{config:fixture.session.config,status:'stopped'},summary:fixture.session.metrics,events};}
     else if(url.pathname==='/favicon.ico'){res.writeHead(204);return res.end();}
     else {const name=url.pathname==='/'?'index.html':url.pathname.slice(1);if(!['index.html','style.css','app.js'].includes(name)){res.writeHead(404);return res.end();}res.writeHead(200,{'Content-Type':name.endsWith('.css')?'text/css':name.endsWith('.js')?'text/javascript':'text/html'});return res.end(fs.readFileSync(path.join(staticDir,name)));}
     res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(body));
@@ -129,10 +131,14 @@ async function run() {
     fixture.session.mode='experiment';
     await page.reload();await page.waitForFunction(()=>document.querySelector('#chat-form').classList.contains('hidden'));
     await page.locator('[data-tab="models"]').click();await page.locator('.model-card button').last().click();assert(await page.locator('#advanced-model-form').isVisible());assert.equal(await page.locator('#advanced-model-id').inputValue(),'Qwen/Qwen3.8-27B');
+    await page.locator('[data-tab="results"]').click();
+    await page.locator('#import-file').setInputFiles({name:'run-imported.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({id:'run-imported',manifest:{status:'complete',config:{}},summary:{},events:[{type:'message',role:'user',content:'Imported <img src=x onerror=alert(1)>'}]}))});
+    await page.locator('#import-run').click();await page.waitForFunction(()=>document.querySelector('#import-status').textContent.includes('Imported run-imported'));
+    await page.waitForFunction(()=>document.querySelector('#replay-title').textContent==='run-imported');assert.equal(await page.locator('#replay-conversation img').count(),0);assert.equal(await page.locator('#replay-links a[href$="/bundle"]').count(),1);
     await page.locator('[data-tab="live"]').click();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
-    for(const width of [320,390,768]){await page.setViewportSize({width,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);}
+    for(const width of [320,390,768]){await page.setViewportSize({width,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await page.locator('[data-tab="results"]').click();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await page.locator('[data-tab="live"]').click();}
     assert.deepEqual(errors,[]);
-    console.log(JSON.stringify({passed:true,commands:commands.map(c=>c.command),checks:['safe reasoning rendering','tool outcomes','dose graph','control acknowledgment','aux gate','manual pulse','reset','pause/resume controls','global stop','full-history reconnect recovery','streamed phase counters','assigned-task score','autonomous composer hidden','calibration compatibility','custom corpus upload and size limit','recipe-preserving demonstrations','explicit demo override','thinking allowance','advanced checkpoint form','desktop/mobile overflow'],errors}));
+    console.log(JSON.stringify({passed:true,commands:commands.map(c=>c.command),checks:['safe reasoning rendering','tool outcomes','dose graph','control acknowledgment','aux gate','manual pulse','reset','pause/resume controls','global stop','full-history reconnect recovery','streamed phase counters','assigned-task score','autonomous composer hidden','calibration compatibility','custom corpus upload and size limit','recipe-preserving demonstrations','explicit demo override','thinking allowance','advanced checkpoint form','offline evidence import and safe replay','portable bundle link','desktop/mobile overflow'],errors}));
   } finally {if(browser)await browser.close();await new Promise(resolve=>server.close(resolve));}
 }
 run().catch(error=>{console.error(error);process.exitCode=1;});

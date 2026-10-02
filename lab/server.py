@@ -5,9 +5,11 @@ from urllib.parse import urlparse, parse_qs
 import hmac
 import json
 import mimetypes
+import shutil
 
 from .reports import render_report
 from .storage import ROOT
+from .resources import ResourceStop
 
 
 RUN_ARTIFACTS = frozenset({
@@ -61,6 +63,20 @@ def create_server(service, host="127.0.0.1", port=8766):
                     mime += "; charset=utf-8"
             return self.reply(200, file.read_bytes(), mime, extra=extra)
 
+        def reply_download(self, file):
+            self.send_response(200)
+            self.send_header("Content-Type", "application/zip")
+            self.send_header("Content-Length", str(file.stat().st_size))
+            self.send_header("Content-Disposition", "attachment; filename=" + json.dumps(file.name))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.end_headers()
+            try:
+                with file.open("rb") as stream:
+                    shutil.copyfileobj(stream, self.wfile, length=1024**2)
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+
         def do_GET(self):
             try:
                 self.local_request()
@@ -75,6 +91,9 @@ def create_server(service, host="127.0.0.1", port=8766):
                     parts = path.split("/")
                     if len(parts) not in {4, 5}:
                         raise FileNotFoundError()
+                    if len(parts) == 5 and parts[4] == "bundle":
+                        with service.portable_export(parts[3]) as bundle:
+                            return self.reply_download(bundle)
                     if len(parts) == 5 and parts[4] in RUN_ARTIFACTS:
                         directory = service.store.run_path(parts[3]).resolve()
                         artifact = (directory / parts[4]).resolve()
@@ -84,7 +103,7 @@ def create_server(service, host="127.0.0.1", port=8766):
                     run = service.store.read_run(parts[3])
                     if len(parts) == 5 and parts[4] == "report":
                         historical = service.store.run_path(parts[3]) / "report.html"
-                        html = historical.read_text(encoding="utf-8") if run["historical"] and historical.exists() else render_report(run)
+                        html = historical.read_text(encoding="utf-8") if run["historical"] and not run.get("imported") and historical.exists() else render_report(run)
                         return self.reply(200, html, "text/html; charset=utf-8")
                     if len(parts) == 5 and parts[4] == "export":
                         return self.reply(200, run, extra={"Content-Disposition": f'attachment; filename="{parts[3]}.json"'})
@@ -112,12 +131,24 @@ def create_server(service, host="127.0.0.1", port=8766):
                 self.reply(404, dict(error="Not found"))
             except (ValueError, TypeError) as exc:
                 self.reply(400, dict(error=str(exc)))
+            except ResourceStop as exc:
+                self.reply(507, dict(error=str(exc), resource=exc.to_dict()))
             except Exception as exc:
                 self.reply(500, dict(error=f"Server error: {exc}"))
 
         def do_POST(self):
             try:
                 self.local_request()
+                if self.path == "/api/import":
+                    token = self.headers.get("X-CSRF-Token", "")
+                    if not hmac.compare_digest(token, service.csrf):
+                        return self.reply(403, dict(error="Refresh the page to renew its control token"))
+                    mime = self.headers.get("Content-Type", "").split(";", 1)[0]
+                    if mime not in {"application/json", "application/zip"}:
+                        return self.reply(415, dict(error="Upload an evidence ZIP or JSON export"))
+                    size = int(self.headers.get("Content-Length", "0"))
+                    self.connection.settimeout(30)
+                    return self.reply(201, service.import_record(self.rfile, size, mime))
                 if self.path != "/api/command":
                     return self.reply(404, dict(error="Not found"))
                 if not self.headers.get("Content-Type", "").startswith("application/json"):
@@ -132,6 +163,10 @@ def create_server(service, host="127.0.0.1", port=8766):
                 self.reply(202, result)
             except (ValueError, TypeError, KeyError) as exc:
                 self.reply(400, dict(error=str(exc)))
+            except FileExistsError as exc:
+                self.reply(409, dict(error=str(exc)))
+            except ResourceStop as exc:
+                self.reply(507, dict(error=str(exc), resource=exc.to_dict()))
             except Exception as exc:
                 self.reply(500, dict(error=f"Command failed: {exc}"))
     return ThreadingHTTPServer((host, port), Handler)

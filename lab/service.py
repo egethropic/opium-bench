@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from collections import deque
 from copy import deepcopy
+from contextlib import contextmanager
 from pathlib import Path
 import json
 import os
@@ -12,6 +13,7 @@ import secrets
 import subprocess
 import sys
 import threading
+import tempfile
 
 from .storage import ROOT, Store, new_id, preflight, read_json, storage_info, utc_now
 
@@ -98,6 +100,9 @@ class LabService:
         self.process_commands = {}
         self.command_runs = {}
         self.handled_processes = set()
+        from .resources import ResourceGuard
+        self.resources = ResourceGuard(dict(data=self.store.root, cache=self.cache_dir,
+                                            temp=self.store.root / "tmp"))
         self._recover_abandoned_runs()
 
     @staticmethod
@@ -126,6 +131,8 @@ class LabService:
         edited. Recovery appends an explicit event and preserves raw records.
         """
         for path in self.store.runs.iterdir():
+            if (path / "_portable").is_dir():
+                continue  # Imported owners and statuses are inert source evidence.
             manifest = read_json(path / "manifest.json", {}) if path.is_dir() else {}
             if manifest.get("status") not in {"queued", "running", "awaiting_user", "paused"}:
                 continue
@@ -141,6 +148,8 @@ class LabService:
                 continue
 
     def _finalize_interrupted_run(self, identifier, reason, intentional=False):
+        if (self.store.run_path(identifier) / "_portable").is_dir():
+            return
         run = self.store.read_run(identifier)
         manifest, events = run["manifest"], run["events"]
         if manifest.get("status") not in {"queued", "running", "awaiting_user", "paused"}:
@@ -274,6 +283,67 @@ class LabService:
                 elif kind == "status":
                     self.store.update(identifier, status=e.get("status", "running"))
             return e
+
+    @contextmanager
+    def portable_export(self, identifier):
+        """Export a settled record; a running writer must be stopped first."""
+        from .portability import export_bundle
+        with self.lock:
+            source = self.store.run_path(identifier)
+            manifest = read_json(source / "manifest.json", {})
+            imported = (source / "_portable").is_dir()
+            if not imported and manifest.get("status") in {"queued", "running", "paused", "awaiting_user"}:
+                raise ValueError("Stop this session before exporting its complete portable record")
+            calibration = None
+            if manifest.get("calibration_id"):
+                try:
+                    calibration = self.store.calibration_path(manifest["calibration_id"])
+                except ValueError:
+                    pass  # Historical evidence may not include a local bundle.
+            temporary = self.store.root / "tmp"
+            temporary.mkdir(exist_ok=True)
+            directory = tempfile.TemporaryDirectory(prefix="export-", dir=temporary)
+            try:
+                target = Path(directory.name) / (identifier + ".zip")
+                export_bundle(source, target, calibration_dir=calibration, guard=self.resources)
+            except BaseException:
+                directory.cleanup()
+                raise
+        try:
+            yield target  # Do not hold the service lock during a browser download.
+        finally:
+            directory.cleanup()
+
+    def import_record(self, stream, size, content_type):
+        """Receive bounded raw evidence without loading a model or trusting paths."""
+        from .portability import import_bundle, import_json_export, Limits
+        limits = Limits()
+        maximum = limits.compressed_bytes if content_type == "application/zip" else limits.member_bytes
+        if type(size) is not int or not 0 < size <= maximum:
+            raise ValueError("Evidence upload exceeds the 128 MiB ZIP / 64 MiB JSON limit")
+        temporary = self.store.root / "tmp"
+        temporary.mkdir(exist_ok=True)
+        operation = new_id("upload")
+        self.resources.reserve(operation, {temporary: size})
+        try:
+            with tempfile.TemporaryDirectory(prefix="import-", dir=temporary) as directory:
+                source = Path(directory) / "upload"
+                with source.open("xb") as output:
+                    remaining = size
+                    while remaining:
+                        chunk = stream.read(min(remaining, self.resources.max_write_bytes))
+                        if not chunk:
+                            raise ValueError("Evidence upload ended before its declared size")
+                        self.resources.before_write(operation, temporary, len(chunk))
+                        output.write(chunk)
+                        self.resources.written(operation, temporary, len(chunk))
+                        remaining -= len(chunk)
+                importer = import_bundle if content_type == "application/zip" else import_json_export
+                with self.lock:
+                    reserved = {row["id"] for row in self.store.catalog()}
+                    return importer(source, self.store.runs, guard=self.resources, reserved_ids=reserved)
+        finally:
+            self.resources.release(operation)
 
     def _launch(self):
         if self.process and self.process.poll() is None:

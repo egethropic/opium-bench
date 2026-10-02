@@ -12,3 +12,5 @@
 #global-stop{min-height:28px;padding:5px 9px;font-size:9px}@media(max-width:460px){#global-stop{padding:4px 6px;font-size:8px;min-height:25px}.topbar-right .model-pill{max-width:88px}}
 
 .status-chip.paused{background:#fff0d9;color:#826531}.run-buttons{flex-wrap:wrap;justify-content:flex-end}
+
+.import-form{display:flex;align-items:center;flex-wrap:wrap;gap:14px;padding:16px;margin-bottom:20px}.import-form label{flex:1;min-width:0}.import-form input{max-width:100%}.import-form .helper{flex-basis:100%;margin:0}

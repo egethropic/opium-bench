@@ -147,7 +147,7 @@ class Store:
                 rows.append(dict(id=path.name, mode=m.get("mode", "historical"),
                     status=m.get("status", "unknown"), created_at=m.get("created_at", m.get("started_utc", "")),
                     config=m.get("config", {}), summary=read_json(path / "summary.json", m.get("summary", {})),
-                    historical=base != self.runs, model=m.get("model", {})))
+                    historical=base != self.runs, imported=(path / "_portable").is_dir(), model=m.get("model", {})))
         return sorted(rows, key=lambda x: x["created_at"], reverse=True)
 
     def calibration_catalog(self):
@@ -183,4 +183,4 @@ class Store:
                     pass  # Incomplete final write after an interrupted process.
         return dict(id=identifier, manifest=read_json(path / "manifest.json", {}),
                     summary=read_json(path / "summary.json", {}), events=events,
-                    historical=not has_events)
+                    historical=not has_events, imported=(path / "_portable").is_dir())
