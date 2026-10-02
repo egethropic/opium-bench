@@ -29,7 +29,7 @@ cd opium-bench
 python3 launch_lab.py --data-dir ./data --cache-dir ./data/hf-cache</code></pre>
 <p>Open <code>http://localhost:8766</code>. The service uses Python's standard library. It does not load a model when you open the page. You can inspect the included historical reports or new run folders without installing PyTorch.</p>
 <h3>GPU worker installation</h3>
-<p>A compatible NVIDIA host driver is required. Install the runtime on the drive that will hold large files. Replace the path below with a real location. For example, under WSL, <code>/mnt/d/opium-den</code> points to a folder on Windows D:. Keep <code>OPIUM_STORAGE</code> set for later commands in the same shell.</p>
+<p>A compatible NVIDIA host driver and CPython 3.12 with its <code>venv</code> support must already be installed; the preparation helper does not install Python itself. Install the runtime on the drive that will hold large files. Replace the path below with a real location. For example, under WSL, <code>/mnt/d/opium-bench</code> points to a folder on Windows D:. Keep <code>OPIUM_STORAGE</code> set for later commands in the same shell.</p>
 <pre><code>export OPIUM_STORAGE=/path/to/large-drive/opium-bench
 export HF_HOME="$OPIUM_STORAGE/cache/huggingface"
 prepare_opium() {
@@ -39,7 +39,7 @@ prepare_opium() {
     --environment-gib 12 --cache-gib 12 --temp-gib 4 "$@"
 }
 
-prepare_opium --execute -- python3 -m venv "$OPIUM_STORAGE/venv"
+prepare_opium --execute -- python3.12 -m venv "$OPIUM_STORAGE/venv"
 prepare_opium --allow-network --execute -- \
   "$OPIUM_STORAGE/venv/bin/python" -m pip install torch==2.8.0 \
   --index-url https://download.pytorch.org/whl/cu128
@@ -66,7 +66,7 @@ python3 launch_lab.py \
 <h3>Qwen3.8-27B and NF4</h3>
 <p>The pinned Qwen3.8-27B NF4 conversion has loaded entirely onto our RTX 4090 with <strong>17.30 GiB allocated before generation</strong>. Model-specific calibration and direct/thinking tool-calling smoke checks passed. The full 54-episode behavioral batch completed with 209/210 tasks correct and no voluntary auxiliary calls; see the <a href="results.html#model27">combined findings</a>. The 5090 has not been tested. Follow the <a href="setup-27b.md">separate 27B setup guide</a> for pinned packages, checkpoint provenance, CUDA kernels, and storage requirements. Keep the original 4B environment intact. Context and working allocations require additional memory beyond the loaded model.</p>
 <p>Full-precision shards can still be downloaded when NF4 quantization is performed during loading. A prequantized artifact must match the backend's supported format; a GGUF file, AWQ checkpoint, or GPTQ checkpoint is not an NF4 substitute. Verify disk use, actual GPU residency, context capacity, calibration, and no-op behavior before interpreting new results. Save the model revision and runtime versions with the study.</p>
-<p><strong>Switch the interpreter for 27B.</strong> Stop active work and relaunch with <code>--python</code> pointing at the separate pinned 27B environment, or start it on a separate port with its own data/cache paths. Selecting the 27B catalog entry alone does not install or switch its required Transformers runtime. Return to the original 4B interpreter and matching calibration for comparisons with the original reference.</p>
+<p><strong>Switch the interpreter for 27B.</strong> Stop active work, then choose <strong>Models → Unload model</strong> in the old instance or shut that service down. Stop alone leaves its model in GPU memory. Relaunch with <code>--python</code> pointing at the separate pinned 27B environment, or start it on a separate port with its own data/cache paths after releasing the old model. Selecting the 27B catalog entry alone does not install or switch its required Transformers runtime. Return to the original 4B interpreter and matching calibration for comparisons with the original reference.</p>
 
 <h2 id="calibration">4. Calibrate the exact model</h2>
 <p>Open <strong>Calibration</strong>, select the loaded model profile, and enter one or more zero-based decoder block indices. For Qwen3-4B, the workshop defaults to <code>12, 18, 25</code> for selection among three candidates; <code>18</code> alone is a simpler starting point. The downstream observation layer must be later than every candidate and defaults to the final block. Click <strong>Extract & evaluate probes</strong>.</p>

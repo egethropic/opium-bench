@@ -17,9 +17,9 @@ Do not attach an invented token budget. A negative or inconclusive behavioral re
 
 ## Implementation audit and current release gate
 
-**Implementation is locally exercised; the release is not yet complete.** The last full suite passed 622 tests in 128.432 seconds before the final diagnostic/report audit changes. Later focused coverage passed 78 diagnostic/runtime tests and 9 new behavioral-report tests. Browser checks cover the designer's 25 real-resolver calls, the app fixture's 19 command actions, and all seven actual-server tabs at 320/390/768/1440 pixels with no reported errors. The compatibility checker still matches 808 protected files, three study expansions, ten legacy defaults and 24 visible payloads. Exact evidence and limits are in [validation.md](validation.md).
+**Implementation is locally exercised; the release is not yet complete.** The latest full suite passed 709 tests in 175.274 seconds (`work/feature-release-final2-suite.log`), including the runtime-version producer and checkpoint-error finalization fixes. Focused runtime/checkpoint coverage passed 57 tests in 44.080 seconds. Browser checks cover the designer's 25 real-resolver calls, the app fixture's 19 command actions including reconnect/recovery-header handling (`work/feature-browser-recovery.log`), and all seven actual-server tabs at 320/390/768/1440 pixels with no reported errors. The compatibility checker matches 808 protected files, three study expansions, ten legacy defaults and 24 visible payloads. Exact evidence and limits are in [validation.md](validation.md).
 
-The checkmarks below refer to implementation and CPU/browser coverage, not new scientific findings. Real 4B acceptance, targeted 27B acceptance, clean-directory first-run qualification, immutable acceptance publication and final push remain unchecked below. A successful 4B load is preparation only. The audited stress/relief template now uses an explicit compatible history-transfer contract:
+The checkmarks below refer to implementation and CPU/browser coverage, not new scientific findings. Final 4B qualification, targeted 27B acceptance, full clean-directory first-run qualification, immutable acceptance publication and final push remain unchecked below. The 4B extraction and numerical validation have finished, but no nonzero dose passed the frozen bounds. The first 14-case protocol invocation failed during setup with zero generated tokens/actions; its failed episode receipts and outer `no_final_receipt` are retained with supervisor recovery evidence. After the metadata/finalization repair, a separate invocation completed 14/14 cases with 18/28 assigned tasks correct, 5,864 tokens (2,755 reasoning), and zero voluntary auxiliary calls. Diagnostic, yoke and lifecycle stage invocations also completed, with their limits recorded below. Portable attempt 01 failed with `Unsafe bundle path` and is under investigation. These results do not replace failed attempts or close the final release gates. The audited stress/relief template uses an explicit compatible history-transfer contract:
 
 - [x] Stress/relief template v2 carries one genuine full visible-history prefix into all eight active/sham × baseline × framing arms, with fresh tasks, budgets and intervention state. An eight-arm admission regression passes. It makes no internal-state continuation or discovery claim and preserves strict checkpoint compatibility.
 
@@ -32,9 +32,32 @@ The checkmarks below refer to implementation and CPU/browser coverage, not new s
 | WP5 | `lab/discovery.py`, `diagnostic_runner.py`, `exposure.py`, `yoke_runner.py`, worker and protocol integration; isolated branch/scoring/evidence/yoke/worker tests, including partial records, hidden-key exclusion and exact controller/cursor binding |
 | WP6 | `lab/protocol_library.py`, `protocol_runner.py`, `research_jobs.py`, `statistics.py`, `behavioral_analysis.py`, `task_axes.py`, CLI and versioned templates; library/statistics/task/runner/research-job/report tests. All attempts remain recorded, and analysis labels first/latest inclusion |
 | WP7 | `lab/resources.py`, shared guarded storage and runtime/worker/service writes, `prepare_runtime.py`, guarded publication; resource/storage/service/worker/setup/publication tests simulate reserve crossing and cancel only owned processes |
-| WP8 | `lab/static/designer.js`, app UI, coherent guides and no-model replay; browser fixture, real resolver designer test and actual-server responsive check. Fresh-install model-backed acceptance still pending |
+| WP8 | `lab/static/designer.js`, app UI, coherent guides, `check_runtime.py` and no-model replay; browser fixture, real resolver designer test and actual-server responsive check. Eight runtime-checker tests passed; metadata/storage checks passed for both existing runtimes. A clean no-ML server served all 131 previously published replays; fresh-clone model-backed acceptance and replay of the new archive remain pending |
 
 Interpretation constraints are implemented, not merely documentation: a declared criterion validation status without bound raw evidence stays ineligible; partial diagnostic responses are excluded from primary scoring while retained separately; random controls report actual rounded norms; missing exposure remains unavailable; branch-local reports do not infer a first press before their inherited boundary. See [criterion evidence](criterion-evidence.md) and [research workflows](research-workflows.md).
+
+The actual 4B numerical receipt reinforces these limits. Combined dose 0.25
+exceeded the selection relative-edit ceiling (0.35761 versus 0.30), so the admitted
+dose is zero. All four generated validation continuations were sham-only,
+truncated at 16 tokens and unrated. Perfect heldout probe AUC on two scenario
+families per concept, alongside strong cross-concept correlations, does not
+validate isolated emotions or transfer to generated reasoning. The remaining
+frozen 0.25 cases are explicitly engineering stress checks. The independently
+audited publisher preserves scientific bytes and failed/missing evidence;
+passing its 16 CPU tests does not itself complete the publication gate.
+
+Completed 4B stage receipts are `release-acceptance-4b-protocol-02`,
+`release-acceptance-4b-diagnostic-01`, `release-acceptance-4b-yoke-01` and
+`release-acceptance-4b-lifecycle-01`. The single diagnostic context produced a
+sham/sham false positive and remains interpretation-ineligible because the
+criterion is unvalidated; no answer was fed back to the unchanged parent. The
+yoked recipient covered all 197 observed source output positions with matched
+coefficients and zero index error, but its measured edit-norm sum differed from
+the source, so this is not proof of identical states. Pause/resume and both
+continued-state/fresh-budget branches preserved the source; their chat runs were
+intentionally stopped. The failed `release-acceptance-4b-portable-01` receipt is
+retained. Portable recovery, targeted 27B smoke and all final publication/review
+gates remain pending; see [the validation ledger](validation.md) for exact counts.
 
 ## Cross-cutting compatibility contract (required before parallel implementation)
 
@@ -162,6 +185,19 @@ Ship editable, versioned **runnable templates**, with dry-run expansion, estimat
 - [x] Update README, guide, setup docs, roadmap and validation with the exact completed feature set and measured configurations. Preserve published 4B/27B findings as the original study outcomes; new acceptance findings are clearly separate. Add short procedural examples for each new workflow and precise button/cost/decay semantics.
 
 **Files:** `lab/static/index.html`, `lab/static/app.js`, `lab/static/style.css`, `lab/reports.py`, `README.md`, `docs/guide.html`, `docs/roadmap.md`, `docs/validation.md`, `docs/setup-27b.md`; screenshots only after implementation. **Acceptance:** local browser fixture exercises create preset/tool → run → pause/resume → branch → export/import → review; controls/graphs remain usable at 320,390,768,1440px with no overflow/errors; keyboard labels/status announcements and safe rendering checked. Extend `tests/ui_smoke.cjs` and manually inspect representative screenshots. Do not replace the existing stack just to introduce a framework.
+
+**First-run evidence so far:** `check_runtime.py --check` reads the selected
+interpreter's package versions and current data/cache/temp backing-volume
+reserves without installing, downloading or creating directories. Both existing
+environments passed; CUDA is queried only with explicit `--check-cuda` and was
+not queried for those receipts. A separate clean data/cache server, with ML
+imports blocked, served the 131 existing published replays without a model
+worker. The unchecked first-run item still requires the complete documented
+model workflow and clean-clone review of the new acceptance publication.
+The later explicit 27B CUDA environment check passed
+(`work/runtime-check-27b-cuda.json`): PyTorch 2.8.0+cu128, CUDA 12.8 available,
+one device and C++11 ABI enabled, without tensor allocation. It does not close
+the pending 27B model/experiment acceptance gate.
 
 ## Integration order and parallel ownership
 

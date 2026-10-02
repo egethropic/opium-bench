@@ -87,7 +87,8 @@ activations need additional space. Minimum GPU capacity has not been established
 Replace `/path/to/large-drive/opium-bench` below with a real path. Under WSL, a
 secondary Windows drive can be addressed as, for example, `/mnt/d/opium-bench`.
 Keep the environment, package caches, temporary files, model cache, and run data
-on that drive when C: is nearly full.
+on that drive when C: is nearly full. CPython 3.12 with its `venv` support must
+already be installed; the preparation helper does not install Python itself.
 
 ```bash
 export OPIUM_STORAGE=/path/to/large-drive/opium-bench
@@ -99,7 +100,7 @@ prepare_opium() {
     --environment-gib 12 --cache-gib 12 --temp-gib 4 "$@"
 }
 
-prepare_opium --execute -- python3 -m venv "$OPIUM_STORAGE/venv"
+prepare_opium --execute -- python3.12 -m venv "$OPIUM_STORAGE/venv"
 prepare_opium --allow-network --execute -- \
   "$OPIUM_STORAGE/venv/bin/python" -m pip install torch==2.8.0 \
   --index-url https://download.pytorch.org/whl/cu128

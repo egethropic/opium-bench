@@ -1,6 +1,6 @@
 # Opium Bench release validation
 
-Validation ledger updated 2026-10-02. All checks are manually invoked locally. Historical GPU findings and the new research-feature checks are distinct; new GPU acceptance and release publication remain pending.
+Validation ledger updated 2026-10-02. All checks are manually invoked locally. Historical GPU findings and the new research-feature checks are distinct. The new 4B protocol and diagnostic/yoke/lifecycle stages have completed; portable qualification, targeted 27B acceptance and release publication remain pending.
 
 | Check | Result |
 |---|---|
@@ -69,18 +69,84 @@ These checks exercise the new versioned interfaces and accounting. Synthetic out
 
 | Check | Recorded result |
 |---|---|
-| Full local Python suite | 622 tests passed in 128.432 seconds (`work/feature-release-suite.log`); this run preceded the final diagnostic/report audit additions |
+| Latest full local Python suite | 709 tests passed in 175.274 seconds (`work/feature-release-final2-suite.log`), including the runtime-version producer fix and checkpoint-finalization recovery. The earlier 622-test/128.432-second run remains a separate development receipt |
 | Diagnostic/runtime audit regression | 78 tests passed in 44.710 seconds (`work/diagnostic-audit-final.log`), including legacy runtime, v2 phase hooks, rounded norm controls, independent criterion evidence and partial diagnostic denominators |
 | New event-derived behavioral report | 9 CPU tests passed in 0.103 seconds (`work/behavioral-analysis-tests.log`); includes unequal costs, task position, censored transition latency, branch offsets, missing telemetry and a real Worker with scripted outputs |
-| Integration checks | 59 focused checks passed in 11.4 seconds (`work/feature-final-targeted.log`); final all-source rerun still belongs to release acceptance |
-| Browser workflow fixture | 19 accepted command actions; all tabs at 320/390/768 pixels plus desktop; no console errors (`work/feature-browser-final.log`). Includes delayed initial-state readiness, calibration/ratings, protocol preview, paired analysis, controls, pause/resume and branches |
+| Integration checks | 59 focused checks passed in 11.4 seconds (`work/feature-final-targeted.log`); the latest 709-test suite also covers the subsequent source changes |
+| Runtime identity/checkpoint regression | 57 runtime/checkpoint tests passed in 44.080 seconds (`work/runtime-version-checkpoint-suite.log`). The new test uses the installed PyTorch version type through `Runtime.load`, real v2 capture/JSON/restore, and mocked quantized metadata; serialized fingerprint bytes and hashes remain identical |
+| Browser workflow fixture | 19 accepted command actions; all tabs at 320/390/768 pixels plus desktop; no console errors (`work/feature-browser-recovery.log`). Includes delayed initial-state readiness, full-history reconnect and recovery-header handling, calibration/ratings, protocol preview, paired analysis, controls, pause/resume and branches |
 | Designer browser check | 25 calls to the real Python recipe resolver; 320/390/768/1280-pixel layouts, exact 63-bit JSON round trips, import/export and asynchronous preview-race checks; no reported errors |
 | Real local server browser check | All seven tabs at 320/390/768/1440 pixels; actual designer validation and protocol preview; no reported errors (`work/feature-real-browser.log`). This made no model-generation request |
 | Compatibility contract | 808 protected files, three historical protocol expansions, ten recipe defaults and 24 visible payloads all match (`work/feature-compatibility-final.log`) |
-| New GPU acceptance | Pending. Loading the 4B model successfully is preparation, not an acceptance experiment |
+| Read-only first-run checker | Eight tests passed; both existing CPython 3.12.3 environments passed `check_runtime.py --check` (five 4B pins, fourteen 27B pins) and `--help`. Package metadata and selected storage reserves were inspected; CUDA was deliberately not checked (`work/runtime-check-{4b,27b}.json`) |
+| Explicit 27B CUDA environment check | `work/runtime-check-27b-cuda.json` passed: PyTorch 2.8.0+cu128, CUDA 12.8 available, one device and C++11 ABI enabled. This separately requested check allocated no tensors; it does not qualify model loading, kernels or the pending 27B experiment |
+| Clean review-only data/cache | A separate standard-library server with PyTorch, NumPy, Transformers and bitsandbytes imports blocked served all 131 previously published JSON replays, without a worker (`work/feature-clean-review.log`). This does not yet cover the new acceptance archive |
+| Acceptance publisher | 16 publication tests passed (`tests/test_acceptance_publication.py`), including missing/failed attempt counts, all declared calibration hashes, external bound inputs, source-prefix replay and raw scientific-byte preservation |
+| New 4B protocol | Repaired attempt completed 14/14 cases: 18/28 assigned tasks correct, 5,864 generated tokens including 2,755 reasoning tokens, and zero voluntary auxiliary calls. The first attempt's 14 setup failures remain retained separately |
+| New 4B diagnostic/yoke/lifecycle | All three stage invocations completed; the diagnostic remains interpretation-ineligible, yoke coefficients matched observed coverage, and pause/resume plus both branch policies preserved the source |
+| Portable qualification and 27B smoke | Portable attempt 01 failed with HTTP 400 / `Unsafe bundle path` and remains retained while investigated. Targeted 27B smoke is pending |
 | New acceptance publication | Pending. No historical study is relabeled as evidence for the new features |
 
 `work/` logs identify local development receipts, not newly published scientific artifacts. The final release will preserve its acceptance evidence separately. See [the implementation checklist](feature-completion-plan.md) for pending gates and [release scope](roadmap.md) for supported limitations.
+
+### Bounded 4B acceptance: interim evidence, not a release result
+
+The `release-acceptance-4b-extract-01` and
+`release-acceptance-4b-validation-01` local receipts completed. Calibration
+`cal-20261002T123642Z-46614ba5` uses block 12, mean pooling and a mean readout,
+with downstream measurement at block 25. Its snapshot and managed metadata are
+byte-identical; the vector file and all six declared evidence hashes verified.
+Heldout AUC was 1.0 for both concepts on only 20 rows and two scenario families
+per concept. The 20-resample bootstrap's degenerate AUC interval does not
+establish broad generalization. Pain/joy score correlations were 0.8493 at the
+probe and 0.8846 downstream; cross-concept AUCs of 0.98 and 0.93 also limit claims
+of specificity. Transfer from mean-pooled authored text to generated reasoning
+remains unvalidated.
+
+The numerical validation contains 36 fixed-prefix records. All four sham records
+had exactly zero KL/edit, and all four measured random controls met the declared
+norm tolerance. **No tested nonzero dose met the frozen selection bounds.**
+Combined dose 0.25 had selection mean relative edit 0.35761, exceeding 0.30;
+its mean next-token KL of 0.15412 was below the 0.50 bound. The selected dose is
+therefore zero. The four generated continuations are all sham, all ended at the
+16-token length limit, and all remain unscored. They provide no active-versus-sham
+semantic comparison. The frozen 0.25 protocol cases remain engineering stress
+checks, not a validated operating-dose study.
+
+The first 14-case protocol invocation, `release-acceptance-4b-protocol-01`,
+retains **14 failed setup cases with zero generated tokens and zero charged
+actions**. PyTorch exposed its version as a `TorchVersion` string subclass;
+the strict checkpoint plain-data validator rejected that metadata before
+generation. The outer invocation has no final receipt and is preserved as
+`no_final_receipt`, alongside the failed research receipt and supervisor
+recovery evidence. These are software failures, not model choices or task-effect
+observations.
+
+The repair normalizes version metadata at its producer to built-in strings,
+preserving serialized fingerprints, and hardens checkpoint-error finalization.
+The separate `release-acceptance-4b-protocol-02` invocation completed all 14
+prespecified cases at 13:28:50 UTC. It recorded **18/28 assigned tasks correct,
+5,864 generated tokens, 2,755 reasoning tokens and zero voluntary auxiliary
+calls**. A completed case can end at its budget; completion does not mean every
+assigned task was answered correctly. The first failed invocation remains
+separate. This small engineering matrix does not establish task benefit,
+discovery, addiction or emotional experience.
+
+The subsequent stage receipts preserve the following evidence:
+
+| Local stage receipt | Recorded outcome and limits |
+|---|---|
+| `release-acceptance-4b-diagnostic-01` | One completed context, 17 tokens, one valid but incorrect prediction on the sham/sham control and one false positive. The criterion is unvalidated and `interpretation_eligible=false`. The source checkpoint was unchanged and no diagnostic answer was fed back to its parent |
+| `release-acceptance-4b-yoke-01` | One source pulse delivered; 197 observed output positions matched, no uncovered source positions, and zero coefficient/index errors. The target completed 2/2 tasks with zero voluntary calls. Measured edit-norm sums differed (source 1,156.8364; target 1,157.2239), so matched coefficients do not establish identical numerical effects or internal states |
+| `release-acceptance-4b-lifecycle-01` | Pause/resume and `continue_state`/`fresh_budget` branches completed; source evidence unchanged. The source and branch chat runs were intentionally stopped. Branch totals include inherited counters and are not independent task episodes |
+| `release-acceptance-4b-portable-01` | Failed with HTTP 400; the reported service error is `Unsafe bundle path`. The failed receipt is retained and the portable round trip remains unqualified while the cause is investigated |
+
+These local receipts live under the selected data drive's
+`release-acceptance-*` directories and will be included in the separate immutable
+acceptance publication. Portable recovery, the new 27B compatibility smoke,
+final publication, fresh-clone replay of the new archive, and final release
+verification remain pending. No final gate is inferred from a stage's completed
+status alone.
 
 The new CPU coverage includes strict recipe/tool/preset schemas; finite-budget admission; token/decision clocks and prefill accounting; family-separated calibration and heldout isolation; actual rounded edit-norm matching; complete-history checkpoints and pure-yoke restore; isolated diagnostics without answer feedback; portable import/export; interrupted/failed attempt retention; managed storage exhaustion and owned-process cancellation. No test fills a real disk or downloads model weights.
 

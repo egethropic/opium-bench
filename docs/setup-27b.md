@@ -34,7 +34,7 @@ For this exact pinned NF4 profile, download preflight reserves a 20 GiB estimate
 
 ## Create the environment
 
-Run from the repository root. Choose a storage path on a sufficiently spacious disk; `/mnt/d/` is an example for WSL. These commands create a new environment and leave the existing 4B environment intact.
+Run from the repository root with CPython 3.12 and its `venv` support already installed; the preparation helper does not install Python itself. Choose a storage path on a sufficiently spacious disk; `/mnt/d/` is an example for WSL. These commands create a new environment and leave the existing 4B environment intact.
 
 ```bash
 export OPIUM_27B_STORAGE=/mnt/d/opium-bench-27b
@@ -92,7 +92,10 @@ the separate load, calibration and kernel checks below cover their own scopes.
 
 ## Launch, load, and calibrate
 
-Stop any current experiment before switching workers. Launch a separate local instance on a free port if the original viewer is still running:
+Stop any current experiment, then choose **Models → Unload model** in the old
+instance or shut that service down before loading 27B. **Stop alone leaves the
+old model in GPU memory.** If the original viewer stays open for review with its
+model unloaded, launch the 27B instance on a free port:
 
 ```bash
 python3 launch_lab.py \
